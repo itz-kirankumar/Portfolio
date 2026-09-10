@@ -1,40 +1,38 @@
-'use client'
 // app/dashboard/layout.tsx
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { getServerSession } from 'next-auth'
+import { redirect } from 'next/navigation'
+import { authOptions } from '@/lib/auth'
 import Sidebar from '@/components/dashboard/Sidebar'
-import GlobalBackdrop from '@/components/portfolio/GlobalBackdrop'
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const session = await getServerSession(authOptions)
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login')
-    }
-  }, [status, router])
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-6 h-6 border-2 border-[#7ef0c8] border-t-transparent rounded-full animate-spin" />
-          <p className="text-white/30 text-sm">Loading dashboard...</p>
-        </div>
-      </div>
-    )
+  if (!session?.user) {
+    redirect('/login')
   }
 
-  if (!session) return null
-
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex">
-      <GlobalBackdrop />
-      <Sidebar user={session.user} />
-      <main className="flex-1 ml-64 min-h-screen overflow-y-auto p-8">
-        {children}
+    <div className="min-h-screen bg-[#0a0a0f] text-white">
+      <Sidebar user={{
+        id: session.user.id || '',
+        name: session.user.name,
+        email: session.user.email,
+        image: session.user.image,
+      }} />
+
+      {/* 
+        FIXED: 
+        1. <main> only handles clearing the fixed sidebar (md:pl-64) and mobile header (pt-20)
+        2. The inner <div> safely handles the left/right padding (px-5 md:px-8) 
+      */}
+      <main className="w-full md:pl-64 pt-20 md:pt-8 transition-all duration-300">
+        <div className="max-w-6xl mx-auto px-5 md:px-8 pb-12">
+          {children}
+        </div>
       </main>
     </div>
   )

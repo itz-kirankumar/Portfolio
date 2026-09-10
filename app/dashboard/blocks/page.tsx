@@ -2,6 +2,7 @@
 // app/dashboard/blocks/page.tsx
 import { useState, useEffect } from 'react'
 import { Plus, GripVertical, Eye, EyeOff, Edit2, Trash2 } from 'lucide-react'
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import BlockPicker from '@/components/dashboard/BlockPicker'
 import BlockEditor from '@/components/dashboard/BlockEditor'
 import type { Block } from '@/types'
@@ -19,13 +20,48 @@ export default function BlocksPage() {
       try {
         const res = await fetch('/api/blocks')
         const data = await res.json()
-        setBlocks(data.blocks || [])
+        
+        // Ensure blocks are sorted by order when loaded
+        const sortedBlocks = (data.blocks || []).sort((a: Block, b: Block) => a.order - b.order)
+        setBlocks(sortedBlocks)
       } catch (err) {
         console.error('Failed to fetch blocks', err)
       }
     }
     fetchBlocks()
   }, [setBlocks])
+
+  // --- MOBILE OPTIMIZED DRAG & DROP ---
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination) return
+
+    const items = Array.from(blocks)
+    const [reorderedItem] = items.splice(result.source.index, 1)
+    items.splice(result.destination.index, 0, reorderedItem)
+
+    // Assign new sequential order numbers
+    const updatedBlocks = items.map((block, index) => ({
+      ...block,
+      order: index + 1
+    }))
+
+    // Optimistic UI Update (Instant snap)
+    setBlocks(updatedBlocks)
+
+    // Background Save
+    try {
+      await Promise.all(updatedBlocks.map(b => 
+        fetch('/api/blocks', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: b.id, order: b.order })
+        })
+      ))
+    } catch (err) {
+      console.error('Failed to save block order:', err)
+      alert('Failed to save order. Please refresh.')
+    }
+  }
 
   const toggleVisibility = async (block: Block) => {
     const newVisible = !block.visible
@@ -43,19 +79,19 @@ export default function BlocksPage() {
     removeBlock(id)
   }
 
-  // Safe preview function - Fixed the undefined 'html' error
+  // Safe preview generator
   const getBlockPreview = (block: Block): string => {
     const c = block.content as any
-
     const defaults: Record<string, string> = {
-      text: c?.html ? c.html.replace(/<[^>]+>/g, ' ').slice(0, 80) : 'Text block',
-      image: c?.url ? 'Image: ' + c.url.split('/').pop() : 'Image block',
-      youtube: c?.url ? 'YouTube video' : 'YouTube block',
+      text: c?.html ? c.html.replace(/<[^>]+>/g, ' ').slice(0, 40) + '...' : 'Text block',
+      image: c?.url ? 'Image: ' + c.url.split('/').pop()?.slice(0, 20) : 'Image block',
+      youtube: c?.title || 'YouTube video',
       instagram: 'Instagram post',
       linkedin: 'LinkedIn post',
-      map: 'Map location',
+      map: c?.label || 'Map location',
       pdf: c?.filename || 'PDF document',
-      testimonial: c?.quote ? `"${c.quote.slice(0, 60)}..."` : 'Testimonial',
+      testimonial: c?.name || 'Testimonial',
+      experience: c?.title || 'Experience',
       service: c?.title || 'Service offering',
       button: c?.label || 'Button',
       blog: c?.title || 'Blog post',
@@ -65,7 +101,6 @@ export default function BlocksPage() {
       divider: 'Divider',
       contact: 'Contact form',
     }
-
     return defaults[block.type] || block.type
   }
 
@@ -73,6 +108,7 @@ export default function BlocksPage() {
     setShowPicker(false)
     setLoading(true)
 
+    // ... (Your existing defaultContent logic here) ...
     const defaultContent: any = {
       text: { html: '<p>New text content here...</p>' },
       image: { url: '', caption: '', alt: '' },
@@ -90,6 +126,7 @@ export default function BlocksPage() {
       social: { links: [], displayStyle: 'icons' },
       divider: { style: 'line', height: 40 },
       contact: {},
+      experience: { title: 'Experience', items: [] }
     }
 
     const newBlockPayload = {
@@ -97,10 +134,7 @@ export default function BlocksPage() {
       visible: true,
       animation: 'fadeIn' as const,
       content: defaultContent[type] || {},
-      settings: { 
-        maxWidth: 'lg' as const, 
-        alignment: 'left' as const 
-      },
+      settings: { maxWidth: 'lg' as const, alignment: 'left' as const },
       order: blocks.length + 1,
     }
 
@@ -110,9 +144,7 @@ export default function BlocksPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newBlockPayload),
       })
-
       if (!res.ok) throw new Error('Failed to create')
-
       const { id } = await res.json()
       setBlocks([...blocks, { ...newBlockPayload, id } as Block])
     } catch (err) {
@@ -127,86 +159,111 @@ export default function BlocksPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-4xl mx-auto pb-24">
+      {/* Mobile-optimized Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="font-syne text-4xl font-bold text-white">Blocks</h1>
-          <p className="text-white/40 mt-1">Manage your portfolio content</p>
+          <h1 className="font-syne text-3xl sm:text-4xl font-bold text-white">Blocks</h1>
+          <p className="text-white/40 mt-1 text-sm sm:text-base">Drag to reorder your content</p>
         </div>
         <button
           onClick={() => setShowPicker(true)}
           disabled={loading}
-          className="flex items-center gap-2 bg-[#7ef0c8] hover:bg-[#5dd4aa] text-black px-6 py-3 rounded-2xl font-medium transition-colors disabled:opacity-70"
+          className="flex items-center justify-center gap-2 bg-[#7ef0c8] hover:bg-[#5dd4aa] text-black px-6 py-3.5 sm:py-3 rounded-2xl font-bold transition-colors disabled:opacity-70 w-full sm:w-auto"
         >
           <Plus size={20} />
-          Add Block
+          {loading ? 'Adding...' : 'Add Block'}
         </button>
       </div>
 
-      <div className="space-y-3">
-        {blocks.length === 0 && (
-          <div className="bg-[#13131a] border border-white/10 rounded-3xl p-16 text-center">
-            <p className="text-white/40">No blocks yet. Click "Add Block" to start building your portfolio.</p>
-          </div>
-        )}
+      {blocks.length === 0 && (
+        <div className="bg-[#13131a] border border-white/10 rounded-3xl p-10 sm:p-16 text-center">
+          <p className="text-white/40">No blocks yet. Click "Add Block" to start building your portfolio.</p>
+        </div>
+      )}
 
-        {blocks.map((block) => (
-          <div
-            key={block.id}
-            className="group bg-[#13131a] border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-white/20 transition-all"
-          >
-            <GripVertical className="text-white/20 cursor-grab" size={22} />
+      {/* DRAG AND DROP CONTEXT */}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="portfolio-blocks">
+          {(provided) => (
+            <div 
+              {...provided.droppableProps} 
+              ref={provided.innerRef} 
+              className="space-y-3"
+            >
+              {blocks.map((block, index) => (
+                <Draggable key={block.id} draggableId={block.id} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className={`group bg-[#13131a] border rounded-2xl p-3 sm:p-5 flex items-center gap-2 sm:gap-4 transition-all ${
+                        snapshot.isDragging 
+                          ? 'border-[#7ef0c8] shadow-[0_0_30px_rgba(126,240,200,0.15)] z-50 scale-[1.02]' 
+                          : 'border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      {/* 
+                        TOUCH-NONE is crucial here: it stops mobile browsers from trying to scroll 
+                        when the user drags the handle, enabling smooth drag and drop! 
+                      */}
+                      <div 
+                        {...provided.dragHandleProps} 
+                        className="p-2 -ml-2 text-white/20 hover:text-white/60 cursor-grab active:cursor-grabbing touch-none"
+                      >
+                        <GripVertical size={24} />
+                      </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3">
-                <span className="text-xs uppercase font-mono tracking-widest bg-white/5 px-2.5 py-1 rounded-md">
-                  {block.type}
-                </span>
-                <p className="text-white font-medium truncate">
-                  {getBlockPreview(block)}
-                </p>
-              </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                          <span className="text-[10px] sm:text-xs uppercase font-mono tracking-widest bg-white/5 px-2 py-1 rounded w-fit text-white/50">
+                            {block.type}
+                          </span>
+                          <p className="text-white text-sm sm:text-base font-medium truncate">
+                            {getBlockPreview(block)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Mobile Optimization: Opacity is 100 on mobile, hover effect only on desktop */}
+                      <div className="flex items-center gap-0.5 sm:gap-1 opacity-100 sm:opacity-50 sm:group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => toggleVisibility(block)}
+                          className="p-2.5 sm:p-2 hover:bg-white/10 rounded-xl text-white/80 transition-colors"
+                        >
+                          {block.visible ? <Eye size={18} /> : <EyeOff size={18} className="text-red-400" />}
+                        </button>
+
+                        <button
+                          onClick={() => setEditingBlock(block)}
+                          className="p-2.5 sm:p-2 hover:bg-[#7ef0c8]/20 hover:text-[#7ef0c8] rounded-xl text-white/80 transition-colors"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+
+                        <button
+                          onClick={() => deleteBlock(block.id)}
+                          className="p-2.5 sm:p-2 hover:bg-red-500/20 text-white/80 hover:text-red-400 rounded-xl transition-colors"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </div>
-
-            <div className="flex items-center gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={() => toggleVisibility(block)}
-                className="p-2 hover:bg-white/10 rounded-xl"
-              >
-                {block.visible ? <Eye size={18} /> : <EyeOff size={18} />}
-              </button>
-
-              <button
-                onClick={() => setEditingBlock(block)}
-                className="p-2 hover:bg-white/10 rounded-xl"
-              >
-                <Edit2 size={18} />
-              </button>
-
-              <button
-                onClick={() => deleteBlock(block.id)}
-                className="p-2 hover:bg-red-500/20 text-red-400 rounded-xl"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       {showPicker && (
-        <BlockPicker
-          onSelect={handleAddBlock}
-          onClose={() => setShowPicker(false)}
-        />
+        <BlockPicker onSelect={handleAddBlock} onClose={() => setShowPicker(false)} />
       )}
 
       {editingBlock && (
-        <BlockEditor
-          block={editingBlock}
-          onSave={handleSaveEdit}
-          onClose={() => setEditingBlock(null)}
-        />
+        <BlockEditor block={editingBlock} onSave={handleSaveEdit} onClose={() => setEditingBlock(null)} />
       )}
     </div>
   )
