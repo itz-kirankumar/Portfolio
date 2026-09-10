@@ -1,97 +1,70 @@
-'use client'
 // app/login/page.tsx
-import { signIn, useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
+import SignInButton from './SignInButton'
+import { Eyebrow } from '@/components/ui/primitives'
+import { authOptions } from '@/lib/auth'
 
-export default function LoginPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (status === 'authenticated' && session) {
-      router.push('/dashboard')
-    }
-  }, [session, status, router])
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#7ef0c8] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
-  if (status === 'authenticated') return null
-
-  const handleSignIn = async () => {
-    setLoading(true)
-    await signIn('google', { callbackUrl: '/dashboard' })
-  }
-
-  return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-
-        {/* Logo */}
-        <div className="text-center mb-12">
-          <h1 className="font-syne text-4xl font-black text-white tracking-tight mb-2">
-            port<span className="text-[#7ef0c8]">folio</span>
-          </h1>
-          <p className="text-white/40 text-sm">Build your dream portfolio in minutes</p>
-        </div>
-
-        {/* Card */}
-        <div className="bg-[#13131a] border border-white/10 rounded-2xl p-8">
-          <h2 className="font-syne text-2xl font-bold text-white mb-2">Welcome</h2>
-          <p className="text-white/40 text-sm mb-8">
-            Sign in to access and edit your portfolio dashboard
-          </p>
-
-          <button
-            onClick={handleSignIn}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-3 bg-white text-gray-800 font-medium py-3 px-6 rounded-xl hover:bg-gray-100 transition-colors duration-200 disabled:opacity-70"
-          >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <GoogleIcon />
-            )}
-            {loading ? 'Signing in...' : 'Continue with Google'}
-          </button>
-
-          <p className="text-white/25 text-xs text-center mt-6">
-            By signing in, you agree to our Terms of Service and Privacy Policy.
-          </p>
-        </div>
-
-        {/* Feature hints */}
-        <div className="grid grid-cols-3 gap-3 mt-6">
-          {[
-            { icon: '🧱', label: '15 Block Types' },
-            { icon: '🎨', label: 'Full Theme Control' },
-            { icon: '💳', label: 'Razorpay Payments' },
-          ].map(f => (
-            <div key={f.label} className="bg-white/5 border border-white/5 rounded-xl p-3 text-center">
-              <div className="text-lg mb-1">{f.icon}</div>
-              <p className="text-white/40 text-xs">{f.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
+export const metadata: Metadata = {
+  title: 'Sign in',
+  robots: { index: false, follow: false },
 }
 
-function GoogleIcon() {
+const ERRORS: Record<string, string> = {
+  AccessDenied:
+    'That Google account is not the owner of this site, so it cannot sign in. If this should be you, check OWNER_EMAIL.',
+  Configuration:
+    'Sign-in is misconfigured on the server. Check GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and NEXTAUTH_SECRET.',
+  Verification: 'That sign-in link has expired. Try again.',
+  OAuthAccountNotLinked: 'That email is already linked to a different sign-in method.',
+}
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  // searchParams is a Promise in Next 16.
+  searchParams: Promise<{ error?: string; callbackUrl?: string }>
+}) {
+  const session = await getServerSession(authOptions)
+  if (session?.user?.isOwner) redirect('/admin')
+
+  const { error, callbackUrl } = await searchParams
+  const message = error ? (ERRORS[error] ?? 'Sign-in failed. Try again.') : null
+
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.909-2.259c-.806.54-1.837.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
-      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-    </svg>
+    <main className="paper-grain grid min-h-screen place-items-center bg-paper px-6 py-16">
+      <div className="w-full max-w-sm">
+        <div className="text-center">
+          <Eyebrow className="mb-5 text-center">site admin</Eyebrow>
+          <h1 className="font-display text-3xl font-semibold tracking-[-0.025em] text-ink">
+            Sign in to edit
+          </h1>
+          <p className="mt-3 text-[0.94rem] leading-relaxed text-ink-soft">
+            One account can edit this site. Everyone else just gets to read it.
+          </p>
+        </div>
+
+        {message ? (
+          <p
+            role="alert"
+            className="mt-8 rounded-lg bg-coral-soft px-4 py-3 text-[0.88rem] leading-relaxed text-coral-ink ring-1 ring-coral/30"
+          >
+            {message}
+          </p>
+        ) : null}
+
+        <div className="mt-8">
+          <SignInButton callbackUrl={callbackUrl && callbackUrl.startsWith('/') ? callbackUrl : '/admin'} />
+        </div>
+
+        <p className="mt-10 text-center">
+          <Link href="/" className="link-underline text-[0.85rem] text-ink-soft hover:text-ink">
+            ← Back to the site
+          </Link>
+        </p>
+      </div>
+    </main>
   )
 }

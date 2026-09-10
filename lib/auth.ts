@@ -1,70 +1,59 @@
 // lib/auth.ts
+//
+// Single-owner auth. This site has exactly one editor: whoever owns
+// OWNER_EMAIL. Everyone else is refused at sign-in.
+//
+// Ownership is derived PER REQUEST in the session callback, not stamped into
+// the token at sign-in. `signIn` runs once and the JWT lives 30 days, so a
+// token minted before OWNER_EMAIL changed would otherwise keep admin access
+// for a month.
+
 import type { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
-import { getProfile, createProfile } from './firestore'
+
+function ownerEmail(): string | null {
+  const value = process.env.OWNER_EMAIL?.trim().toLowerCase()
+  return value ? value : null
+}
+
+/** Fails closed: with OWNER_EMAIL unset, nobody is an owner. */
+export function isOwnerEmail(email?: string | null): boolean {
+  const owner = ownerEmail()
+  if (!owner || !email) return false
+  return email.trim().toLowerCase() === owner
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-}),
+    }),
   ],
 
   callbacks: {
-    async signIn({ user, account }) {
-      if (account?.provider === 'google' && user.id && user.email) {
-        try {
-          const existing = await getProfile(user.id)
-          if (!existing) {
-            // Generate clean username from email prefix
-            const base = user.email
-              .split('@')[0]
-              .toLowerCase()
-              .replace(/[^a-z0-9]/g, '')
-            const username = base + Math.floor(Math.random() * 1000)
+    async signIn({ account, profile }) {
+      if (account?.provider !== 'google') return false
 
-            await createProfile(user.id, {
-              uid: user.id,
-              email: user.email,
-              displayName: user.name ?? user.email.split('@')[0],
-              avatar: user.image ?? undefined,
-              username,
-              bio: '',
-              location: '',
-              website: '',
-              theme: {
-                preset: 'Dark Mint',
-                primaryColor: '#7ef0c8',
-                accentColor: '#818cf8',
-                bgColor: '#0a0a0f',
-                surfaceColor: '#13131a',
-                textColor: '#e8e6e0',
-                headingFont: 'Syne',
-                bodyFont: 'DM Sans',
-                borderRadius: 'lg',
-                darkMode: true,
-              },
-              seo: {},
-            })
-          }
-        } catch (err) {
-          console.error('[NextAuth] signIn error:', err)
-        }
-      }
-      return true
-    },
+      // `profile.email_verified` is the Google-asserted claim; `profile.email`
+      // alone can be set on an unverified account.
+      const verified = (profile as { email_verified?: boolean } | undefined)?.email_verified
+      if (verified === false) return false
 
-    async session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub
-      }
-      return session
+      return isOwnerEmail(profile?.email)
     },
 
     async jwt({ token, user }) {
       if (user?.id) token.sub = user.id
       return token
+    },
+
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub ?? ''
+        session.user.isOwner = isOwnerEmail(token.email ?? session.user.email)
+      }
+      return session
     },
   },
 
@@ -80,14 +69,14 @@ export const authOptions: NextAuthOptions = {
 
   secret: process.env.NEXTAUTH_SECRET,
 
-  debug: true, // Hardcoded to true temporarily to help you see the logs
+  debug: process.env.NODE_ENV === 'development',
 }
 
-// Extend next-auth types
 declare module 'next-auth' {
   interface Session {
     user: {
       id: string
+      isOwner: boolean
       name?: string | null
       email?: string | null
       image?: string | null

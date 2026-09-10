@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// Uploads happen server-side with admin credentials. Public files are served
+// through Firebase download tokens (a per-object secret in the URL), not
+// through these rules, so direct client access stays closed.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
