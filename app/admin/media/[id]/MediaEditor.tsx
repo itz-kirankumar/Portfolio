@@ -47,7 +47,13 @@ export default function MediaEditor({ initialData, id }: { initialData: Partial<
         body: formData,
       })
 
-      const json = await res.json()
+      let json
+      try {
+        json = await res.json()
+      } catch (e) {
+        throw new Error(`Upload failed (Status ${res.status}). Ensure the file is under 4.5MB.`)
+      }
+
       if (!res.ok) throw new Error(json.error || 'Upload failed')
 
       update({

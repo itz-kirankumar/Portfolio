@@ -40,11 +40,14 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+import { MEDIA_COLLECTION, mediaSchema } from '@/lib/schemas/media'
+
 export default async function HomePage() {
-  const [content, allPosts, allServices] = await Promise.all([
+  const [content, allPosts, allServices, allMedia] = await Promise.all([
     getCachedSiteContent(),
     safeList(POSTS_COLLECTION, postSchema),
-    safeList(SERVICES_COLLECTION, serviceSchema)
+    safeList(SERVICES_COLLECTION, serviceSchema),
+    safeList(MEDIA_COLLECTION, mediaSchema)
   ])
   const { meta } = content
 
@@ -68,6 +71,25 @@ export default async function HomePage() {
   const activeServices = allServices
     .filter(s => s.active)
     .sort((a, b) => a.order - b.order)
+
+  // Featured Media
+  const featuredMedia = allMedia.filter(m => m.featured)
+  if (featuredMedia.length > 0) {
+    // If the gallery isn't configured, provide a default
+    if (!content.gallery) content.gallery = { eyebrow: 'Featured', heading: 'Gallery', photos: [] }
+    
+    // Convert Media items to Gallery Photos
+    const mappedPhotos = featuredMedia.map(m => ({
+      src: m.kind === 'embed' ? m.thumbUrl || m.url : m.url,
+      alt: m.alt || m.title || '',
+      caption: m.caption || m.title || '',
+      url: m.url,
+      kind: m.kind
+    }))
+    
+    // Append or prepend them to the existing static ones
+    content.gallery.photos = [...content.gallery.photos, ...mappedPhotos]
+  }
 
   const personJsonLd = {
     '@context': 'https://schema.org',

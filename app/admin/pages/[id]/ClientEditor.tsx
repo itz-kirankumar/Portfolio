@@ -22,6 +22,8 @@ export function ClientEditor({ id, initialData }: { id: string; initialData: Par
     doc: initialData.doc || '',
   })
 
+  const [addToNav, setAddToNav] = useState(false)
+
   const update = (patch: Partial<CustomPage>) => {
     setData(prev => ({ ...prev, ...patch }))
     setDirty(true)
@@ -39,7 +41,7 @@ export function ClientEditor({ id, initialData }: { id: string; initialData: Par
     const cleanSlug = data.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     
     const payload = { ...data, slug: cleanSlug, id: targetId }
-    const res = await savePage(targetId, payload)
+    const res = await savePage(targetId, payload, addToNav)
     
     setSaving(false)
     if (res.ok) {
@@ -92,6 +94,21 @@ export function ClientEditor({ id, initialData }: { id: string; initialData: Par
                   placeholder="e.g. about-me"
                 />
               </Field>
+
+              {id === 'new' && (
+                <div className="pt-2">
+                  <label className="flex items-center gap-2 text-[0.85rem] font-medium text-ink cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={addToNav} 
+                      onChange={e => setAddToNav(e.target.checked)} 
+                      className="rounded border-rule text-coral focus:ring-coral-soft"
+                    />
+                    Add to Global Navigation
+                  </label>
+                  <p className="text-[0.75rem] text-ink-soft ml-6 mt-1">If published, this page will be added to your website's main menu.</p>
+                </div>
+              )}
 
               {id !== 'new' && (
                 <div className="pt-2">

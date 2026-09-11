@@ -55,8 +55,18 @@ export async function GET(req: NextRequest) {
     const thumbUrl = getOg('image') || ''
     const authorName = getOg('site_name') || platform
 
+    let finalUrl = url
+    if (platform === 'youtube') {
+      const videoIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i)
+      if (videoIdMatch) {
+        finalUrl = `https://www.youtube.com/embed/${videoIdMatch[1]}`
+      }
+    } else if (platform === 'instagram' && !url.includes('/embed')) {
+      finalUrl = url.replace(/\/$/, '') + '/embed'
+    }
+
     return NextResponse.json({
-      url,
+      url: finalUrl,
       platform,
       title: title.replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"'),
       thumbUrl,
