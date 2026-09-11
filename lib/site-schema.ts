@@ -13,6 +13,7 @@ const url = z.string().trim() // hrefs may be '#anchor', 'mailto:', 'tel:' or ab
 const link = z.object({
   label: str.max(80),
   href: url.max(500),
+  newTab: z.boolean().default(false),
 })
 
 const photo = z.object({

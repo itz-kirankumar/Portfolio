@@ -7,9 +7,14 @@
 // would make the whole route dynamic and throw away the prerender.
 
 import type { Metadata } from 'next'
+import { safeList } from '@/lib/store'
+import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
+import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
 import { SiteFooter, SiteNav, UtilityBar } from '@/components/site/Chrome'
 import { CredPills, Hero, ProofStrip } from '@/components/site/Hero'
 import { Audiences, Projects, Ventures, Ways } from '@/components/site/Work'
+import { ServicesList } from '@/components/site/ServicesList'
+import { Section, SectionHead } from '@/components/ui/primitives'
 import {
   Closing,
   Contrasts,
@@ -24,7 +29,7 @@ export const revalidate = 3600
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta, hero } = await getCachedSiteContent()
-  const title = `${meta.name} — ${meta.descriptor.replace(/\.$/, '')}`
+  const title = `${meta.name}`
   const description = hero.subhead.slice(0, 200)
 
   return {
@@ -36,8 +41,33 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const content = await getCachedSiteContent()
+  const [content, allPosts, allServices] = await Promise.all([
+    getCachedSiteContent(),
+    safeList(POSTS_COLLECTION, postSchema),
+    safeList(SERVICES_COLLECTION, serviceSchema)
+  ])
   const { meta } = content
+
+  // Override static posts with real ones
+  const publishedPosts = allPosts
+    .filter(p => p.status === 'published')
+    .sort((a, b) => b.publishedAt - a.publishedAt)
+    .slice(0, 5)
+    .map(p => ({
+      title: p.title,
+      blurb: p.excerpt,
+      href: `/writing/${p.slug}`,
+      date: new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    }))
+
+  if (publishedPosts.length > 0) {
+    content.writing.posts = publishedPosts
+  }
+
+  // Active services
+  const activeServices = allServices
+    .filter(s => s.active)
+    .sort((a, b) => a.order - b.order)
 
   const personJsonLd = {
     '@context': 'https://schema.org',
@@ -83,6 +113,18 @@ export default async function HomePage() {
         <ProofStrip proof={content.proof} />
         <Audiences audiences={content.audiences} />
         <Ways ways={content.ways} />
+
+        {activeServices.length > 0 && (
+          <Section id="services" tone="deep">
+            <SectionHead 
+              eyebrow="Offerings" 
+              heading="Ways we can work together" 
+              intro="Select a service to book a slot directly." 
+            />
+            <ServicesList services={activeServices} />
+          </Section>
+        )}
+
         <Ventures ventures={content.ventures} />
         <Projects projects={content.projects} />
         <PointOfView pov={content.pov} />

@@ -60,7 +60,11 @@ let cachedDb: Firestore | null = null
 export function getAdminDb(): Firestore {
   if (!cachedDb) {
     cachedDb = getFirestore(getAdminApp())
-    cachedDb.settings({ ignoreUndefinedProperties: true })
+    try {
+      cachedDb.settings({ ignoreUndefinedProperties: true })
+    } catch (e) {
+      // Ignore "Firestore has already been initialized" in dev HMR
+    }
   }
   return cachedDb
 }

@@ -109,7 +109,9 @@ export function SiteNav({ nav, resumeUrl }: { nav: NavContent; resumeUrl: string
           {nav.links.map((link) => (
             <li key={link.href + link.label}>
               <a
-                href={link.href}
+                href={link.href.startsWith('#') ? `/${link.href}` : link.href}
+                target={link.newTab ? '_blank' : undefined}
+                rel={link.newTab ? 'noopener noreferrer' : undefined}
                 className="link-underline text-[0.88rem] text-ink-soft transition-colors hover:text-ink"
               >
                 {link.label}
@@ -175,7 +177,9 @@ export function SiteNav({ nav, resumeUrl }: { nav: NavContent; resumeUrl: string
           {nav.links.map((link) => (
             <li key={link.href + link.label}>
               <a
-                href={link.href}
+                href={link.href.startsWith('#') ? `/${link.href}` : link.href}
+                target={link.newTab ? '_blank' : undefined}
+                rel={link.newTab ? 'noopener noreferrer' : undefined}
                 onClick={() => setOpen(false)}
                 className="block border-b border-rule/60 py-3 font-display text-lg text-ink"
               >
@@ -241,8 +245,8 @@ export function SiteFooter({
               <li key={link.href + link.label}>
                 <a
                   href={link.href}
-                  target={link.href.startsWith('http') ? '_blank' : undefined}
-                  rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  target={link.newTab ? '_blank' : undefined}
+                  rel={link.newTab ? 'noopener noreferrer' : undefined}
                   className="link-underline text-[0.88rem] text-ink-soft hover:text-ink"
                 >
                   {link.label}

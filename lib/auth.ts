@@ -16,7 +16,13 @@ function ownerEmail(): string | null {
   return value ? value : null
 }
 
-/** Fails closed: with OWNER_EMAIL unset, nobody is an owner. */
+/**
+ * Fails closed: with OWNER_EMAIL unset, nobody is an owner.
+ *
+ * Deliberately silent. This runs on every session resolution, so logging the
+ * configured owner and the incoming address here put both in the server log on
+ * every request.
+ */
 export function isOwnerEmail(email?: string | null): boolean {
   const owner = ownerEmail()
   if (!owner || !email) return false

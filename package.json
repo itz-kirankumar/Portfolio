@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:sanitize": "node scripts/sanitize.test.cjs"
   },
   "dependencies": {
     "@auth/firebase-adapter": "^2.11.1",
