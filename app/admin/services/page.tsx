@@ -1,5 +1,5 @@
 import { safeList } from '@/lib/store'
-import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
+import { SERVICES_COLLECTION, serviceSchema, formatPrice } from '@/lib/schemas/service'
 import { PageHeader, EmptyState, BTN_PRIMARY } from '@/components/admin/ui'
 import Link from 'next/link'
 import { Plus, Briefcase } from 'lucide-react'
@@ -53,7 +53,7 @@ export default async function ServicesPage() {
                       )}
                     </div>
                     <p className="mt-1 text-[0.82rem] text-ink-soft">
-                      {service.durationMins} mins · {service.currency} {service.price}
+                      {service.durationMins} mins &middot; {formatPrice(service.priceInPaise, service.currency)}
                     </p>
                   </div>
                   <div className="text-[0.82rem] font-mono uppercase tracking-wider text-ink-soft">

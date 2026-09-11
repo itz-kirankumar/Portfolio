@@ -1,11 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
+import { Iframe } from './IframeExtension'
+import { MediaPickerModal } from './MediaPickerModal'
+import type { Media } from '@/lib/schemas/media'
 import {
   Bold,
   Italic,
@@ -19,7 +23,8 @@ import {
   ListOrdered,
   Quote,
   ImageIcon,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Library
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -30,6 +35,8 @@ export function Tiptap({
   initialContent?: string
   onChange: (html: string, json: string) => void
 }) {
+  const [showMediaPicker, setShowMediaPicker] = useState(false)
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -41,6 +48,7 @@ export function Tiptap({
         openOnClick: false,
       }),
       Image,
+      Iframe,
       Placeholder.configure({
         placeholder: 'Write your post here...',
       }),
@@ -84,6 +92,31 @@ export function Tiptap({
     </button>
   )
 
+  const handleMediaSelect = (media: Media) => {
+    setShowMediaPicker(false)
+    if (media.kind === 'image') {
+      editor.chain().focus().setImage({ src: media.url, alt: media.alt || media.title }).run()
+    } else if (media.kind === 'video' || media.kind === 'embed') {
+      editor.chain().focus().insertContent({
+        type: 'iframe',
+        attrs: { src: media.url, title: media.title }
+      }).run()
+    } else {
+      editor.chain().focus().setLink({ href: media.url }).insertContent(media.title || 'Download File').run()
+    }
+  }
+
+  const toggleBold = () => editor.chain().focus().toggleBold().run()
+  const toggleItalic = () => editor.chain().focus().toggleItalic().run()
+  const toggleStrike = () => editor.chain().focus().toggleStrike().run()
+  const toggleCode = () => editor.chain().focus().toggleCode().run()
+  const toggleH1 = () => editor.chain().focus().toggleHeading({ level: 1 }).run()
+  const toggleH2 = () => editor.chain().focus().toggleHeading({ level: 2 }).run()
+  const toggleH3 = () => editor.chain().focus().toggleHeading({ level: 3 }).run()
+  const toggleBulletList = () => editor.chain().focus().toggleBulletList().run()
+  const toggleOrderedList = () => editor.chain().focus().toggleOrderedList().run()
+  const toggleBlockquote = () => editor.chain().focus().toggleBlockquote().run()
+
   const addImage = () => {
     const url = window.prompt('Image URL')
     if (url) {
@@ -94,65 +127,74 @@ export function Tiptap({
   const setLink = () => {
     const previousUrl = editor.getAttributes('link').href
     const url = window.prompt('URL', previousUrl)
-
-    if (url === null) return
+    
+    if (url === null) return // cancelled
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run()
       return
     }
-
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
   }
 
   return (
-    <div className="border border-rule rounded-md overflow-hidden bg-card">
-      <div className="flex flex-wrap items-center gap-1 border-b border-rule bg-paper-deep/50 p-1">
-        <MenuButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')}>
-          <Bold className="size-4" />
-        </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')}>
-          <Italic className="size-4" />
-        </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')}>
-          <UnderlineIcon className="size-4" />
-        </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')}>
-          <Strikethrough className="size-4" />
-        </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive('code')}>
-          <Code className="size-4" />
-        </MenuButton>
-        <div className="w-px h-4 bg-rule mx-1" />
-        <MenuButton onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive('heading', { level: 1 })}>
+    <div className="border border-rule rounded-xl bg-card shadow-sm overflow-hidden">
+      <div className="flex flex-wrap items-center gap-1 border-b border-rule bg-paper-deep/50 p-2">
+        <MenuButton onClick={toggleH1} active={editor.isActive('heading', { level: 1 })}>
           <Heading1 className="size-4" />
         </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive('heading', { level: 2 })}>
+        <MenuButton onClick={toggleH2} active={editor.isActive('heading', { level: 2 })}>
           <Heading2 className="size-4" />
         </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })}>
+        <MenuButton onClick={toggleH3} active={editor.isActive('heading', { level: 3 })}>
           <Heading3 className="size-4" />
         </MenuButton>
-        <div className="w-px h-4 bg-rule mx-1" />
-        <MenuButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')}>
+        
+        <div className="w-px h-6 bg-rule mx-1" />
+        
+        <MenuButton onClick={toggleBold} active={editor.isActive('bold')}>
+          <Bold className="size-4" />
+        </MenuButton>
+        <MenuButton onClick={toggleItalic} active={editor.isActive('italic')}>
+          <Italic className="size-4" />
+        </MenuButton>
+        <MenuButton onClick={toggleStrike} active={editor.isActive('strike')}>
+          <Strikethrough className="size-4" />
+        </MenuButton>
+        <MenuButton onClick={toggleCode} active={editor.isActive('code')}>
+          <Code className="size-4" />
+        </MenuButton>
+
+        <div className="w-px h-6 bg-rule mx-1" />
+
+        <MenuButton onClick={toggleBulletList} active={editor.isActive('bulletList')}>
           <List className="size-4" />
         </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')}>
+        <MenuButton onClick={toggleOrderedList} active={editor.isActive('orderedList')}>
           <ListOrdered className="size-4" />
         </MenuButton>
-        <MenuButton onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')}>
+        <MenuButton onClick={toggleBlockquote} active={editor.isActive('blockquote')}>
           <Quote className="size-4" />
         </MenuButton>
-        <div className="w-px h-4 bg-rule mx-1" />
+
+        <div className="w-px h-6 bg-rule mx-1" />
+
         <MenuButton onClick={setLink} active={editor.isActive('link')}>
           <LinkIcon className="size-4" />
         </MenuButton>
-        <MenuButton onClick={addImage}>
-          <ImageIcon className="size-4" />
+        <MenuButton onClick={() => setShowMediaPicker(true)}>
+          <Library className="size-4 text-coral-ink" />
         </MenuButton>
       </div>
       <div className="p-4 sm:p-6 min-h-[400px] prose-editor">
         <EditorContent editor={editor} />
       </div>
+      
+      {showMediaPicker && (
+        <MediaPickerModal 
+          onClose={() => setShowMediaPicker(false)}
+          onSelect={handleMediaSelect}
+        />
+      )}
     </div>
   )
 }

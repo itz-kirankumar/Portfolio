@@ -17,6 +17,7 @@ export const SCHEMA_VERSION = 1
 export interface Link {
   label: string
   href: string
+  newTab?: boolean
 }
 
 export interface Photo {
@@ -41,6 +42,9 @@ export interface Meta {
   linkedin: string
   /** Uploaded via /admin/media. Empty string hides every résumé link. */
   resumeUrl: string
+  keywords?: string
+  twitterHandle?: string
+  ogImageUrl?: string
 }
 
 /* ------------------------------------------------------- 1 · utility bar --- */

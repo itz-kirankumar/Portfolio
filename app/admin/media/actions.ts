@@ -71,3 +71,10 @@ export async function deleteMedia(id: string): Promise<{ ok: boolean; error?: st
     return { ok: false, error: err.message || 'Could not delete media.' }
   }
 }
+
+import { safeList } from '@/lib/store'
+export async function getAllMedia() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.isOwner) return []
+  return safeList(MEDIA_COLLECTION, mediaSchema, { orderBy: ['createdAt', 'desc'] })
+}

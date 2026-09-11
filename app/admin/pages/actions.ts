@@ -9,7 +9,7 @@ export async function savePage(id: string, data: any) {
     const validated = pageSchema.parse(data)
     validated.updatedAt = Date.now()
     
-    await putDoc(PAGES_COLLECTION, id, validated)
+    await putDoc(PAGES_COLLECTION, id, pageSchema, validated)
     
     revalidatePath('/admin/pages')
     revalidatePath(`/${validated.slug}`)
