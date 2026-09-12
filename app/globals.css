@@ -196,3 +196,51 @@
   text-wrap: balance;
   hyphens: none;
 }
+
+/* ---------------------------------------------------------------------------
+   Rich Editorial Prose Overrides
+--------------------------------------------------------------------------- */
+@layer base {
+  .prose blockquote {
+    font-family: var(--font-display) !important;
+    font-size: 1.5em !important;
+    line-height: 1.4 !important;
+    color: var(--color-coral-ink) !important;
+    border-left: none !important;
+    padding-left: 0 !important;
+    margin-top: 2.5em !important;
+    margin-bottom: 2.5em !important;
+    position: relative;
+    font-style: italic !important;
+    text-wrap: pretty;
+  }
+  .prose blockquote p {
+    color: inherit !important;
+  }
+  .prose blockquote::before {
+    content: '"';
+    position: absolute;
+    left: -2rem;
+    top: -0.5rem;
+    font-size: 3rem;
+    color: var(--color-coral);
+    font-family: var(--font-display);
+    opacity: 0.3;
+  }
+  
+  .prose figure {
+    margin-top: 3em !important;
+    margin-bottom: 3em !important;
+  }
+  .prose figcaption {
+    font-family: var(--font-mono) !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: var(--color-ink-soft) !important;
+    text-align: right !important;
+    margin-top: 1rem !important;
+    padding-bottom: 1.5rem !important;
+    border-bottom: 1px solid var(--color-rule) !important;
+  }
+}

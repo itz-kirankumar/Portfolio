@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { SiteFooter, SiteNav, UtilityBar } from '@/components/site/Chrome'
@@ -8,11 +8,10 @@ import { safeList, safeGet } from '@/lib/store'
 import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
 import { COMMENTS_COLLECTION, commentSchema } from '@/lib/schemas/comment'
 import { CommentsList } from '@/components/site/CommentsList'
-
-export const revalidate = 3600
-
 import { cookies } from 'next/headers'
 import { ArticleActions } from '@/components/site/ArticleActions'
+
+export const revalidate = 3600
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -26,7 +25,7 @@ export async function generateMetadata({ params }: Omit<Props, 'searchParams'>):
   if (!post) return {}
   
   const { meta } = await getCachedSiteContent()
-  const title = `${post.title} — ${meta.name}`
+  const title = `${post.title} - ${meta.name}`
   
   return {
     title,
@@ -99,94 +98,65 @@ export default async function WritingDetailPage({ params, searchParams }: Props)
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
               </div>
-              <div className="relative mx-auto w-full max-w-4xl px-6 pb-16 lg:px-8">
-                <div className="mb-4 flex items-center gap-3">
-                  <span className="font-mono text-[0.75rem] uppercase tracking-[0.15em] text-white/80">
-                    Writing
-                  </span>
-                  {formattedDate && (
-                    <>
-                      <span className="text-white/40">/</span>
-                      <time 
-                        className="font-mono text-[0.75rem] uppercase tracking-[0.15em] text-white/80" 
-                        dateTime={new Date(displayDate).toISOString()}
-                      >
-                        {formattedDate}
-                      </time>
-                    </>
-                  )}
-                </div>
-                
-                <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.02em] text-white text-balance drop-shadow-sm">
+              <div className="relative mx-auto w-full max-w-7xl px-6 pb-16 lg:px-8">
+                <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.02em] text-white text-balance drop-shadow-sm max-w-4xl">
                   {post.title}
                 </h1>
-
-                {post.excerpt && (
-                  <p className="mt-6 text-[1.25rem] leading-relaxed text-white/90 max-w-3xl text-pretty drop-shadow-sm">
-                    {post.excerpt}
-                  </p>
-                )}
-
-                <div className="mt-8 flex items-center gap-4 font-mono text-[0.8rem] text-white/70">
-                  <span>{post.readingMinutes} min read</span>
-                  {post.tags.length > 0 && (
-                    <>
-                      <span className="text-white/40">•</span>
-                      <span>{post.tags.join(', ')}</span>
-                    </>
-                  )}
-                </div>
               </div>
             </header>
           ) : (
-            <header className="mx-auto max-w-4xl px-6 pt-24 pb-12 lg:px-8 lg:pt-32">
-              <div className="mb-6 flex items-center gap-3">
-                <Eyebrow tone="ink">Writing</Eyebrow>
-                {formattedDate && (
-                  <>
-                    <span className="text-ink-soft/40">/</span>
-                    <time 
-                      className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-ink-soft" 
-                      dateTime={new Date(displayDate).toISOString()}
-                    >
-                      {formattedDate}
-                    </time>
-                  </>
-                )}
-              </div>
-              
-              <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.02em] text-ink text-balance">
+            <header className="mx-auto max-w-7xl px-6 pt-24 pb-12 lg:px-8 lg:pt-32">
+              <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.02em] text-ink text-balance max-w-4xl">
                 {post.title}
               </h1>
-
-              {post.excerpt && (
-                <p className="mt-6 text-[1.25rem] leading-relaxed text-ink-soft max-w-3xl text-pretty">
-                  {post.excerpt}
-                </p>
-              )}
-
-              <div className="mt-8 flex items-center gap-4 font-mono text-[0.8rem] text-ink-soft">
-                <span>{post.readingMinutes} min read</span>
-                {post.tags.length > 0 && (
-                  <>
-                    <span className="text-ink-soft/40">•</span>
-                    <span>{post.tags.join(', ')}</span>
-                  </>
-                )}
-              </div>
               <RuleDivider className="mt-12" />
             </header>
           )}
 
-          <div 
-            className="prose prose-stone prose-lg md:prose-xl mx-auto mt-12 max-w-3xl px-6 text-ink lg:px-8 prose-headings:font-display prose-headings:font-bold prose-p:leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: post.html }} 
-          />
-          
-          <div className="mx-auto mt-24 max-w-3xl px-6 lg:px-8">
-            <RuleDivider />
-            <ArticleActions title={post.title} slug={post.slug} initialLikes={post.likes || 0} />
-            <CommentsList postId={post.slug} initialComments={comments} />
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_2.5fr] items-start">
+            
+            {/* Left Sidebar Metadata */}
+            <aside className="lg:sticky lg:top-32 space-y-8 order-2 lg:order-1 border-t border-rule lg:border-t-0 pt-8 lg:pt-0">
+              <div>
+                <Eyebrow tone="ink" className="mb-4 block">Writing</Eyebrow>
+                {formattedDate && (
+                  <time 
+                    className="block font-mono text-[0.75rem] uppercase tracking-[0.15em] text-ink-soft mb-6" 
+                    dateTime={new Date(displayDate).toISOString()}
+                  >
+                    {formattedDate}
+                  </time>
+                )}
+                
+                {post.excerpt && (
+                  <p className="text-[1.1rem] leading-relaxed text-ink-soft mb-6 text-pretty font-medium">
+                    {post.excerpt}
+                  </p>
+                )}
+
+                <div className="flex flex-col gap-2 font-mono text-[0.8rem] text-ink-soft pt-6 border-t border-rule/50">
+                  <span>{post.readingMinutes} min read</span>
+                  {post.tags.length > 0 && (
+                    <span className="mt-2">{post.tags.join(', ')}</span>
+                  )}
+                </div>
+              </div>
+            </aside>
+
+            {/* Main Content Area */}
+            <div className="order-1 lg:order-2">
+              <div 
+                className="prose prose-stone prose-lg md:prose-xl max-w-none text-ink prose-headings:font-display prose-headings:font-bold prose-p:leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: post.html }} 
+              />
+              
+              <div className="mt-24">
+                <RuleDivider />
+                <ArticleActions title={post.title} slug={post.slug} initialLikes={post.likes || 0} />
+                <CommentsList postId={post.slug} initialComments={comments} />
+              </div>
+            </div>
+
           </div>
         </article>
       </main>

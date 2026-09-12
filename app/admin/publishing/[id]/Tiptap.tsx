@@ -227,7 +227,7 @@ export function Tiptap({
           <Library className="size-4 text-coral-ink" />
         </MenuButton>
       </div>
-      <div className="p-4 sm:p-6 min-h-[400px] prose-editor">
+      <div className="p-4 sm:p-6 min-h-[400px] prose prose-stone prose-lg md:prose-xl max-w-none text-ink prose-headings:font-display prose-headings:font-bold prose-p:leading-relaxed">
         <EditorContent editor={editor} />
       </div>
       
