@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useUI as useToast } from '@/lib/store/ui'
 import { useState } from 'react'
@@ -144,7 +144,7 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
                 {ALL_PRESETS.map(preset => (
                   <button
-                    key={preset.id}
+                    key={`${preset.id}-${preset.isDark ? 'dark' : 'light'}`}
                     onClick={() => setBasePreset(preset)}
                     className={cn(
                       "flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all text-left group",
