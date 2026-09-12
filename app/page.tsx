@@ -3,7 +3,7 @@
 // The portfolio. Statically prerendered and revalidated hourly; the admin's
 // Server Action busts it immediately via revalidateTag/revalidatePath.
 //
-// This page must never call getServerSession() — that reads cookies(), which
+// This page must never call getServerSession() â€” that reads cookies(), which
 // would make the whole route dynamic and throw away the prerender.
 
 import type { Metadata } from 'next'
@@ -24,6 +24,7 @@ import {
   Writing,
 } from '@/components/site/Voice'
 import { getCachedSiteContent } from '@/lib/site'
+import { getCachedTheme } from '@/lib/theme'
 
 export const revalidate = 3600
 
@@ -41,10 +42,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import { MEDIA_COLLECTION, mediaSchema } from '@/lib/schemas/media'
+import { DEFAULT_SECTION_ORDER } from '@/lib/schemas/theme'
 
 export default async function HomePage() {
-  const [content, allPosts, allServices, allMedia] = await Promise.all([
+  const [content, theme, allPosts, allServices, allMedia] = await Promise.all([
     getCachedSiteContent(),
+    getCachedTheme(),
     safeList(POSTS_COLLECTION, postSchema),
     safeList(SERVICES_COLLECTION, serviceSchema),
     safeList(MEDIA_COLLECTION, mediaSchema)
@@ -116,6 +119,11 @@ export default async function HomePage() {
     ],
   }
 
+  const isVisible = (key: string) => {
+    const section = theme.sections?.find(s => s.key === key)
+    return section ? section.visible : true
+  }
+
   return (
     <>
       <script
@@ -130,13 +138,13 @@ export default async function HomePage() {
       <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} />
 
       <main>
-        <Hero hero={content.hero} meta={meta} />
-        <CredPills creds={content.creds} />
-        <ProofStrip proof={content.proof} />
-        <Audiences audiences={content.audiences} />
-        <Ways ways={content.ways} />
+        {isVisible('hero') && <Hero hero={content.hero} meta={meta} />}
+        {isVisible('creds') && <CredPills creds={content.creds} />}
+        {isVisible('proof') && <ProofStrip proof={content.proof} />}
+        {isVisible('audiences') && <Audiences audiences={content.audiences} />}
+        {isVisible('ways') && <Ways ways={content.ways} />}
 
-        {activeServices.length > 0 && (
+        {activeServices.length > 0 && isVisible('services') && (
           <Section id="services" tone="deep">
             <SectionHead 
               eyebrow="Offerings" 
@@ -147,14 +155,14 @@ export default async function HomePage() {
           </Section>
         )}
 
-        <Ventures ventures={content.ventures} />
-        <Projects projects={content.projects} />
-        <PointOfView pov={content.pov} />
-        <Contrasts contrasts={content.contrasts} />
-        <Gallery gallery={content.gallery} />
-        <Writing writing={content.writing} />
-        <OneCard oneCard={content.oneCard} />
-        <Closing closing={content.closing} meta={meta} />
+        {isVisible('ventures') && <Ventures ventures={content.ventures} />}
+        {isVisible('projects') && <Projects projects={content.projects} />}
+        {isVisible('pov') && <PointOfView pov={content.pov} />}
+        {isVisible('contrasts') && <Contrasts contrasts={content.contrasts} />}
+        {isVisible('gallery') && <Gallery gallery={content.gallery} />}
+        {isVisible('writing') && <Writing writing={content.writing} />}
+        {isVisible('oneCard') && <OneCard oneCard={content.oneCard} />}
+        {isVisible('closing') && <Closing closing={content.closing} meta={meta} />}
       </main>
 
       <SiteFooter footer={content.footer} meta={meta} />

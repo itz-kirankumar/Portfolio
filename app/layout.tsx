@@ -69,19 +69,26 @@ export async function generateMetadata(): Promise<Metadata> {
 
 import { NewsletterPopup } from '@/components/site/NewsletterPopup'
 import { Tracker } from '@/components/site/Tracker'
+import { ThemeProvider } from '@/components/site/ThemeProvider'
+import { getCachedTheme } from '@/lib/theme'
 
 export const viewport: Viewport = {
   themeColor: '#FBF7F0',
   colorScheme: 'light',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const theme = await getCachedTheme()
+
   return (
     <html
       lang="en"
       className={`${bricolage.variable} ${inter.variable} ${jetbrains.variable} ${caveat.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <ThemeProvider theme={theme} />
+      </head>
       <body className="bg-paper text-ink font-sans antialiased" suppressHydrationWarning>
         <Tracker />
         {children}
