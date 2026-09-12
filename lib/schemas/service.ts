@@ -11,6 +11,9 @@ import { z } from 'zod'
 export const PAYMENT_MODES = ['razorpay', 'link', 'free'] as const
 export type PaymentMode = (typeof PAYMENT_MODES)[number]
 
+export const SERVICE_TYPES = ['consultation', 'digital_download'] as const
+export type ServiceType = (typeof SERVICE_TYPES)[number]
+
 const str = z.string().trim()
 
 export const serviceSchema = z.object({
@@ -18,11 +21,16 @@ export const serviceSchema = z.object({
     .min(1)
     .max(80)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { error: 'Lowercase letters, numbers and dashes only.' }),
+  
+  type: z.enum(SERVICE_TYPES).default('consultation'),
+  
   title: str.min(1).max(120),
   summary: str.max(400).default(''),
   /** Long description. Sanitised HTML from the same editor as posts. */
   body: z.string().max(60_000).default(''),
   coverUrl: str.max(2000).default(''),
+  /** Used for digital downloads */
+  fileUrl: str.max(2000).default(''),
   /** Short selling points shown as a list on the service card. */
   highlights: z.array(str.max(160)).max(8).default([]),
 

@@ -54,14 +54,20 @@ export async function generateMetadata(): Promise<Metadata> {
       description: meta.descriptor,
       url: siteUrl,
       locale: 'en_IN',
-      images: meta.ogImageUrl ? [{ url: meta.ogImageUrl, width: 1200, height: 630 }] : undefined,
+      images: [
+        {
+          url: meta.ogImageUrl || `${siteUrl}/api/og?title=${encodeURIComponent(meta.name)}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: meta.name,
       description: meta.descriptor,
       creator: meta.twitterHandle,
-      images: meta.ogImageUrl ? [meta.ogImageUrl] : undefined,
+      images: [meta.ogImageUrl || `${siteUrl}/api/og?title=${encodeURIComponent(meta.name)}`],
     },
     robots: { index: true, follow: true },
   }

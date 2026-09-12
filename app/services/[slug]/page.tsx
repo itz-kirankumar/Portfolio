@@ -21,9 +21,32 @@ export async function generateMetadata({
   const { slug } = await params
   const service = await safeGet(SERVICES_COLLECTION, slug, serviceSchema)
   if (!service || !service.active) return {}
+  
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const ogUrl = new URL('/api/og', siteUrl)
+  ogUrl.searchParams.set('title', service.title)
+  ogUrl.searchParams.set('type', 'service')
+
   return {
     title: service.title,
     description: service.summary,
+    openGraph: {
+      title: service.title,
+      description: service.summary,
+      images: [
+        {
+          url: ogUrl.toString(),
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: service.title,
+      description: service.summary,
+      images: [ogUrl.toString()],
+    }
   }
 }
 
@@ -58,14 +81,16 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                 <p className="font-display text-4xl font-semibold text-ink">
                   {formatPrice(service.priceInPaise, service.currency)}
                 </p>
-                <p className="mt-2 font-mono text-xs uppercase tracking-widest text-ink-soft">
-                  {occupiedMins(service)} minute session
-                </p>
+                {service.type !== 'digital_download' && (
+                  <p className="mt-2 font-mono text-xs uppercase tracking-widest text-ink-soft">
+                    {occupiedMins(service)} minute session
+                  </p>
+                )}
               </div>
 
               <div className="flex justify-center md:justify-end md:shrink-0">
                 <Button href={bookNowUrl} variant="solid" size="lg" className="w-full sm:w-auto">
-                  Book Now
+                  {service.type === 'digital_download' ? 'Get it now' : 'Book Now'}
                 </Button>
               </div>
             </div>
@@ -97,7 +122,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         <Reveal kind="up" delay={180}>
           <div className="mt-16 text-center">
             <Button href={bookNowUrl} variant="solid" size="lg">
-              Book Now
+              {service.type === 'digital_download' ? 'Get it now' : 'Book Now'}
             </Button>
           </div>
         </Reveal>

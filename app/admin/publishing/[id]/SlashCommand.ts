@@ -1,4 +1,4 @@
-﻿import { Extension } from '@tiptap/core'
+import { Extension } from '@tiptap/core'
 import Suggestion, { SuggestionOptions } from '@tiptap/suggestion'
 import { ReactRenderer } from '@tiptap/react'
 import tippy, { Instance as TippyInstance } from 'tippy.js'
@@ -81,6 +81,20 @@ export const getSuggestionItems = () => [
     description: 'Insert a horizontal rule',
     command: ({ editor, range }: any) => {
       editor.chain().focus().deleteRange(range).setHorizontalRule().run()
+    },
+  },
+  {
+    title: 'Image / Media',
+    description: 'Insert an image, video, or file',
+    command: () => {
+      window.dispatchEvent(new CustomEvent('open-media-picker'))
+    },
+  },
+  {
+    title: 'Table',
+    description: 'Insert a table',
+    command: ({ editor, range }: any) => {
+      editor.chain().focus().deleteRange(range).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
     },
   },
 ]

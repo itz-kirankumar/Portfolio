@@ -1,6 +1,6 @@
-﻿'use client'
+'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -12,6 +12,15 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import { TextAlign } from '@tiptap/extension-text-align'
 import { Iframe } from './IframeExtension'
 import { MediaPickerModal } from './MediaPickerModal'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
+import { all, createLowlight } from 'lowlight'
+import 'highlight.js/styles/github.css'
+
+const lowlight = createLowlight(all)
 import type { Media } from '@/lib/schemas/media'
 import {
   Bold,
@@ -47,12 +56,28 @@ export function Tiptap({
   const [showMediaPicker, setShowMediaPicker] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
 
+  useEffect(() => {
+    const handler = () => setShowMediaPicker(true)
+    window.addEventListener('open-media-picker', handler)
+    return () => window.removeEventListener('open-media-picker', handler)
+  }, [])
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
+        codeBlock: false,
       }),
+      CodeBlockLowlight.configure({
+        lowlight,
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
       Underline,
       TextStyle,
       Color,

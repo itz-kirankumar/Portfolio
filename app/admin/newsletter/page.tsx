@@ -2,6 +2,8 @@ import { safeList } from '@/lib/store'
 import { SUBSCRIBERS_COLLECTION, subscriberSchema } from '@/lib/schemas/subscriber'
 import { Users } from 'lucide-react'
 import { PageHeader, EmptyState } from '@/components/admin/ui'
+import { Button } from '@/components/ui/primitives'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Newsletter' }
@@ -13,10 +15,15 @@ export default async function NewsletterPage() {
 
   return (
     <>
-      <PageHeader
-        title="Newsletter"
-        description="Manage your newsletter subscribers."
-      />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <PageHeader
+          title="Newsletter"
+          description="Manage your newsletter subscribers."
+        />
+        <Button href="/admin/newsletter/compose" className="w-fit" variant="solid" size="md">
+          Compose Email
+        </Button>
+      </div>
 
       {subscribers.length === 0 ? (
         <div className="mt-6">

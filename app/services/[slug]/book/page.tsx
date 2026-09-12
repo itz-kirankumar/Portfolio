@@ -1,4 +1,4 @@
-﻿import { notFound, redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { safeGet, safeList, createStrict } from '@/lib/store'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
 import { bookingSchema, BOOKINGS_COLLECTION } from '@/lib/schemas/booking'
@@ -30,22 +30,31 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
     redirect(service.paymentLinkUrl)
   }
 
-  async function handleBook(formData: FormData) {
+    async function handleBook(formData: FormData) {
     'use server'
     const name = formData.get('name') as string
     const email = formData.get('email') as string
-    const dateStr = formData.get('date') as string
-    const timeStr = formData.get('time') as string
     const notes = formData.get('notes') as string
     
-    if (!name || !email || !dateStr || !timeStr) {
-      throw new Error('Please fill all required fields')
-    }
+    let startISO = new Date().toISOString()
+    let endISO = new Date().toISOString()
 
-    // Parse date and time in the user's local timezone assumption
-    const start = new Date(`${dateStr}T${timeStr}:00`)
-    const startISO = start.toISOString()
-    const endISO = new Date(start.getTime() + service!.durationMins * 60000).toISOString()
+    if (service!.type !== 'digital_download') {
+      const dateStr = formData.get('date') as string
+      const timeStr = formData.get('time') as string
+      
+      if (!name || !email || !dateStr || !timeStr) {
+        throw new Error('Please fill all required fields')
+      }
+
+      const start = new Date(`${dateStr}T${timeStr}:00`)
+      startISO = start.toISOString()
+      endISO = new Date(start.getTime() + service!.durationMins * 60000).toISOString()
+    } else {
+      if (!name || !email) {
+        throw new Error('Please fill all required fields')
+      }
+    }
     
     const docId = bookingId(service!.id, startISO)
     
@@ -57,8 +66,8 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
       notes,
       startISO,
       endISO,
-      tz: 'UTC', // We could grab this from the browser on the client, but keeping it simple
-      durationMins: service!.durationMins,
+      tz: 'UTC',
+      durationMins: service!.type === 'digital_download' ? 0 : service!.durationMins,
       status: 'pending',
       payment: {
         mode: service!.paymentMode,
@@ -85,7 +94,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
         <Reveal kind="up">
           <SectionHead
             align="center"
-            heading={`Book ${service.title}`}
+            heading={service.type === 'digital_download' ? `Get ${service.title}` : `Book ${service.title}`}
             intro={service.summary}
           />
         </Reveal>
@@ -119,15 +128,17 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                 />
               </div>
 
-              <SlotPicker 
-                service={service} 
-                availability={availability} 
-                upcomingBookings={upcomingBookings}
-              />
+              {service.type !== 'digital_download' && (
+                <SlotPicker 
+                  service={service} 
+                  availability={availability} 
+                  upcomingBookings={upcomingBookings}
+                />
+              )}
 
               <div>
                 <label htmlFor="notes" className="block text-sm font-medium text-ink mb-1.5">
-                  What would you like to discuss?
+                  {service.type === 'digital_download' ? 'Notes (Optional)' : 'What would you like to discuss?'}
                 </label>
                 <textarea
                   id="notes"
@@ -142,7 +153,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                   type="submit"
                   className="w-full inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] px-7 py-3.5 text-[1rem] bg-coral-deep text-white shadow-paper hover:-translate-y-0.5 hover:bg-coral-ink hover:shadow-lift"
                 >
-                  Confirm Booking
+                  {service.type === 'digital_download' ? 'Proceed to Checkout' : 'Confirm Booking'}
                 </button>
               </div>
             </form>

@@ -45,17 +45,36 @@ export async function saveSection(section: string, raw: unknown): Promise<SaveRe
   try {
     await saveSiteSection(
       section as SectionKey,
-      parsed.data as SiteContent[SectionKey]
+      parsed.data as SiteContent[SectionKey],
+      'draft'
     )
   } catch (err) {
     console.error('[admin] save failed:', err)
     return { ok: false, error: 'Could not write to the database.' }
   }
 
-  revalidateTag(SITE_CACHE_TAG, 'max') // one-arg form is a type error in 16.2.3
-  revalidatePath('/')
   revalidatePath('/admin')
   revalidatePath(`/admin/${section}`)
 
   return { ok: true, savedAt: Date.now() }
+}
+
+import { publishDraft } from '@/lib/site'
+
+export async function publishSite(): Promise<SaveResult> {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.isOwner) {
+    return { ok: false, error: 'Not authorised.' }
+  }
+  
+  try {
+    await publishDraft()
+    revalidateTag(SITE_CACHE_TAG, 'max')
+    revalidatePath('/')
+    revalidatePath('/admin')
+    return { ok: true, savedAt: Date.now() }
+  } catch (err) {
+    console.error('[admin] publish failed:', err)
+    return { ok: false, error: 'Could not publish site.' }
+  }
 }

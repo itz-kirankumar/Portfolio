@@ -138,7 +138,7 @@ export default async function HomePage() {
       <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} showThemeToggle={theme.darkMode === 'toggle'} />
 
       <main>
-        {isVisible('hero') && <Hero hero={content.hero} meta={meta} />}
+        {isVisible('hero') && <Hero hero={content.hero} meta={meta} layout={theme.heroLayout} />}
         {isVisible('creds') && <CredPills creds={content.creds} />}
         {isVisible('proof') && <ProofStrip proof={content.proof} />}
         {isVisible('audiences') && <Audiences audiences={content.audiences} />}

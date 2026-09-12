@@ -448,6 +448,8 @@ export function SaveBar({
   savedAt,
   error,
   issues,
+  saveLabel = 'Save changes',
+  resetLabel = 'Discard',
 }: {
   dirty: boolean
   saving: boolean
@@ -456,6 +458,8 @@ export function SaveBar({
   savedAt?: number | null
   error?: string | null
   issues?: string[]
+  saveLabel?: string
+  resetLabel?: string
 }) {
   // Ctrl/Cmd-S is muscle memory for anyone who has ever used a CMS. Without it,
   // the browser's own save-page dialog appears, which is worse than nothing.
@@ -512,11 +516,11 @@ export function SaveBar({
         <div className="flex items-center gap-2">
           {onReset ? (
             <button type="button" onClick={onReset} disabled={!dirty || saving} className={BTN}>
-              Discard
+              {resetLabel}
             </button>
           ) : null}
           <button type="button" onClick={onSave} disabled={!dirty || saving} className={BTN_PRIMARY}>
-            {saving ? 'Saving…' : 'Save changes'}
+            {saving ? 'Saving…' : saveLabel}
           </button>
         </div>
       </div>

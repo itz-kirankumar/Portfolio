@@ -10,7 +10,7 @@ export default async function AdminSectionPage({ params }: { params: Promise<{ s
   const { section } = await params
   if (!isSectionKey(section)) redirect('/admin')
 
-  const content = await getSiteContent()
+  const content = await getSiteContent('draft')
   const data = content[section]
   const meta = SECTION_META.find(s => s.key === section)
 

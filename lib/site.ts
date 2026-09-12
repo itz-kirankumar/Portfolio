@@ -54,30 +54,36 @@ function migrate(stored: StoredSite): StoredSite {
  * executes this — if it threw, a build on any machine without FIREBASE_ADMIN_*
  * would fail outright instead of producing a correctly seeded page.
  */
-export async function getSiteContent(): Promise<SiteContent> {
+export async function getSiteContent(id: 'content' | 'draft' = 'content'): Promise<SiteContent> {
   if (!hasAdminCredentials()) return resolve(null)
 
   try {
-    const snap = await getAdminDb().collection(DOC_PATH.collection).doc(DOC_PATH.id).get()
-    if (!snap.exists) return resolve(null)
+    const snap = await getAdminDb().collection(DOC_PATH.collection).doc(id).get()
+    if (!snap.exists) {
+      if (id === 'draft') {
+        // If draft doesn't exist, fall back to content
+        return getSiteContent('content')
+      }
+      return resolve(null)
+    }
     return resolve(migrate(snap.data() as StoredSite))
   } catch (err) {
-    console.error('[site] read failed, falling back to defaults:', err)
+    console.error(`[site] read ${id} failed, falling back to defaults:`, err)
     return resolve(null)
   }
 }
 
-/** Cached for the public page. Invalidated by `revalidateTag(SITE_CACHE_TAG, 'max')`. */
-export const getCachedSiteContent = unstable_cache(getSiteContent, ['site-content'], {
+/** Cached for the public page. Invalidated by `revalidateTag(SITE_CACHE_TAG)`. */
+export const getCachedSiteContent = unstable_cache(() => getSiteContent('content'), ['site-content'], {
   tags: [SITE_CACHE_TAG],
   revalidate: false,
 })
 
 /** When the document was last saved, or null. Used by the /admin index. */
-export async function getSiteUpdatedAt(): Promise<number | null> {
+export async function getSiteUpdatedAt(id: 'content' | 'draft' = 'content'): Promise<number | null> {
   if (!hasAdminCredentials()) return null
   try {
-    const snap = await getAdminDb().collection(DOC_PATH.collection).doc(DOC_PATH.id).get()
+    const snap = await getAdminDb().collection(DOC_PATH.collection).doc(id).get()
     const data = snap.data() as StoredSite | undefined
     return data?.updatedAt ?? null
   } catch {
@@ -91,13 +97,26 @@ export async function getSiteUpdatedAt(): Promise<number | null> {
  */
 export async function saveSiteSection<K extends SectionKey>(
   section: K,
-  value: SiteContent[K]
+  value: SiteContent[K],
+  id: 'content' | 'draft' = 'draft'
 ): Promise<void> {
   await getAdminDb()
     .collection(DOC_PATH.collection)
-    .doc(DOC_PATH.id)
+    .doc(id)
     .set(
       { [section]: value, schemaVersion: SCHEMA_VERSION, updatedAt: Date.now() },
       { mergeFields: [section, 'schemaVersion', 'updatedAt'] }
     )
+}
+
+/** Publishes the current draft to content */
+export async function publishDraft(): Promise<void> {
+  const db = getAdminDb()
+  const draftRef = db.collection(DOC_PATH.collection).doc('draft')
+  const contentRef = db.collection(DOC_PATH.collection).doc('content')
+  
+  const draftSnap = await draftRef.get()
+  if (draftSnap.exists) {
+    await contentRef.set({ ...draftSnap.data(), updatedAt: Date.now() })
+  }
 }

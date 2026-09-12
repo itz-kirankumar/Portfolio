@@ -13,6 +13,7 @@ import { ChevronRight, ExternalLink, LogOut, Menu, Plus, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BTN, GHOST_BTN } from '@/components/admin/ui'
 import { CREATE_ACTIONS, NAV, buildCrumbs, isActive } from './nav-config'
+import { PublishButton } from './PublishButton'
 
 /** Closes a popover on outside click and Escape. Both, because either alone feels broken. */
 function useDismiss(open: boolean, close: () => void) {
@@ -242,6 +243,7 @@ export default function Topbar({ email, name }: { email: string; name: string })
           <span className="hidden sm:inline">Preview site</span>
         </a>
 
+        <PublishButton />
         <CreateMenu />
         <AccountMenu email={email} name={name} />
       </div>

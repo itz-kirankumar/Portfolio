@@ -1,14 +1,26 @@
-﻿import { ImageResponse } from 'next/og'
+import { ImageResponse } from 'next/og'
 import { NextRequest } from 'next/server'
+import { getCachedTheme } from '@/lib/theme'
+import { getCachedSiteContent } from '@/lib/site'
 
-export const runtime = 'edge'
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
+    const title = searchParams.get('title')
+    const type = searchParams.get('type') // 'post', 'service', 'page'
 
-    const title = searchParams.get('title') || 'My Portfolio'
-    const cover = searchParams.get('cover')
+    const [theme, site] = await Promise.all([
+      getCachedTheme(),
+      getCachedSiteContent(),
+    ])
+
+    const primaryColor = theme.light.coral || '#e8543f'
+    const bgColor = theme.light.paper || '#fbf7f0'
+    const textColor = theme.light.ink || '#1a1815'
+
+    const displayTitle = title || site.meta.name
+    const subtitle = title ? site.meta.name : site.meta.descriptor
 
     return new ImageResponse(
       (
@@ -18,72 +30,59 @@ export async function GET(req: NextRequest) {
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'flex-end',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            backgroundColor: bgColor,
             padding: '80px',
-            backgroundColor: '#0a0a0a',
-            backgroundImage: cover ? `url(${cover})` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            fontFamily: 'sans-serif',
           }}
         >
-          {cover && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0,0,0,0.6)',
-              }}
-            />
-          )}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              zIndex: 1,
+              alignItems: 'center',
+              marginBottom: '40px',
             }}
           >
-            <h1
+            <span
               style={{
-                fontSize: 80,
-                fontWeight: 800,
-                color: 'white',
-                lineHeight: 1.1,
-                marginBottom: 30,
-                letterSpacing: '-0.02em',
+                fontSize: '32px',
+                color: primaryColor,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
               }}
             >
-              {title}
-            </h1>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <div
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  backgroundColor: '#ff6b4a',
-                  marginRight: 16,
-                }}
-              />
-              <span
-                style={{
-                  fontSize: 32,
-                  color: 'rgba(255,255,255,0.8)',
-                  fontWeight: 500,
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                Article
-              </span>
-            </div>
+              {type || 'Portfolio'}
+            </span>
+          </div>
+
+          <div
+            style={{
+              fontSize: '84px',
+              fontWeight: 800,
+              color: textColor,
+              lineHeight: 1.1,
+              letterSpacing: '-2px',
+              marginBottom: '30px',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {displayTitle}
+          </div>
+
+          <div
+            style={{
+              fontSize: '36px',
+              color: textColor,
+              opacity: 0.7,
+              fontWeight: 400,
+            }}
+          >
+            {subtitle}
           </div>
         </div>
       ),
@@ -94,7 +93,7 @@ export async function GET(req: NextRequest) {
     )
   } catch (e: any) {
     console.error(e)
-    return new Response(`Failed to generate image`, {
+    return new Response(`Failed to generate the image`, {
       status: 500,
     })
   }
