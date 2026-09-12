@@ -29,6 +29,10 @@ export async function savePost(id: string, data: any) {
         }
     }
 
+    if (parsed.data.status === 'published' && parsed.data.publishedAt === 0) {
+      parsed.data.publishedAt = Date.now()
+    }
+
     // We use the new slug as the ID if the ID was 'new' or if slug changed
     // Note: If slug changes on an existing post, this creates a new doc.
     const docId = id === 'new' ? parsed.data.slug : id

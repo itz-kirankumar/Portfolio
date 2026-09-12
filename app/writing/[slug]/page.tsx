@@ -10,6 +10,7 @@ import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
 export const revalidate = 3600
 
 import { cookies } from 'next/headers'
+import { ArticleActions } from '@/components/site/ArticleActions'
 
 type Props = {
   params: Promise<{ slug: string }>
@@ -62,8 +63,9 @@ export default async function WritingDetailPage({ params, searchParams }: Props)
   const content = await getCachedSiteContent()
   const { meta } = content
 
-  const formattedDate = post.publishedAt > 0 
-    ? new Date(post.publishedAt).toLocaleDateString('en-US', {
+  const displayDate = post.publishedAt > 0 ? post.publishedAt : post.createdAt
+  const formattedDate = displayDate > 0 
+    ? new Date(displayDate).toLocaleDateString('en-US', {
         month: 'long',
         day: 'numeric',
         year: 'numeric'
@@ -75,66 +77,115 @@ export default async function WritingDetailPage({ params, searchParams }: Props)
       <UtilityBar utility={content.utility} />
       <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} />
 
-      <main className="min-h-screen bg-paper pb-16 pt-16 sm:pb-24 sm:pt-24 lg:pb-32 lg:pt-32">
+      <main className="min-h-screen bg-paper pb-16 lg:pb-32">
         <article>
-          <header className="mx-auto max-w-2xl px-6 lg:px-8">
-            <div className="mb-6 flex items-center gap-3">
-              <Eyebrow tone="ink">Writing</Eyebrow>
-              {formattedDate && (
-                <>
-                  <span className="text-ink-soft/40">/</span>
-                  <time 
-                    className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-ink-soft" 
-                    dateTime={new Date(post.publishedAt).toISOString()}
-                  >
-                    {formattedDate}
-                  </time>
-                </>
-              )}
-            </div>
-            
-            <h1 className="font-display text-[clamp(2rem,5vw,3.5rem)] font-semibold leading-[1.08] tracking-[-0.02em] text-ink">
-              {post.title}
-            </h1>
-
-            {post.excerpt && (
-              <p className="mt-6 text-[1.15rem] leading-relaxed text-ink-soft">
-                {post.excerpt}
-              </p>
-            )}
-
-            <div className="mt-8 flex items-center gap-4 font-mono text-[0.8rem] text-ink-soft">
-              <span>{post.readingMinutes} min read</span>
-              {post.tags.length > 0 && (
-                <>
-                  <span className="text-ink-soft/40">·</span>
-                  <span>{post.tags.join(', ')}</span>
-                </>
-              )}
-            </div>
-          </header>
-
           {post.coverUrl ? (
-            <div className="mx-auto mt-12 max-w-5xl px-6 lg:px-8">
-              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-card ring-1 ring-rule shadow-paper">
+            <header className="relative w-full h-[70vh] min-h-[500px] flex flex-col justify-end">
+              <div className="absolute inset-0">
                 <Image
                   src={post.coverUrl}
                   alt={post.title}
                   fill
                   className="object-cover"
                   priority
-                  sizes="(min-width: 1024px) 64rem, 100vw"
+                  sizes="100vw"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
               </div>
-            </div>
+              <div className="relative mx-auto w-full max-w-4xl px-6 pb-16 lg:px-8">
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="font-mono text-[0.75rem] uppercase tracking-[0.15em] text-white/80">
+                    Writing
+                  </span>
+                  {formattedDate && (
+                    <>
+                      <span className="text-white/40">/</span>
+                      <time 
+                        className="font-mono text-[0.75rem] uppercase tracking-[0.15em] text-white/80" 
+                        dateTime={new Date(displayDate).toISOString()}
+                      >
+                        {formattedDate}
+                      </time>
+                    </>
+                  )}
+                </div>
+                
+                <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.02em] text-white text-balance drop-shadow-sm">
+                  {post.title}
+                </h1>
+
+                {post.excerpt && (
+                  <p className="mt-6 text-[1.25rem] leading-relaxed text-white/90 max-w-3xl text-pretty drop-shadow-sm">
+                    {post.excerpt}
+                  </p>
+                )}
+
+                <div className="mt-8 flex items-center gap-4 font-mono text-[0.8rem] text-white/70">
+                  <span>{post.readingMinutes} min read</span>
+                  {post.tags.length > 0 && (
+                    <>
+                      <span className="text-white/40">•</span>
+                      <span>{post.tags.join(', ')}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </header>
           ) : (
-            <RuleDivider className="mx-auto mt-12 max-w-2xl px-6 lg:px-8" />
+            <header className="mx-auto max-w-4xl px-6 pt-24 pb-12 lg:px-8 lg:pt-32">
+              <div className="mb-6 flex items-center gap-3">
+                <Eyebrow tone="ink">Writing</Eyebrow>
+                {formattedDate && (
+                  <>
+                    <span className="text-ink-soft/40">/</span>
+                    <time 
+                      className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-ink-soft" 
+                      dateTime={new Date(displayDate).toISOString()}
+                    >
+                      {formattedDate}
+                    </time>
+                  </>
+                )}
+              </div>
+              
+              <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.05] tracking-[-0.02em] text-ink text-balance">
+                {post.title}
+              </h1>
+
+              {post.excerpt && (
+                <p className="mt-6 text-[1.25rem] leading-relaxed text-ink-soft max-w-3xl text-pretty">
+                  {post.excerpt}
+                </p>
+              )}
+
+              <div className="mt-8 flex items-center gap-4 font-mono text-[0.8rem] text-ink-soft">
+                <span>{post.readingMinutes} min read</span>
+                {post.tags.length > 0 && (
+                  <>
+                    <span className="text-ink-soft/40">•</span>
+                    <span>{post.tags.join(', ')}</span>
+                  </>
+                )}
+              </div>
+              <RuleDivider className="mt-12" />
+            </header>
           )}
 
           <div 
-            className="prose prose-stone prose-lg mx-auto mt-12 max-w-2xl px-6 text-ink lg:px-8"
+            className="prose prose-stone prose-lg md:prose-xl mx-auto mt-12 max-w-2xl px-6 text-ink lg:px-8 prose-headings:font-display prose-headings:font-bold prose-p:leading-relaxed"
             dangerouslySetInnerHTML={{ __html: post.html }} 
           />
+          
+          <div className="mx-auto mt-24 max-w-2xl px-6 lg:px-8">
+            <RuleDivider />
+            <ArticleActions title={post.title} slug={post.slug} />
+            
+            {/* Future placeholder for anonymous comments like Cusdis / Giscus */}
+            <div id="comments" className="mt-16 rounded-xl border border-rule bg-paper-deep/50 p-8 text-center">
+              <p className="text-sm font-medium text-ink-soft">Comments are enabled for this post.</p>
+              <p className="text-xs text-ink-soft/70 mt-1">Comment system loading...</p>
+            </div>
+          </div>
         </article>
       </main>
 

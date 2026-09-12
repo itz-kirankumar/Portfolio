@@ -54,13 +54,13 @@ export default async function HomePage() {
   // Override static posts with real ones
   const publishedPosts = allPosts
     .filter(p => p.status === 'published')
-    .sort((a, b) => b.publishedAt - a.publishedAt)
+    .sort((a, b) => (b.publishedAt || b.createdAt) - (a.publishedAt || a.createdAt))
     .slice(0, 5)
     .map(p => ({
       title: p.title,
       blurb: p.excerpt,
       href: `/writing/${p.slug}`,
-      date: new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      date: new Date(p.publishedAt || p.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
     }))
 
   if (publishedPosts.length > 0) {
