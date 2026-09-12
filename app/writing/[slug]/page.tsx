@@ -4,8 +4,10 @@ import { notFound } from 'next/navigation'
 import { SiteFooter, SiteNav, UtilityBar } from '@/components/site/Chrome'
 import { getCachedSiteContent } from '@/lib/site'
 import { RuleDivider, Eyebrow } from '@/components/ui/primitives'
-import { safeGet } from '@/lib/store'
+import { safeList, safeGet } from '@/lib/store'
 import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
+import { COMMENTS_COLLECTION, commentSchema } from '@/lib/schemas/comment'
+import { CommentsList } from '@/components/site/CommentsList'
 
 export const revalidate = 3600
 
@@ -62,6 +64,11 @@ export default async function WritingDetailPage({ params, searchParams }: Props)
 
   const content = await getCachedSiteContent()
   const { meta } = content
+
+  const comments = await safeList(COMMENTS_COLLECTION, commentSchema, {
+    where: [['postId', '==', slug], ['status', '==', 'approved']],
+    orderBy: ['createdAt', 'desc']
+  })
 
   const displayDate = post.publishedAt > 0 ? post.publishedAt : post.createdAt
   const formattedDate = displayDate > 0 
@@ -172,19 +179,14 @@ export default async function WritingDetailPage({ params, searchParams }: Props)
           )}
 
           <div 
-            className="prose prose-stone prose-lg md:prose-xl mx-auto mt-12 max-w-2xl px-6 text-ink lg:px-8 prose-headings:font-display prose-headings:font-bold prose-p:leading-relaxed"
+            className="prose prose-stone prose-lg md:prose-xl mx-auto mt-12 max-w-3xl px-6 text-ink lg:px-8 prose-headings:font-display prose-headings:font-bold prose-p:leading-relaxed"
             dangerouslySetInnerHTML={{ __html: post.html }} 
           />
           
-          <div className="mx-auto mt-24 max-w-2xl px-6 lg:px-8">
+          <div className="mx-auto mt-24 max-w-3xl px-6 lg:px-8">
             <RuleDivider />
-            <ArticleActions title={post.title} slug={post.slug} />
-            
-            {/* Future placeholder for anonymous comments like Cusdis / Giscus */}
-            <div id="comments" className="mt-16 rounded-xl border border-rule bg-paper-deep/50 p-8 text-center">
-              <p className="text-sm font-medium text-ink-soft">Comments are enabled for this post.</p>
-              <p className="text-xs text-ink-soft/70 mt-1">Comment system loading...</p>
-            </div>
+            <ArticleActions title={post.title} slug={post.slug} initialLikes={post.likes || 0} />
+            <CommentsList postId={post.slug} initialComments={comments} />
           </div>
         </article>
       </main>

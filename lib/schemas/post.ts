@@ -62,6 +62,7 @@ export const postSchema = z.object({
   /** Epoch ms for `status: 'scheduled'`. */
   scheduledFor: z.number().int().min(0).default(0),
   readingMinutes: z.number().int().min(0).max(600).default(1),
+  likes: z.number().int().min(0).default(0),
 
   newsletter: newsletterSchema.default({
     enabled: false,
