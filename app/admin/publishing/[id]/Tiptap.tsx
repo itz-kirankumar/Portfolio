@@ -134,14 +134,17 @@ export function Tiptap({
   const handleMediaSelect = (media: Media) => {
     setShowMediaPicker(false)
     if (media.kind === 'image') {
-      editor.chain().focus().setImage({ src: media.url, alt: media.alt || media.title }).insertContent('<p></p>').run()
+      editor.chain().focus().insertContent([
+        { type: 'image', attrs: { src: media.url, alt: media.alt || media.title || '' } },
+        { type: 'paragraph' }
+      ]).run()
     } else if (media.kind === 'video' || media.kind === 'embed') {
       editor.chain().focus().insertContent([
-        { type: 'iframe', attrs: { src: media.url, title: media.title } },
+        { type: 'iframe', attrs: { src: media.url, title: media.title || '' } },
         { type: 'paragraph' }
       ]).run()
     } else {
-      editor.chain().focus().setLink({ href: media.url }).insertContent(media.title || 'Download File').insertContent('<p></p>').run()
+      editor.chain().focus().setLink({ href: media.url }).insertContent(media.title || 'Download File').insertContent({ type: 'paragraph' }).run()
     }
   }
 
