@@ -1,4 +1,5 @@
-'use client'
+﻿'use client'
+
 import { useUI as useToast } from '@/lib/store/ui'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -8,6 +9,15 @@ import { SaveBar } from '@/components/admin/ui'
 import { LIGHT_PRESETS, DARK_PRESETS } from './ThemePresets'
 import { cn } from '@/lib/utils'
 import { Paintbrush, LayoutTemplate, Link as LinkIcon, Settings2, GripVertical, Check } from 'lucide-react'
+
+// Combine presets for the Base Theme picker
+const ALL_PRESETS = [
+  ...LIGHT_PRESETS.map(p => ({ ...p, isDark: false })),
+  ...DARK_PRESETS.filter(p => p.id !== 'custom').map(p => ({ ...p, isDark: true })),
+]
+
+// Exclude custom from the Dark Mode Theme picker map, we add it back manually if needed
+const DARK_MODE_OPTIONS = DARK_PRESETS
 
 function FormItem({ label, description, children }: { label: string, description?: React.ReactNode, children: React.ReactNode }) {
   return (
@@ -34,11 +44,14 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
 
   const [data, setData] = useState<Theme>(initialData)
   
-  // Keep track of the active tab
   const [activeTab, setActiveTab] = useState<'colors' | 'meta' | 'layout' | 'sections'>('colors')
-  // Keep track of custom colors panel state
-  const [showLightCustom, setShowLightCustom] = useState(Object.keys(data.light).length > 0 && !LIGHT_PRESETS.some(p => JSON.stringify(p.palette) === JSON.stringify(data.light)))
-  const [showDarkCustom, setShowDarkCustom] = useState(Object.keys(data.dark).length > 0 && !DARK_PRESETS.some(p => JSON.stringify(p.palette) === JSON.stringify(data.dark)))
+  
+  const [showBaseCustom, setShowBaseCustom] = useState(
+    Object.keys(data.light).length > 0 && !ALL_PRESETS.some(p => JSON.stringify(p.palette) === JSON.stringify(data.light))
+  )
+  const [showDarkCustom, setShowDarkCustom] = useState(
+    Object.keys(data.dark).length > 0 && !DARK_MODE_OPTIONS.some(p => JSON.stringify(p.palette) === JSON.stringify(data.dark))
+  )
 
   const handleSave = async () => {
     setLoading(true)
@@ -62,17 +75,17 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
     setData(prev => ({ ...prev, meta: { ...prev.meta, [key]: value } }))
   }
 
-  const setLightPreset = (preset: typeof LIGHT_PRESETS[0]) => {
+  const setBasePreset = (preset: typeof ALL_PRESETS[0]) => {
     setData(prev => ({ ...prev, light: { ...preset.palette } }))
-    setShowLightCustom(preset.id === 'custom')
+    setShowBaseCustom(preset.id === 'custom')
   }
 
-  const setDarkPreset = (preset: typeof DARK_PRESETS[0]) => {
+  const setDarkPreset = (preset: typeof DARK_MODE_OPTIONS[0]) => {
     setData(prev => ({ ...prev, dark: { ...preset.palette } }))
     setShowDarkCustom(preset.id === 'custom')
   }
 
-  const updateLightToken = (token: string, color: string) => {
+  const updateBaseToken = (token: string, color: string) => {
     setData(prev => ({
       ...prev,
       light: { ...prev.light, [token]: color }
@@ -87,7 +100,7 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
   }
 
   const TABS = [
-    { id: 'colors', label: 'Colors & Presets', icon: Paintbrush },
+    { id: 'colors', label: 'Theme & Colors', icon: Paintbrush },
     { id: 'layout', label: 'Typography & Layout', icon: LayoutTemplate },
     { id: 'meta', label: 'Metadata & SEO', icon: LinkIcon },
     { id: 'sections', label: 'Homepage Sections', icon: GripVertical },
@@ -125,40 +138,44 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
         {activeTab === 'colors' && (
           <div className="space-y-12">
             <section>
-              <h3 className="text-lg font-display font-bold mb-4">Light Theme</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {LIGHT_PRESETS.map(preset => (
+              <h3 className="text-lg font-display font-bold mb-1">Base Theme</h3>
+              <p className="text-ink-soft text-sm mb-4">Choose a single default theme for your platform. This scales across all devices.</p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+                {ALL_PRESETS.map(preset => (
                   <button
                     key={preset.id}
-                    onClick={() => setLightPreset(preset)}
+                    onClick={() => setBasePreset(preset)}
                     className={cn(
                       "flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all text-left group",
-                      (!showLightCustom && JSON.stringify(data.light) === JSON.stringify(preset.palette)) || (showLightCustom && preset.id === 'custom')
+                      (!showBaseCustom && JSON.stringify(data.light) === JSON.stringify(preset.palette)) || (showBaseCustom && preset.id === 'custom')
                         ? "border-coral bg-coral/5 ring-4 ring-coral/10"
                         : "border-rule hover:border-stone-300 hover:bg-stone-50"
                     )}
                   >
                     <div 
-                      className="w-full h-16 rounded-lg border border-rule/50 shadow-sm flex items-center justify-center relative overflow-hidden"
-                      style={{ backgroundColor: preset.palette.paper || '#fbf7f0' }}
+                      className="w-full h-12 rounded-lg border border-rule/50 shadow-sm flex items-center justify-center relative overflow-hidden"
+                      style={{ backgroundColor: preset.palette.paper || (preset.isDark ? '#16130f' : '#fbf7f0') }}
                     >
                       <div 
                         className="absolute inset-x-0 bottom-0 h-1/2 opacity-50"
-                        style={{ backgroundColor: preset.palette['paper-deep'] || '#f0eadc' }}
+                        style={{ backgroundColor: preset.palette['paper-deep'] || (preset.isDark ? '#0f0d0a' : '#f0eadc') }}
                       />
                       <div 
-                        className="w-8 h-8 rounded-full shadow-sm z-10 border border-white/20"
-                        style={{ backgroundColor: preset.palette.coral || '#e8543f' }}
+                        className="w-6 h-6 rounded-full shadow-sm z-10 border border-white/20"
+                        style={{ backgroundColor: preset.palette.coral || (preset.isDark ? '#ff6b4f' : '#e8543f') }}
                       />
                     </div>
-                    <span className="font-medium text-sm text-ink group-hover:text-coral-ink transition-colors">{preset.name}</span>
+                    <span className="font-medium text-xs text-ink group-hover:text-coral-ink transition-colors text-center leading-tight">
+                      {preset.name}
+                    </span>
                   </button>
                 ))}
               </div>
 
-              {showLightCustom && (
+              {showBaseCustom && (
                 <div className="bg-paper-deep/30 rounded-xl p-6 border border-rule/50">
-                  <h4 className="text-sm font-medium mb-4 flex items-center gap-2"><Settings2 className="w-4 h-4"/> Custom Light Palette</h4>
+                  <h4 className="text-sm font-medium mb-4 flex items-center gap-2"><Settings2 className="w-4 h-4"/> Custom Palette</h4>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {THEME_TOKENS.map(token => (
                       <div key={token} className="flex flex-col gap-1.5">
@@ -167,13 +184,13 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
                           <input 
                             type="color" 
                             value={data.light[token] || '#000000'} 
-                            onChange={(e) => updateLightToken(token, e.target.value)}
+                            onChange={(e) => updateBaseToken(token, e.target.value)}
                             className="w-8 h-8 rounded cursor-pointer border-0 p-0"
                           />
                           <input 
                             type="text" 
                             value={data.light[token] || ''}
-                            onChange={(e) => updateLightToken(token, e.target.value)}
+                            onChange={(e) => updateBaseToken(token, e.target.value)}
                             placeholder="Default"
                             className="flex-1 w-20 text-xs font-mono bg-white border border-rule rounded px-2 py-1.5"
                           />
@@ -187,62 +204,97 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
 
             <div className="h-px w-full bg-rule/50" />
 
-            <section>
-              <h3 className="text-lg font-display font-bold mb-4">Dark Theme</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {DARK_PRESETS.map(preset => (
-                  <button
-                    key={preset.id}
-                    onClick={() => setDarkPreset(preset)}
-                    className={cn(
-                      "flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all text-left group",
-                      (!showDarkCustom && JSON.stringify(data.dark) === JSON.stringify(preset.palette)) || (showDarkCustom && preset.id === 'custom')
-                        ? "border-coral bg-coral/5 ring-4 ring-coral/10"
-                        : "border-rule hover:border-stone-300 hover:bg-stone-50"
-                    )}
-                  >
-                    <div 
-                      className="w-full h-16 rounded-lg border border-rule/50 shadow-sm flex items-center justify-center relative overflow-hidden"
-                      style={{ backgroundColor: preset.palette.paper || '#16130f' }}
-                    >
-                      <div 
-                        className="absolute inset-x-0 bottom-0 h-1/2 opacity-50"
-                        style={{ backgroundColor: preset.palette['paper-deep'] || '#0f0d0a' }}
-                      />
-                      <div 
-                        className="w-8 h-8 rounded-full shadow-sm z-10 border border-white/20"
-                        style={{ backgroundColor: preset.palette.coral || '#ff6b4f' }}
-                      />
-                    </div>
-                    <span className="font-medium text-sm text-ink group-hover:text-coral-ink transition-colors">{preset.name}</span>
-                  </button>
-                ))}
+            <section className="space-y-6">
+              <div>
+                <h3 className="text-lg font-display font-bold mb-1">Dual Theme Support (Dark Mode)</h3>
+                <p className="text-ink-soft text-sm">
+                  Allow your site to adapt when the user toggles dark mode or their system setting is dark.
+                </p>
               </div>
 
-              {showDarkCustom && (
-                <div className="bg-paper-deep/30 rounded-xl p-6 border border-rule/50">
-                  <h4 className="text-sm font-medium mb-4 flex items-center gap-2"><Settings2 className="w-4 h-4"/> Custom Dark Palette</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {THEME_TOKENS.map(token => (
-                      <div key={token} className="flex flex-col gap-1.5">
-                        <label className="text-xs font-mono text-ink-soft capitalize">{token.replace('-', ' ')}</label>
-                        <div className="flex items-center gap-2">
-                          <input 
-                            type="color" 
-                            value={data.dark[token] || '#000000'} 
-                            onChange={(e) => updateDarkToken(token, e.target.value)}
-                            className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                          />
-                          <input 
-                            type="text" 
-                            value={data.dark[token] || ''}
-                            onChange={(e) => updateDarkToken(token, e.target.value)}
-                            placeholder="Default"
-                            className="flex-1 w-20 text-xs font-mono bg-white border border-rule rounded px-2 py-1.5"
-                          />
+              <div className="flex items-center gap-3">
+                <input 
+                  type="checkbox" 
+                  id="enable-dark"
+                  checked={data.darkMode !== 'off'}
+                  onChange={e => setData(prev => ({ ...prev, darkMode: e.target.checked ? 'auto' : 'off' }))}
+                  className="w-5 h-5 rounded border-rule text-coral focus:ring-coral"
+                />
+                <label htmlFor="enable-dark" className="font-medium text-ink cursor-pointer">Enable Alternate Theme</label>
+              </div>
+
+              {data.darkMode !== 'off' && (
+                <div className="pl-8 space-y-8 animate-in fade-in slide-in-from-top-2">
+                  <FormItem label="Dark Mode Policy">
+                    <select 
+                      value={data.darkMode} 
+                      onChange={e => setData(prev => ({ ...prev, darkMode: e.target.value as any }))}
+                      className="w-full max-w-sm rounded-md border border-rule px-3 py-2 text-sm bg-white"
+                    >
+                      <option value="auto">System Preference (Auto)</option>
+                      <option value="toggle">User Toggle Button</option>
+                    </select>
+                  </FormItem>
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Alternate Theme</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      {DARK_MODE_OPTIONS.map(preset => (
+                        <button
+                          key={preset.id}
+                          onClick={() => setDarkPreset(preset)}
+                          className={cn(
+                            "flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all text-left group",
+                            (!showDarkCustom && JSON.stringify(data.dark) === JSON.stringify(preset.palette)) || (showDarkCustom && preset.id === 'custom')
+                              ? "border-coral bg-coral/5 ring-4 ring-coral/10"
+                              : "border-rule hover:border-stone-300 hover:bg-stone-50"
+                          )}
+                        >
+                          <div 
+                            className="w-full h-12 rounded-lg border border-rule/50 shadow-sm flex items-center justify-center relative overflow-hidden"
+                            style={{ backgroundColor: preset.palette.paper || '#16130f' }}
+                          >
+                            <div 
+                              className="absolute inset-x-0 bottom-0 h-1/2 opacity-50"
+                              style={{ backgroundColor: preset.palette['paper-deep'] || '#0f0d0a' }}
+                            />
+                            <div 
+                              className="w-6 h-6 rounded-full shadow-sm z-10 border border-white/20"
+                              style={{ backgroundColor: preset.palette.coral || '#ff6b4f' }}
+                            />
+                          </div>
+                          <span className="font-medium text-xs text-ink group-hover:text-coral-ink transition-colors leading-tight">{preset.name}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {showDarkCustom && (
+                      <div className="bg-paper-deep/30 rounded-xl p-6 border border-rule/50">
+                        <h4 className="text-sm font-medium mb-4 flex items-center gap-2"><Settings2 className="w-4 h-4"/> Custom Alternate Palette</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          {THEME_TOKENS.map(token => (
+                            <div key={token} className="flex flex-col gap-1.5">
+                              <label className="text-xs font-mono text-ink-soft capitalize">{token.replace('-', ' ')}</label>
+                              <div className="flex items-center gap-2">
+                                <input 
+                                  type="color" 
+                                  value={data.dark[token] || '#000000'} 
+                                  onChange={(e) => updateDarkToken(token, e.target.value)}
+                                  className="w-8 h-8 rounded cursor-pointer border-0 p-0"
+                                />
+                                <input 
+                                  type="text" 
+                                  value={data.dark[token] || ''}
+                                  onChange={(e) => updateDarkToken(token, e.target.value)}
+                                  placeholder="Default"
+                                  className="flex-1 w-20 text-xs font-mono bg-white border border-rule rounded px-2 py-1.5"
+                                />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               )}
@@ -253,18 +305,6 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
         {/* LAYOUT TAB */}
         {activeTab === 'layout' && (
           <div className="space-y-8 max-w-2xl">
-            <FormItem label="Dark Mode Policy">
-              <select 
-                value={data.darkMode} 
-                onChange={e => setData(prev => ({ ...prev, darkMode: e.target.value as any }))}
-                className="w-full rounded-md border border-rule px-3 py-2 text-sm bg-white"
-              >
-                <option value="off">Off (Light only)</option>
-                <option value="toggle">User Toggle (Default)</option>
-                <option value="auto">System Preference (Auto)</option>
-              </select>
-            </FormItem>
-            
             <FormItem label="Hero Layout" description="How the homepage introduction is styled.">
               <select 
                 value={data.heroLayout} 
@@ -350,7 +390,7 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
         {activeTab === 'sections' && (
           <div className="max-w-2xl">
             <p className="text-ink-soft mb-6 text-sm">
-              Control which sections appear on your homepage. (Reordering coming soon)
+              Control which sections appear on your homepage.
             </p>
             <div className="space-y-2">
               {data.sections.length === 0 ? (
@@ -359,7 +399,6 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
                 </div>
               ) : null}
               
-              {/* If sections is empty, we show a default list to toggle from */}
               {['hero', 'creds', 'proof', 'audiences', 'ways', 'ventures', 'projects', 'pov', 'gallery', 'writing', 'closing'].map((key) => {
                 const existing = data.sections.find(s => s.key === key)
                 const isVisible = existing ? existing.visible : true
@@ -392,7 +431,17 @@ export default function ThemeEditor({ initialData }: { initialData: Theme }) {
         )}
       </div>
 
-      <SaveBar onSave={handleSave} saving={loading} error={error} dirty={JSON.stringify(data) !== JSON.stringify(initialData)} onReset={() => { setData(initialData); setShowLightCustom(Object.keys(initialData.light).length > 0 && !LIGHT_PRESETS.some(p => JSON.stringify(p.palette) === JSON.stringify(initialData.light))); setShowDarkCustom(Object.keys(initialData.dark).length > 0 && !DARK_PRESETS.some(p => JSON.stringify(p.palette) === JSON.stringify(initialData.dark))) }} />
+      <SaveBar 
+        onSave={handleSave} 
+        saving={loading} 
+        error={error} 
+        dirty={JSON.stringify(data) !== JSON.stringify(initialData)} 
+        onReset={() => {
+          setData(initialData)
+          setShowBaseCustom(Object.keys(initialData.light).length > 0 && !ALL_PRESETS.some(p => JSON.stringify(p.palette) === JSON.stringify(initialData.light)))
+          setShowDarkCustom(Object.keys(initialData.dark).length > 0 && !DARK_MODE_OPTIONS.some(p => JSON.stringify(p.palette) === JSON.stringify(initialData.dark)))
+        }} 
+      />
     </div>
   )
 }

@@ -134,18 +134,18 @@ export function Writing({ writing }: { writing: WritingContent }) {
   const hasPosts = writing.posts.length > 0
 
   return (
-    <Section id="writing" tone="dark">
+    <Section id="writing" tone="deep">
       <div className="grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
         <SectionHead
           eyebrow={writing.eyebrow}
           heading={writing.heading}
           intro={writing.intro}
-          tone="paper"
+          tone="ink"
         />
 
         <div>
           {hasPosts ? (
-            <ul className="divide-y divide-white/10 border-y border-white/10">
+            <ul className="divide-y divide-rule border-y border-rule">
               {writing.posts.map((post, i) => (
                 <Reveal as="li" kind="fade" delay={i * 55} key={post.href + post.title}>
                   <a
@@ -155,18 +155,18 @@ export function Writing({ writing }: { writing: WritingContent }) {
                     className="group flex flex-col gap-1.5 py-5 transition-opacity hover:opacity-80"
                   >
                     {post.date ? (
-                      <span className="font-mono text-[0.64rem] uppercase tracking-[0.16em] text-paper/50">
+                      <span className="font-mono text-[0.64rem] uppercase tracking-[0.16em] text-ink-soft">
                         {post.date}
                       </span>
                     ) : null}
-                    <span className="font-display text-lg font-medium leading-snug tracking-[-0.015em] text-paper">
+                    <span className="font-display text-lg font-medium leading-snug tracking-[-0.015em] text-ink">
                       {post.title}
                       <span aria-hidden="true" className="ml-2 inline-block text-coral transition-transform group-hover:translate-x-1">
                         →
                       </span>
                     </span>
                     {post.blurb ? (
-                      <span className="text-[0.9rem] leading-relaxed text-paper/60">
+                      <span className="text-[0.9rem] leading-relaxed text-ink-soft">
                         {post.blurb}
                       </span>
                     ) : null}
@@ -175,17 +175,16 @@ export function Writing({ writing }: { writing: WritingContent }) {
               ))}
             </ul>
           ) : (
-            <div className="rounded-lg border border-dashed border-white/20 px-6 py-10">
-              <p className="font-hand text-2xl leading-snug text-paper/80">
-                Posts land here soon —
-                <br />
-                in the meantime, the thinking is on LinkedIn.
+            <div className="border border-rule rounded-xl p-8 text-center bg-paper">
+              <p className="font-mono text-sm text-ink-soft">
+                Writing is being imported.<br />
+                In the meantime, the thinking is on LinkedIn.
               </p>
             </div>
           )}
 
           {writing.cta.label ? (
-            <Button href={writing.cta.href} variant="onDark" className="mt-8" external>
+            <Button href={writing.cta.href} variant="outline" className="mt-8" external>
               {writing.cta.label}
               <span aria-hidden="true">→</span>
             </Button>
