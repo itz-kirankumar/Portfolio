@@ -22,10 +22,10 @@ export default async function WritingIndexPage() {
   const content = await getCachedSiteContent()
   const { meta } = content
 
-  const posts = await safeList(POSTS_COLLECTION, postSchema, {
+  const rawPosts = await safeList(POSTS_COLLECTION, postSchema, {
     where: [['status', '==', 'published']],
-    orderBy: ['publishedAt', 'desc'],
   })
+  const posts = rawPosts.sort((a, b) => (b.publishedAt || b.createdAt) - (a.publishedAt || a.createdAt))
 
   return (
     <>

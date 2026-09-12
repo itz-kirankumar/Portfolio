@@ -65,10 +65,10 @@ export default async function WritingDetailPage({ params, searchParams }: Props)
   const content = await getCachedSiteContent()
   const { meta } = content
 
-  const comments = await safeList(COMMENTS_COLLECTION, commentSchema, {
+  const rawComments = await safeList(COMMENTS_COLLECTION, commentSchema, {
     where: [['postId', '==', slug], ['status', '==', 'approved']],
-    orderBy: ['createdAt', 'desc']
   })
+  const comments = rawComments.sort((a, b) => b.createdAt - a.createdAt)
 
   const displayDate = post.publishedAt > 0 ? post.publishedAt : post.createdAt
   const formattedDate = displayDate > 0 
