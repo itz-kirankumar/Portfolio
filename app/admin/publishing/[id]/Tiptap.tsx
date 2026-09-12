@@ -61,6 +61,45 @@ export function Tiptap({
       attributes: {
         class: 'prose prose-stone dark:prose-invert max-w-none focus:outline-none min-h-[400px]',
       },
+      handleDrop: (view, event, slice, moved) => {
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+          const file = event.dataTransfer.files[0]
+          if (file.type.startsWith('image/')) {
+            event.preventDefault()
+            const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
+            if (!coordinates) return false
+            
+            // Upload immediately
+            const uploadFile = async () => {
+              try {
+                const reqRes = await fetch('/api/upload', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ name: file.name, type: file.type, size: file.size, folder: 'gallery' }),
+                })
+                const reqJson = await reqRes.json()
+                if (!reqRes.ok) throw new Error(reqJson.error)
+
+                await fetch(reqJson.signedUrl, {
+                  method: 'PUT',
+                  headers: reqJson.uploadHeaders,
+                  body: file,
+                })
+                
+                editor.chain().focus().insertContentAt(coordinates.pos, {
+                  type: 'image',
+                  attrs: { src: reqJson.url, alt: file.name }
+                }).run()
+              } catch (err: any) {
+                alert(`Upload failed: ${err.message}`)
+              }
+            }
+            uploadFile()
+            return true
+          }
+        }
+        return false
+      }
     },
   })
 

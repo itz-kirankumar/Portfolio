@@ -27,6 +27,7 @@ export interface ListOptions {
   where?: Where[]
   orderBy?: [field: string, direction?: 'asc' | 'desc']
   limit?: number
+  offset?: number
   /** Skip the Zod pass. Only for internal bookkeeping reads. */
   raw?: boolean
 }
@@ -55,6 +56,9 @@ export async function listDocs<S extends z.ZodTypeAny>(
   }
   if (options.limit) {
     query = query.limit(options.limit)
+  }
+  if (options.offset) {
+    query = query.offset(options.offset)
   }
 
   const snap = await query.get()

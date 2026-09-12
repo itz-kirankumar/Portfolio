@@ -7,11 +7,14 @@ import { getCachedSiteContent } from '@/lib/site'
 
 export const revalidate = 3600
 
+import { cookies } from 'next/headers'
+
 type Props = {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Omit<Props, 'searchParams'>): Promise<Metadata> {
   const { slug } = await params
   const pages = await safeList(PAGES_COLLECTION, pageSchema, {
     where: [['slug', '==', slug]],
@@ -29,8 +32,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function CustomPageRender({ params }: Props) {
+export default async function CustomPageRender({ params, searchParams }: Props) {
   const { slug } = await params
+  const search = await searchParams
+  const isPreview = search.preview === 'true'
   
   // Need to query by slug
   const pages = await safeList(PAGES_COLLECTION, pageSchema, {
@@ -39,7 +44,14 @@ export default async function CustomPageRender({ params }: Props) {
   })
   const page = pages[0]
 
-  if (!page || page.status !== 'published') {
+  let isAllowed = false
+  if (page?.status === 'published') isAllowed = true
+  if (page && isPreview) {
+    const session = (await cookies()).get('__session')
+    if (session) isAllowed = true
+  }
+
+  if (!isAllowed || !page) {
     notFound()
   }
 

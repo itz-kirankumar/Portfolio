@@ -38,30 +38,39 @@ export default function MediaEditor({ initialData, id }: { initialData: Partial<
 
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('folder', 'gallery')
-
-      const res = await fetch('/api/upload', {
+      // 1. Get Signed URL
+      const reqRes = await fetch('/api/upload', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          folder: 'gallery'
+        }),
       })
 
-      let json
-      try {
-        json = await res.json()
-      } catch (e) {
-        throw new Error(`Upload failed (Status ${res.status}). Ensure the file is under 4.5MB.`)
+      const reqJson = await reqRes.json()
+      if (!reqRes.ok) throw new Error(reqJson.error || 'Failed to initialize upload')
+
+      // 2. Upload directly to Google Cloud Storage (bypassing Vercel limits)
+      const uploadRes = await fetch(reqJson.signedUrl, {
+        method: 'PUT',
+        headers: reqJson.uploadHeaders,
+        body: file,
+      })
+
+      if (!uploadRes.ok) {
+        throw new Error(`Cloud storage upload failed (Status ${uploadRes.status})`)
       }
 
-      if (!res.ok) throw new Error(json.error || 'Upload failed')
-
+      // 3. Update editor state
       update({
-        url: json.url,
-        storagePath: json.path,
-        kind: json.kind,
-        contentType: json.contentType,
-        bytes: json.bytes,
+        url: reqJson.url,
+        storagePath: reqJson.path,
+        kind: reqJson.kind,
+        contentType: reqJson.contentType,
+        bytes: reqJson.bytes,
         title: data.title || file.name.split('.')[0]
       })
       useUI.getState().toast('File uploaded successfully')

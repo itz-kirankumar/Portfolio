@@ -64,26 +64,24 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const form = await req.formData()
-    const file = form.get('file')
-    const rawFolder = String(form.get('folder') ?? 'photos')
-    const folder = FOLDERS.has(rawFolder) ? rawFolder : 'photos'
+    const { name, type, size, folder: rawFolder } = await req.json()
+    const folder = FOLDERS.has(rawFolder) ? rawFolder : 'gallery'
 
-    if (!(file instanceof File)) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+    if (!name || !type) {
+      return NextResponse.json({ error: 'Missing file metadata' }, { status: 400 })
     }
 
-    const spec = ALLOWED[file.type]
+    const spec = ALLOWED[type]
     if (!spec) {
       return NextResponse.json(
         {
-          error: `Unsupported type "${file.type || 'unknown'}". Allowed: ${ALLOWED_LABEL}.`,
+          error: `Unsupported type "${type}". Allowed: ${ALLOWED_LABEL}.`,
         },
         { status: 415 }
       )
     }
 
-    if (file.size > spec.max) {
+    if (size > spec.max) {
       return NextResponse.json(
         { error: `File too large — ${spec.kind} files are capped at ${Math.round(spec.max / MB)} MB.` },
         { status: 413 }
@@ -91,7 +89,7 @@ export async function POST(req: NextRequest) {
     }
 
     const slug =
-      file.name
+      name
         .replace(/\.[^.]+$/, '')
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
@@ -104,29 +102,32 @@ export async function POST(req: NextRequest) {
     const bucket = getAdminBucket()
     const target = bucket.file(objectPath)
 
-    await pipeline(
-      Readable.fromWeb(file.stream() as Parameters<typeof Readable.fromWeb>[0]),
-      target.createWriteStream({
-        resumable: false,
-        contentType: file.type,
-        metadata: {
-          cacheControl: 'public, max-age=31536000, immutable',
-          metadata: { firebaseStorageDownloadTokens: token },
-        },
-      })
-    )
+    const [signedUrl] = await target.getSignedUrl({
+      version: 'v4',
+      action: 'write',
+      expires: Date.now() + 15 * 60 * 1000, // 15 mins
+      contentType: type,
+      extensionHeaders: {
+        'x-goog-meta-firebasestoragedownloadtokens': token,
+      },
+    })
 
     const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(
       objectPath
     )}?alt=media&token=${token}`
 
     return NextResponse.json({
+      signedUrl,
+      uploadHeaders: {
+        'Content-Type': type,
+        'x-goog-meta-firebasestoragedownloadtokens': token,
+      },
       url,
       path: objectPath,
-      name: file.name,
-      contentType: file.type,
+      name,
+      contentType: type,
       kind: spec.kind,
-      bytes: file.size,
+      bytes: size,
     })
   } catch (err) {
     console.error('[upload] failed:', err)

@@ -73,8 +73,8 @@ export async function deleteMedia(id: string): Promise<{ ok: boolean; error?: st
 }
 
 import { safeList } from '@/lib/store'
-export async function getAllMedia() {
+export async function getAllMedia(limit = 50, offset = 0) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.isOwner) return []
-  return safeList(MEDIA_COLLECTION, mediaSchema, { orderBy: ['createdAt', 'desc'] })
+  return safeList(MEDIA_COLLECTION, mediaSchema, { orderBy: ['createdAt', 'desc'], limit, offset })
 }
