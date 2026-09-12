@@ -204,11 +204,25 @@ export function Tiptap({
 
   const colorPalette = [
     { label: 'Coral', value: '#e8543f' },
+    { label: 'Crimson', value: '#dc143c' },
+    { label: 'Burgundy', value: '#800020' },
+    { label: 'Rose', value: '#e11d48' },
+    { label: 'Burnt Orange', value: '#cc5500' },
+    { label: 'Amber', value: '#ffbf00' },
+    { label: 'Goldenrod', value: '#daa520' },
+    { label: 'Olive', value: '#808000' },
+    { label: 'Forest Green', value: '#15803d' },
+    { label: 'Emerald', value: '#50c878' },
+    { label: 'Teal', value: '#008080' },
+    { label: 'Ocean Blue', value: '#1d4ed8' },
+    { label: 'Navy Blue', value: '#000080' },
+    { label: 'Indigo', value: '#4338ca' },
+    { label: 'Violet', value: '#6d28d9' },
+    { label: 'Amethyst', value: '#9966cc' },
+    { label: 'Plum', value: '#dda0dd' },
+    { label: 'Slate', value: '#708090' },
     { label: 'Deep Ink', value: '#1a1815' },
     { label: 'Soft Ink', value: '#5a554c' },
-    { label: 'Ocean Blue', value: '#1d4ed8' },
-    { label: 'Forest Green', value: '#15803d' },
-    { label: 'Violet', value: '#6d28d9' },
   ]
 
   return (
@@ -249,10 +263,10 @@ export function Tiptap({
             <Palette className="size-4 text-coral-ink" />
           </MenuButton>
           {showColorPicker && (
-            <div className="absolute top-full mt-1 left-0 z-50 bg-paper-deep border border-rule rounded-lg shadow-lift p-2 flex gap-1">
+            <div className="absolute top-full mt-1 left-0 z-50 bg-paper-deep border border-rule rounded-lg shadow-lift p-2 flex flex-wrap gap-1.5 w-[220px]">
               <button 
                 type="button" 
-                className="w-6 h-6 rounded-full bg-white border border-rule flex items-center justify-center text-xs"
+                className="w-6 h-6 rounded-full bg-white border border-rule flex items-center justify-center text-xs text-stone-500 hover:bg-stone-100"
                 onClick={removeColor}
                 title="Default Color"
               >
@@ -262,7 +276,7 @@ export function Tiptap({
                 <button
                   key={c.value}
                   type="button"
-                  className="w-6 h-6 rounded-full border border-rule/20"
+                  className="w-6 h-6 rounded-full border border-rule/20 hover:scale-110 transition-transform"
                   style={{ backgroundColor: c.value }}
                   title={c.label}
                   onClick={() => setColor(c.value)}
