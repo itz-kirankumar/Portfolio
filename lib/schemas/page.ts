@@ -9,6 +9,7 @@ export const pageSchema = z.object({
   html: z.string().default(''),
   doc: z.string().default(''), // JSON string of Tiptap document
   status: z.enum(['draft', 'published']).default('draft'),
+  showInNav: z.boolean().default(false),
   updatedAt: z.number().int().default(0),
 })
 

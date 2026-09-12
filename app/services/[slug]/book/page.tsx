@@ -19,12 +19,110 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
   const availability = await safeGet(AVAILABILITY_COLLECTION, AVAILABILITY_DOC, availabilitySchema) || DEFAULT_AVAILABILITY
   const allBookings = await safeList(BOOKINGS_COLLECTION, bookingSchema)
   const nowMs = Date.now()
-  const upcomingBookings = allBookings
+  let upcomingBookings = allBookings
     .filter(b => b.status !== 'cancelled' && new Date(b.endISO).getTime() > nowMs)
     .map(b => ({
       start: new Date(b.startISO).getTime(),
       end: new Date(b.endISO).getTime()
     }))
+
+  if (Object.keys(availability.googleRefreshTokens || {}).length > 0 || availability.googleRefreshToken || availability.googleCalendarId) {
+    try {
+      const { GoogleAuth, OAuth2Client } = await import('google-auth-library')
+      
+      const horizonDate = new Date()
+      horizonDate.setDate(horizonDate.getDate() + availability.horizonDays + 1)
+      
+      const allTokens = Object.values(availability.googleRefreshTokens || {})
+      if (availability.googleRefreshToken && !allTokens.includes(availability.googleRefreshToken)) {
+        allTokens.push(availability.googleRefreshToken)
+      }
+
+      if (allTokens.length > 0) {
+        // Sync using all available OAuth tokens (multi-admin sync)
+        for (const token of allTokens) {
+          const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET)
+          client.setCredentials({ refresh_token: token })
+          
+          const listRes = await client.request({ url: 'https://www.googleapis.com/calendar/v3/users/me/calendarList' })
+          const items = (listRes.data as any).items || []
+          const cIds = items.filter((c: any) => c.selected !== false).map((c: any) => c.id)
+          
+          if (cIds.length > 0) {
+            const res = await client.request({
+              url: 'https://www.googleapis.com/calendar/v3/freeBusy',
+              method: 'POST',
+              data: {
+                timeMin: new Date().toISOString(),
+                timeMax: horizonDate.toISOString(),
+                items: cIds.map((id: string) => ({ id }))
+              }
+            })
+            
+            const calendars = (res.data as any).calendars
+            if (calendars) {
+              for (const calId of cIds) {
+                const cal = calendars[calId]
+                if (cal && cal.busy) {
+                   const googleBusySlots = cal.busy.map((b: any) => ({
+                     start: new Date(b.start).getTime(),
+                     end: new Date(b.end).getTime()
+                   }))
+                   upcomingBookings = upcomingBookings.concat(googleBusySlots)
+                }
+              }
+            }
+          }
+        }
+      } else if (availability.googleCalendarId) {
+        // Fallback to Service Account manual sync
+        const auth = new GoogleAuth({
+          credentials: {
+            client_email: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+            private_key: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+          },
+          scopes: ['https://www.googleapis.com/auth/calendar.readonly']
+        })
+        const client = await auth.getClient()
+        const calendarIds = availability.googleCalendarId.split(',').map((id: string) => id.trim()).filter(Boolean)
+        
+        if (calendarIds.length > 0) {
+          const res = await client.request({
+            url: 'https://www.googleapis.com/calendar/v3/freeBusy',
+            method: 'POST',
+            data: {
+              timeMin: new Date().toISOString(),
+              timeMax: horizonDate.toISOString(),
+              items: calendarIds.map((id: string) => ({ id }))
+            }
+          })
+          
+          const calendars = (res.data as any).calendars
+          if (calendars) {
+            for (const calId of calendarIds) {
+              const cal = calendars[calId]
+              if (cal && cal.busy) {
+                 const googleBusySlots = cal.busy.map((b: any) => ({
+                   start: new Date(b.start).getTime(),
+                   end: new Date(b.end).getTime()
+                 }))
+                 upcomingBookings = upcomingBookings.concat(googleBusySlots)
+              }
+            }
+          }
+        }
+      }
+    } catch (e: any) {
+      // If the API isn't enabled yet, log a warning rather than an error to avoid triggering the Next.js dev overlay
+      if (e?.message?.includes('not been used in project') || e?.message?.includes('is disabled')) {
+        console.warn('\n\n[Google Calendar API not enabled]')
+        console.warn(e.message)
+        console.warn('Please visit the link above in your browser to enable the Calendar API.\n\n')
+      } else {
+        console.error('Google Calendar error:', e)
+      }
+    }
+  }
 
   if (service.paymentMode === 'link' && service.paymentLinkUrl) {
     redirect(service.paymentLinkUrl)

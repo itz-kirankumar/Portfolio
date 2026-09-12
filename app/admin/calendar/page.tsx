@@ -13,13 +13,15 @@ export default async function CalendarPage() {
     DEFAULT_AVAILABILITY
   )
 
+  const serviceAccountEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL || ''
+
   return (
     <>
       <PageHeader
         title="Calendar & Availability"
         description="Set your weekly schedule and blocked dates."
       />
-      <CalendarEditor initialData={availability} />
+      <CalendarEditor initialData={availability} serviceAccountEmail={serviceAccountEmail} />
     </>
   )
 }

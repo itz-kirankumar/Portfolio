@@ -31,13 +31,14 @@ export const DEFAULT_CONTENT: SiteContent = {
   nav: {
     brand: 'Kiran Kumar G',
     links: [
-      { label: 'Ventures', href: '#ventures' },
-      { label: 'Proof', href: '#proof' },
-      { label: 'How I work', href: '#how-i-work' },
-      { label: 'Writing', href: '#writing' },
-      { label: 'About', href: '#about' },
+      { label: 'Services', href: '/services', newTab: false },
+      { label: 'Ventures', href: '/#ventures', newTab: false },
+      { label: 'Proof', href: '/#proof', newTab: false },
+      { label: 'How I work', href: '/#how-i-work', newTab: false },
+      { label: 'Writing', href: '/#writing', newTab: false },
+      { label: 'About', href: '/#about', newTab: false },
     ],
-    cta: { label: "Let's talk", href: '#contact' },
+    cta: { label: "Let's talk", href: '#contact', newTab: false },
   },
 
   /* ----------------------------------------------------------------- hero */

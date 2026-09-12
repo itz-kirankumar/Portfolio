@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Field, Input, Select, SaveBar, Panel } from '@/components/admin/ui'
-import { savePage } from '../actions'
+import { Field, Input, Select, SaveBar, Panel, Toggle } from '@/components/admin/ui'
+import { savePage, deletePage } from '../actions'
 import { Tiptap } from '../../publishing/[id]/Tiptap'
 import type { CustomPage } from '@/lib/schemas/page'
 import { useUI } from '@/lib/store/ui'
@@ -11,6 +11,7 @@ import { useUI } from '@/lib/store/ui'
 export function ClientEditor({ id, initialData }: { id: string; initialData: Partial<CustomPage> }) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [dirty, setDirty] = useState(false)
   const [savedAt, setSavedAt] = useState<number | null>(null)
   
@@ -20,9 +21,8 @@ export function ClientEditor({ id, initialData }: { id: string; initialData: Par
     status: initialData.status || 'draft',
     html: initialData.html || '',
     doc: initialData.doc || '',
+    showInNav: initialData.showInNav || false,
   })
-
-  const [addToNav, setAddToNav] = useState(false)
 
   const update = (patch: Partial<CustomPage>) => {
     setData(prev => ({ ...prev, ...patch }))
@@ -41,7 +41,7 @@ export function ClientEditor({ id, initialData }: { id: string; initialData: Par
     const cleanSlug = data.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     
     const payload = { ...data, slug: cleanSlug, id: targetId }
-    const res = await savePage(targetId, payload, addToNav)
+    const res = await savePage(targetId, payload)
     
     setSaving(false)
     if (res.ok) {
@@ -53,6 +53,19 @@ export function ClientEditor({ id, initialData }: { id: string; initialData: Par
       }
     } else {
       alert(`Save failed: ${res.error}`)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this page? This cannot be undone.')) return
+    setDeleting(true)
+    const res = await deletePage(id, data.slug || id)
+    if (res.ok) {
+      useUI.getState().toast('Page deleted')
+      router.push('/admin/pages')
+    } else {
+      alert(`Delete failed: ${res.error}`)
+      setDeleting(false)
     }
   }
 
@@ -75,7 +88,7 @@ export function ClientEditor({ id, initialData }: { id: string; initialData: Par
 
         <div className="space-y-6">
           <Panel title="Settings">
-            <div className="space-y-4">
+            <div className="space-y-6">
               <Field label="Status">
                 <Select 
                   value={data.status || 'draft'} 
@@ -95,31 +108,32 @@ export function ClientEditor({ id, initialData }: { id: string; initialData: Par
                 />
               </Field>
 
-              {id === 'new' && (
-                <div className="pt-2">
-                  <label className="flex items-center gap-2 text-[0.85rem] font-medium text-ink cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={addToNav} 
-                      onChange={e => setAddToNav(e.target.checked)} 
-                      className="rounded border-rule text-coral focus:ring-coral-soft"
-                    />
-                    Add to Global Navigation
-                  </label>
-                  <p className="text-[0.75rem] text-ink-soft ml-6 mt-1">If published, this page will be added to your website's main menu.</p>
-                </div>
-              )}
+              <div className="pt-2">
+                <Toggle
+                  checked={data.showInNav || false}
+                  onChange={v => update({ showInNav: v })}
+                  label="Show in Navbar"
+                  help="Add a link to this page in the main navigation menu when published."
+                />
+              </div>
 
               {id !== 'new' && (
-                <div className="pt-2">
+                <div className="pt-2 flex flex-col gap-3">
                   <a 
-                    href={`/p/${data.slug || id}`} 
+                    href={`/${data.slug || id}`} 
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 text-[0.82rem] font-medium text-coral-ink hover:text-coral-deep transition"
                   >
                     Open Live Page &nearr;
                   </a>
+                  <button 
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="text-left text-[0.82rem] font-medium text-coral-ink/70 hover:text-coral-ink transition"
+                  >
+                    {deleting ? 'Deleting...' : 'Delete Page'}
+                  </button>
                 </div>
               )}
             </div>

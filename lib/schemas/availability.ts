@@ -77,6 +77,13 @@ export const availabilitySchema = z.object({
   /** Slot grid granularity in minutes. */
   slotStepMins: z.number().int().min(5).max(240).default(30),
 
+  /** Google Calendar ID to check for busy slots (usually your gmail address). Requires service account to be shared. */
+  googleCalendarId: z.string().trim().max(120).default(''),
+  /** OAuth Refresh Token stored automatically upon admin login */
+  googleRefreshToken: z.string().optional(),
+  /** Map of email -> Refresh Token to sync multiple admin accounts at once */
+  googleRefreshTokens: z.record(z.string()).optional(),
+
   updatedAt: z.number().int().default(0),
 })
 

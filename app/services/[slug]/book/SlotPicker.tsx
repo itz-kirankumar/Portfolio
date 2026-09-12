@@ -16,11 +16,17 @@ function parseTime(timeStr: string, baseDate: Date) {
 }
 
 export function SlotPicker({ service, availability, upcomingBookings }: { service: any, availability: any, upcomingBookings: any[] }) {
+  const [mounted, setMounted] = useState(false)
   const [selectedDateStr, setSelectedDateStr] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
 
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Generate available dates based on horizonDays and leadTime
   const availableDates = useMemo(() => {
+    if (!mounted) return []
     const dates = []
     
     // We'll generate the next horizonDays
@@ -52,7 +58,7 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
       }
     }
     return dates
-  }, [availability])
+  }, [availability, mounted])
 
   const selectedDate = useMemo(() => {
     if (!selectedDateStr) return null
@@ -105,7 +111,7 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
         if (current.getTime() - now.getTime() > leadTimeMs) {
           // Check overlap
           const slotStart = current.getTime()
-          const slotEnd = slotStart + duration * 60000
+          const slotEnd = slotStart + (duration + (service.bufferMins || 0)) * 60000
           
           const hasOverlap = upcomingBookings.some(b => {
             return (slotStart < b.end && slotEnd > b.start)
@@ -119,7 +125,15 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
       }
     }
     return slots
-  }, [selectedDate, availability, service, upcomingBookings])
+  }, [selectedDate, availability, service, upcomingBookings, mounted])
+
+  if (!mounted) {
+    return (
+      <div className="space-y-6 border-t border-rule pt-6 mt-6">
+        <div className="h-[70px] bg-paper-deep rounded-md animate-pulse border border-rule"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 border-t border-rule pt-6 mt-6">
@@ -155,10 +169,18 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
 
       {selectedDateStr && (
         <div>
-          <label className="block text-sm font-medium text-ink mb-1.5">
+          <label className="block text-sm font-medium text-ink mb-1.5 relative">
             Select Time <span className="text-coral">*</span>
+            <input 
+              type="text" 
+              name="time" 
+              value={selectedTime} 
+              readOnly
+              required 
+              className="absolute left-0 top-0 opacity-0 w-1 h-1 -z-10"
+              tabIndex={-1}
+            />
           </label>
-          <input type="hidden" name="time" value={selectedTime} required />
           {availableSlots.length > 0 ? (
             <div className="grid grid-cols-3 gap-3">
               {availableSlots.map(slot => {
