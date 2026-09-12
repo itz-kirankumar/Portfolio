@@ -33,7 +33,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
       const horizonDate = new Date()
       horizonDate.setDate(horizonDate.getDate() + availability.horizonDays + 1)
       
-      const allTokens = Object.values(availability.googleRefreshTokens || {})
+      const allTokens: string[] = Object.values(availability.googleRefreshTokens || {})
       if (availability.googleRefreshToken && !allTokens.includes(availability.googleRefreshToken)) {
         allTokens.push(availability.googleRefreshToken)
       }
