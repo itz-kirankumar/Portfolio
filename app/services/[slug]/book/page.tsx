@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+﻿import { notFound, redirect } from 'next/navigation'
 import { safeGet, safeList, createStrict } from '@/lib/store'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
 import { bookingSchema, BOOKINGS_COLLECTION } from '@/lib/schemas/booking'
@@ -71,6 +71,10 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
       createdAt: Date.now(),
       updatedAt: Date.now(),
     })
+
+    if (service!.paymentMode === 'razorpay') {
+      redirect(`/services/${slug}/book/${docId}/checkout`)
+    }
 
     redirect(`/services/${slug}/book/success`)
   }
