@@ -1,8 +1,8 @@
-'use client'
+﻿'use client'
 // components/site/Chrome.tsx
 //
 // The furniture: status bar, sticky nav, footer. Client components because
-// they need scroll position, a live clock, and a mobile menu — the rest of the
+// they need scroll position, a live clock, and a mobile menu â€” the rest of the
 // page stays on the server.
 
 import { useEffect, useState } from 'react'
@@ -67,7 +67,42 @@ export function UtilityBar({ utility }: { utility: UtilityContent }) {
 
 /* --------------------------------------------------------------- SiteNav --- */
 
-export function SiteNav({ nav, resumeUrl }: { nav: NavContent; resumeUrl: string }) {
+function ThemeToggle() {
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'))
+  }, [])
+
+  const toggle = () => {
+    const root = document.documentElement
+    if (root.classList.contains('dark')) {
+      root.classList.remove('dark')
+      localStorage.theme = 'light'
+      setIsDark(false)
+    } else {
+      root.classList.add('dark')
+      localStorage.theme = 'dark'
+      setIsDark(true)
+    }
+  }
+
+  return (
+    <button
+      onClick={toggle}
+      aria-label="Toggle dark mode"
+      className="grid size-9 place-items-center rounded-full text-ink-soft hover:bg-rule/50 hover:text-ink transition-colors"
+    >
+      {isDark ? (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      )}
+    </button>
+  )
+}
+
+export function SiteNav({ nav, resumeUrl, showThemeToggle }: { nav: NavContent; resumeUrl: string, showThemeToggle?: boolean }) {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -126,13 +161,14 @@ export function SiteNav({ nav, resumeUrl }: { nav: NavContent; resumeUrl: string
                 rel="noopener noreferrer"
                 className="link-underline text-[0.88rem] text-ink-soft transition-colors hover:text-ink"
               >
-                Résumé
+                RÃ©sumÃ©
               </a>
             </li>
           ) : null}
         </ul>
 
         <div className="flex items-center gap-2">
+          {showThemeToggle && <ThemeToggle />}
           <a
             href={nav.cta.href}
             className="hidden rounded-full bg-coral-deep px-4 py-2 text-[0.85rem] font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-coral-ink sm:inline-flex"
@@ -196,7 +232,7 @@ export function SiteNav({ nav, resumeUrl }: { nav: NavContent; resumeUrl: string
                 onClick={() => setOpen(false)}
                 className="block border-b border-rule/60 py-3 font-display text-lg text-ink"
               >
-                Résumé
+                RÃ©sumÃ©
               </a>
             </li>
           ) : null}
@@ -261,13 +297,13 @@ export function SiteFooter({
                   rel="noopener noreferrer"
                   className="link-underline text-[0.88rem] text-ink-soft hover:text-ink"
                 >
-                  Résumé
+                  RÃ©sumÃ©
                 </a>
               </li>
             ) : null}
           </ul>
           <p className="font-mono text-[0.66rem] uppercase tracking-[0.14em] text-ink-soft/70">
-            © {year} · {footer.colophon}
+            Â© {year} Â· {footer.colophon}
           </p>
         </div>
       </div>

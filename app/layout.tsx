@@ -88,6 +88,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
       <head>
         <ThemeProvider theme={theme} />
+        {theme.darkMode === 'toggle' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                try {
+                  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark')
+                  } else {
+                    document.documentElement.classList.remove('dark')
+                  }
+                } catch (_) {}
+              `,
+            }}
+          />
+        )}
       </head>
       <body className="bg-paper text-ink font-sans antialiased" suppressHydrationWarning>
         <Tracker />

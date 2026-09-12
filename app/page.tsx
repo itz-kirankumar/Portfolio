@@ -135,7 +135,7 @@ export default async function HomePage() {
       />
 
       <UtilityBar utility={content.utility} />
-      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} />
+      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} showThemeToggle={theme.darkMode === 'toggle'} />
 
       <main>
         {isVisible('hero') && <Hero hero={content.hero} meta={meta} />}
