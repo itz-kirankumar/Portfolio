@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -34,6 +34,7 @@ import {
   AlignRight,
   AlignJustify
 } from 'lucide-react'
+import { SlashCommand, getSuggestionItems, renderItems } from './SlashCommand'
 import { cn } from '@/lib/utils'
 
 export function Tiptap({
@@ -62,7 +63,15 @@ export function Tiptap({
         openOnClick: false,
       }),
       Image,
-      Iframe,
+          Iframe,
+    SlashCommand.configure({
+      suggestion: {
+        items: ({ query }: { query: string }) => {
+          return getSuggestionItems().filter(item => item.title.toLowerCase().startsWith(query.toLowerCase())).slice(0, 5)
+        },
+        render: renderItems,
+      },
+    }),
       Placeholder.configure({
         placeholder: 'Write your beautiful post here...',
       }),
@@ -270,7 +279,7 @@ export function Tiptap({
                 onClick={removeColor}
                 title="Default Color"
               >
-                ✕
+                âœ•
               </button>
               {colorPalette.map(c => (
                 <button

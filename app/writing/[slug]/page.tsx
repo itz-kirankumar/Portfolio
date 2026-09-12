@@ -1,4 +1,4 @@
-﻿import { Metadata } from 'next'
+import { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { SiteFooter, SiteNav, UtilityBar } from '@/components/site/Chrome'
@@ -27,18 +27,31 @@ export async function generateMetadata({ params }: Omit<Props, 'searchParams'>):
   const { meta } = await getCachedSiteContent()
   const title = `${post.title} - ${meta.name}`
   
+  const ogUrl = new URL('/api/og', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
+  ogUrl.searchParams.set('title', post.title)
+  if (post.coverUrl) {
+    ogUrl.searchParams.set('cover', post.coverUrl)
+  }
+
   return {
     title,
     description: post.excerpt,
     openGraph: { 
       title, 
       description: post.excerpt, 
-      images: post.coverUrl ? [post.coverUrl] : [] 
+      images: [
+        {
+          url: ogUrl.toString(),
+          width: 1200,
+          height: 630,
+        }
+      ]
     },
     twitter: { 
+      card: 'summary_large_image',
       title, 
       description: post.excerpt, 
-      images: post.coverUrl ? [post.coverUrl] : [] 
+      images: [ogUrl.toString()] 
     },
   }
 }

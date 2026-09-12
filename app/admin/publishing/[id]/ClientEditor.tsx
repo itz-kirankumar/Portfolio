@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 import { useUI as useToast } from '@/lib/store/ui'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Field, Input, Textarea, Select, Toggle, SaveBar, Panel } from '@/components/admin/ui'
 import { savePost } from '../actions'
@@ -37,7 +37,25 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
   
   const dirty = JSON.stringify(data) !== JSON.stringify(initialData)
 
-  async function handleSave() {
+    // Auto-save logic
+  const saveTimeoutRef = useRef<NodeJS.Timeout>(null)
+  
+  useEffect(() => {
+    // Only auto-save if it's not a new post, is dirty, and not currently saving
+    if (id !== 'new' && dirty && !saving) {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+      
+      saveTimeoutRef.current = setTimeout(() => {
+        handleSave(true)
+      }, 5000)
+    }
+    
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+    }
+  }, [data, dirty, id, saving])
+
+  async function handleSave(isAutoSave = false) {
     setSaving(true)
     setError(null)
     setIssues([])
@@ -52,8 +70,10 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
     const result = await savePost(savePayload.slug || id, savePayload)
     
     setSaving(false)
-    if (result.success) {
-      useToast.getState().toast('Saved successfully!')
+        if (result.success) {
+      if (!isAutoSave) {
+        useToast.getState().toast('Saved successfully!')
+      }
       if (id === 'new') {
         router.push(`/admin/publishing/${savePayload.slug}`)
       }

@@ -3,6 +3,7 @@ import { safeList } from '@/lib/store'
 import { MEDIA_COLLECTION, mediaSchema, kindLabel } from '@/lib/schemas/media'
 import { Plus, Image as ImageIcon } from 'lucide-react'
 import { BTN_PRIMARY, PageHeader, EmptyState } from '@/components/admin/ui'
+import MediaDropzone from '@/components/admin/MediaDropzone'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Media' }
@@ -13,7 +14,7 @@ export default async function MediaListPage() {
   })
 
   return (
-    <>
+    <MediaDropzone>
       <PageHeader
         title="Media Library"
         description="Manage your uploaded files and embeds."
@@ -68,6 +69,6 @@ export default async function MediaListPage() {
           </ul>
         </div>
       )}
-    </>
+    </MediaDropzone>
   )
 }

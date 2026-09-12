@@ -1,4 +1,4 @@
-'use server'
+﻿'use server'
 
 import { getAdminDb } from '@/lib/admin'
 import { POSTS_COLLECTION } from '@/lib/schemas/post'
@@ -37,6 +37,42 @@ export async function postComment(postId: string, name: string, text: string) {
     return { ok: true }
   } catch (err: any) {
     console.error('Failed to post comment:', err)
+    return { ok: false, error: err.message }
+  }
+}
+
+
+export async function likeComment(commentId: string) {
+  try {
+    const db = getAdminDb()
+    const ref = db.collection(COMMENTS_COLLECTION).doc(commentId)
+    await ref.update({
+      likes: (await import('firebase-admin/firestore')).FieldValue.increment(1)
+    })
+    return { ok: true }
+  } catch (err: any) {
+    console.error('Failed to like comment:', err)
+    return { ok: false, error: err.message }
+  }
+}
+
+export async function postReply(postId: string, parentId: string, name: string, text: string) {
+  try {
+    const data = {
+      postId,
+      parentId,
+      name,
+      text,
+      createdAt: Date.now(),
+      status: 'approved',
+      likes: 0
+    }
+    const parsed = commentSchema.parse(data)
+    await createStrict(COMMENTS_COLLECTION, randomUUID(), commentSchema, parsed)
+    revalidatePath('/writing/' + postId)
+    return { ok: true }
+  } catch (err: any) {
+    console.error('Failed to post reply:', err)
     return { ok: false, error: err.message }
   }
 }

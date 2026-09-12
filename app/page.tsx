@@ -63,7 +63,7 @@ export default async function HomePage() {
       title: p.title,
       blurb: p.excerpt,
       href: `/writing/${p.slug}`,
-      date: new Date(p.publishedAt || p.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      date: new Date(p.publishedAt || p.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     }))
 
   if (publishedPosts.length > 0) {

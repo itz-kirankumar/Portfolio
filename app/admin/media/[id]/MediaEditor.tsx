@@ -7,6 +7,7 @@ import { saveMedia, deleteMedia } from '../actions'
 import { Field, Input, Select, SaveBar, Panel, BTN_PRIMARY, GHOST_BTN } from '@/components/admin/ui'
 import { Image as ImageIcon, Link as LinkIcon, UploadCloud, Loader2, Trash2 } from 'lucide-react'
 import type { Media, MediaKind } from '@/lib/schemas/media'
+import { processAndUploadMediaFile } from '../upload-helper'
 
 export default function MediaEditor({ initialData, id }: { initialData: Partial<Media>, id: string | null }) {
   const router = useRouter()
@@ -38,40 +39,15 @@ export default function MediaEditor({ initialData, id }: { initialData: Partial<
 
     setUploading(true)
     try {
-      // 1. Get Signed URL
-      const reqRes = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          folder: 'gallery'
-        }),
-      })
-
-      const reqJson = await reqRes.json()
-      if (!reqRes.ok) throw new Error(reqJson.error || 'Failed to initialize upload')
-
-      // 2. Upload directly to Google Cloud Storage (bypassing Vercel limits)
-      const uploadRes = await fetch(reqJson.signedUrl, {
-        method: 'PUT',
-        headers: reqJson.uploadHeaders,
-        body: file,
-      })
-
-      if (!uploadRes.ok) {
-        throw new Error(`Cloud storage upload failed (Status ${uploadRes.status})`)
-      }
-
-      // 3. Update editor state
+      const payload = await processAndUploadMediaFile(file)
+      
       update({
-        url: reqJson.url,
-        storagePath: reqJson.path,
-        kind: reqJson.kind,
-        contentType: reqJson.contentType,
-        bytes: reqJson.bytes,
-        title: data.title || file.name.split('.')[0]
+        url: payload.url,
+        storagePath: payload.storagePath,
+        kind: payload.kind,
+        contentType: payload.contentType,
+        bytes: payload.bytes,
+        title: data.title || payload.title
       })
       useUI.getState().toast('File uploaded successfully')
     } catch (err: any) {
