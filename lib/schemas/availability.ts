@@ -82,7 +82,7 @@ export const availabilitySchema = z.object({
   /** OAuth Refresh Token stored automatically upon admin login */
   googleRefreshToken: z.string().optional(),
   /** Map of email -> Refresh Token to sync multiple admin accounts at once */
-  googleRefreshTokens: z.record(z.string()).optional(),
+  googleRefreshTokens: z.record(z.string(), z.string()).optional(),
 
   updatedAt: z.number().int().default(0),
 })
