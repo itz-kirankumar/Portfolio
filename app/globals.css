@@ -42,6 +42,22 @@
   --font-hand: var(--font-caveat), ui-serif, cursive;
 }
 
+.theme-toggle-light {
+  display: none;
+}
+
+.theme-toggle-dark {
+  display: block;
+}
+
+.dark .theme-toggle-light {
+  display: block;
+}
+
+.dark .theme-toggle-dark {
+  display: none;
+}
+
 /* --------------------------------------------------------------------------- */
 
 @layer base {

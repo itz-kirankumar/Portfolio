@@ -13,6 +13,7 @@ import {
   SectionHead,
 } from '@/components/ui/primitives'
 import Reveal from '@/components/ui/Reveal'
+import Link from 'next/link'
 import type {
   ClosingContent,
   ContrastsContent,
@@ -150,8 +151,8 @@ export function Writing({ writing }: { writing: WritingContent }) {
                 <Reveal as="li" kind="fade" delay={i * 55} key={post.href + post.title}>
                   <a
                     href={post.href}
-                    target={post.href.startsWith('http') ? '_blank' : undefined}
-                    rel={post.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="group flex flex-col gap-1.5 py-5 transition-opacity hover:opacity-80"
                   >
                     {post.date ? (
@@ -161,6 +162,7 @@ export function Writing({ writing }: { writing: WritingContent }) {
                     ) : null}
                     <span className="font-display text-lg font-medium leading-snug tracking-[-0.015em] text-ink">
                       {post.title}
+                      <span className="sr-only"> (opens in a new tab)</span>
                       <span aria-hidden="true" className="ml-2 inline-block text-coral transition-transform group-hover:translate-x-1">
                         →
                       </span>
@@ -183,12 +185,25 @@ export function Writing({ writing }: { writing: WritingContent }) {
             </div>
           )}
 
-          {writing.cta.label ? (
-            <Button href={writing.cta.href} variant="outline" className="mt-8" external>
-              {writing.cta.label}
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <Link
+              href="/writing"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-card px-5 py-2.5 text-[0.92rem] font-medium text-ink shadow-paper ring-1 ring-rule transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:shadow-lift hover:ring-coral/60"
+            >
+              Read all writing
               <span aria-hidden="true">→</span>
-            </Button>
-          ) : null}
+            </Link>
+            {writing.cta.label && writing.cta.href !== '/writing' && writing.cta.href !== '/#writing' ? (
+              <a
+                href={writing.cta.href}
+                target={writing.cta.href.startsWith('http') ? '_blank' : undefined}
+                rel={writing.cta.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                className="link-underline text-[0.9rem] font-medium text-coral-ink"
+              >
+                {writing.cta.label}
+              </a>
+            ) : null}
+          </div>
         </div>
       </div>
     </Section>
