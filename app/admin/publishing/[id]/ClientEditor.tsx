@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useUI as useToast } from '@/lib/store/ui'
 
 import { useState, useEffect, useRef } from 'react'
@@ -154,8 +154,8 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
               <Field label="Tags" help="Comma-separated">
                 <Input 
                   value={data.tags?.join(', ') || ''} 
-                  onChange={e => update({ tags: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
-                  placeholder="design, coding"
+                  onChange={e => update({ tags: e.target.value.split(',').map(s => s.trim().replace(/^#+/, '')).filter(Boolean) })}
+                  placeholder="Startups, Fintech, AI"
                 />
               </Field>
 

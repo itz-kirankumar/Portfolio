@@ -13,6 +13,7 @@ import { cookies } from 'next/headers'
 import { ArticleActions } from '@/components/site/ArticleActions'
 import { ReadingProgress } from '@/components/site/ReadingProgress'
 import { BackToTop } from '@/components/site/BackToTop'
+import { normalizeTags } from '@/lib/tags'
 
 export const revalidate = 3600
 
@@ -189,7 +190,16 @@ export default async function WritingDetailPage({ params, searchParams }: Props)
                 <div className="flex flex-col gap-2 font-mono text-[0.8rem] text-ink-soft pt-6 border-t border-rule/50">
                   <span>{post.readingMinutes} min read</span>
                   {post.tags.length > 0 && (
-                    <span className="mt-2">{post.tags.join(', ')}</span>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {normalizeTags(post.tags).map((t) => (
+                        <span
+                          key={t}
+                          className="inline-flex items-center rounded-md bg-paper-deep px-2 py-0.5 font-mono text-[0.7rem] text-ink-soft ring-1 ring-rule/60"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>

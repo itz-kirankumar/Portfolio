@@ -42,25 +42,59 @@ function Meta({ post, className }: { post: WritingIndexPost; className?: string 
   )
 }
 
-function TagRow({ tags }: { tags: string[] }) {
-  if (!tags.length) return null
+function TopicBadges({
+  tags,
+  max = 3,
+  onTagClick,
+}: {
+  tags: string[]
+  max?: number
+  onTagClick?: (tag: string) => void
+}) {
+  if (!tags?.length) return null
+  const visible = tags.slice(0, max)
+  const remaining = tags.length - max
+
   return (
-    <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1">
-      {tags.map((t) => (
-        <li
+    <div className="mt-3 flex flex-wrap items-center gap-1.5">
+      {visible.map((t) => (
+        <span
           key={t}
-          className="font-mono text-[0.68rem] lowercase tracking-[0.04em] text-coral-ink/85"
+          onClick={
+            onTagClick
+              ? (e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onTagClick(t)
+                }
+              : undefined
+          }
+          className={cn(
+            'inline-flex items-center rounded-md bg-paper-deep px-2.5 py-0.5 font-mono text-[0.68rem] font-medium tracking-[0.02em] text-ink-soft ring-1 ring-rule/70 transition-colors',
+            onTagClick && 'cursor-pointer hover:bg-coral-soft hover:text-coral-ink hover:ring-coral/40'
+          )}
         >
-          #{t}
-        </li>
+          {t}
+        </span>
       ))}
-    </ul>
+      {remaining > 0 ? (
+        <span className="font-mono text-[0.65rem] text-ink-soft/70 pl-0.5">
+          +{remaining}
+        </span>
+      ) : null}
+    </div>
   )
 }
 
 /* ------------------------------------------------------------- Featured --- */
 
-function FeaturedLead({ post }: { post: WritingIndexPost }) {
+function FeaturedLead({
+  post,
+  onTagClick,
+}: {
+  post: WritingIndexPost
+  onTagClick: (tag: string) => void
+}) {
   return (
     <article className="group relative">
       <Link
@@ -101,7 +135,7 @@ function FeaturedLead({ post }: { post: WritingIndexPost }) {
                 {post.excerpt}
               </p>
             ) : null}
-            <TagRow tags={post.tags} />
+            <TopicBadges tags={post.tags} max={4} onTagClick={onTagClick} />
             <span className="mt-6 inline-flex items-center gap-1.5 font-medium text-coral-ink">
               Read the piece
               <span className="sr-only"> (opens in a new tab)</span>
@@ -118,7 +152,13 @@ function FeaturedLead({ post }: { post: WritingIndexPost }) {
 
 /* ------------------------------------------------------------- list row --- */
 
-function Row({ post }: { post: WritingIndexPost }) {
+function Row({
+  post,
+  onTagClick,
+}: {
+  post: WritingIndexPost
+  onTagClick: (tag: string) => void
+}) {
   return (
     <li>
       <Link
@@ -146,7 +186,7 @@ function Row({ post }: { post: WritingIndexPost }) {
               {post.excerpt}
             </p>
           ) : null}
-          <TagRow tags={post.tags} />
+          <TopicBadges tags={post.tags} max={3} onTagClick={onTagClick} />
         </div>
 
         {post.coverUrl ? (
@@ -181,12 +221,24 @@ export function WritingIndex({
   const [query, setQuery] = useState('')
   const [activeTag, setActiveTag] = useState<string | null>(null)
 
-  // Topics ordered by how often they appear, so the busiest beats lead.
-  const tags = useMemo(() => {
+  // Frequency count of each topic
+  const tagCounts = useMemo(() => {
     const counts = new Map<string, number>()
-    for (const p of posts) for (const t of p.tags) counts.set(t, (counts.get(t) ?? 0) + 1)
-    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([t]) => t)
+    for (const p of posts) {
+      for (const t of p.tags) {
+        counts.set(t, (counts.get(t) ?? 0) + 1)
+      }
+    }
+    return counts
   }, [posts])
+
+  // Topics ordered by frequency, prioritized by count >= 2 or current activeTag
+  const tags = useMemo(() => {
+    return [...tagCounts.entries()]
+      .filter(([t, count]) => count >= 2 || t === activeTag)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([t]) => t)
+  }, [tagCounts, activeTag])
 
   const q = query.trim().toLowerCase()
   const isDefault = !q && !activeTag
@@ -203,8 +255,8 @@ export function WritingIndex({
     })
   }, [posts, q, activeTag])
 
-  // The featured lead only headlines the unfiltered archive; once the reader
-  // is searching or filtering, every match belongs in the same honest list.
+  // The featured lead headlines the unfiltered archive; once searching or
+  // filtering, every match belongs in the same transparent list.
   const featured = isDefault && posts.length > 0 ? posts[0] : null
   const listPosts = featured ? filtered.filter((p) => p.slug !== featured.slug) : filtered
 
@@ -223,6 +275,10 @@ export function WritingIndex({
     ? `${total} ${total === 1 ? 'piece' : 'pieces'}`
     : `${filtered.length} of ${total}`
 
+  const handleTagToggle = (tag: string) => {
+    setActiveTag((prev) => (prev === tag ? null : tag))
+  }
+
   return (
     <div>
       {/* Header */}
@@ -236,58 +292,85 @@ export function WritingIndex({
 
       {total > 0 ? (
         <>
-          {/* Controls: search + topics */}
-          <div className="mt-12 flex flex-col gap-4 border-y border-rule py-4 lg:flex-row lg:items-center lg:justify-between">
-            <label className="relative flex w-full items-center lg:max-w-xs">
-              <Search aria-hidden="true" className="pointer-events-none absolute left-3.5 size-4 text-ink-soft" />
-              <span className="sr-only">Search writing</span>
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search the archive…"
-                className="w-full rounded-full bg-card py-2.5 pl-10 pr-9 text-[0.92rem] text-ink shadow-paper ring-1 ring-rule placeholder:text-ink-soft/70 focus:ring-coral/60"
-              />
-              {query ? (
-                <button
-                  type="button"
-                  onClick={() => setQuery('')}
-                  aria-label="Clear search"
-                  className="absolute right-3 grid size-5 place-items-center rounded-full text-ink-soft hover:text-ink"
-                >
-                  <X className="size-3.5" />
-                </button>
-              ) : null}
-            </label>
+          {/* Controls: search + topic pills strip */}
+          <div className="mt-12 space-y-4 border-y border-rule py-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <label className="relative flex w-full max-w-sm items-center">
+                <Search aria-hidden="true" className="pointer-events-none absolute left-3.5 size-4 text-ink-soft" />
+                <span className="sr-only">Search writing</span>
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search the archive or topics…"
+                  className="w-full rounded-full bg-card py-2 pl-9 pr-9 text-[0.9rem] text-ink shadow-paper ring-1 ring-rule placeholder:text-ink-soft/70 focus:outline-none focus:ring-2 focus:ring-coral/60"
+                />
+                {query ? (
+                  <button
+                    type="button"
+                    onClick={() => setQuery('')}
+                    aria-label="Clear search"
+                    className="absolute right-3 grid size-5 place-items-center rounded-full text-ink-soft hover:text-ink"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                ) : null}
+              </label>
+
+              <div className="flex items-center gap-3">
+                <p className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-soft">
+                  {countLabel}
+                  {activeTag ? (
+                    <span className="ml-1 font-semibold text-coral-ink">
+                      · {activeTag}
+                    </span>
+                  ) : null}
+                </p>
+
+                {(query || activeTag) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery('')
+                      setActiveTag(null)
+                    }}
+                    className="inline-flex items-center gap-1 rounded-full bg-card px-2.5 py-1 font-mono text-[0.68rem] text-ink-soft ring-1 ring-rule transition-colors hover:text-ink hover:ring-coral/50 cursor-pointer"
+                  >
+                    <X className="size-3" />
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
 
             {tags.length > 0 ? (
               <div
-                className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:mx-0 lg:flex-wrap lg:justify-end lg:overflow-visible lg:px-0 lg:pb-0"
+                className="-mx-4 sm:-mx-6 lg:-mx-8 flex items-center gap-2 overflow-x-auto px-4 sm:px-6 lg:px-8 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 role="group"
                 aria-label="Filter by topic"
               >
-                <TopicChip label="All" active={!activeTag} onClick={() => setActiveTag(null)} />
+                <TopicChip
+                  label="All"
+                  active={!activeTag}
+                  onClick={() => setActiveTag(null)}
+                />
                 {tags.map((t) => (
                   <TopicChip
                     key={t}
                     label={t}
+                    count={tagCounts.get(t)}
                     active={activeTag === t}
-                    onClick={() => setActiveTag(activeTag === t ? null : t)}
+                    onClick={() => handleTagToggle(t)}
                   />
                 ))}
               </div>
             ) : null}
           </div>
 
-          <p className="mt-4 font-mono text-[0.68rem] uppercase tracking-[0.16em] text-ink-soft/80">
-            {countLabel}
-            {activeTag ? <span className="text-coral-ink"> · #{activeTag}</span> : null}
-          </p>
-
           {/* Featured */}
           {featured ? (
             <div className="mt-10">
-              <FeaturedLead post={featured} />
+              <FeaturedLead post={featured} onTagClick={handleTagToggle} />
             </div>
           ) : null}
 
@@ -301,7 +384,7 @@ export function WritingIndex({
                   </h2>
                   <ul className="divide-y divide-rule border-t border-rule">
                     {items.map((p) => (
-                      <Row key={p.slug} post={p} />
+                      <Row key={p.slug} post={p} onTagClick={handleTagToggle} />
                     ))}
                   </ul>
                 </section>
@@ -318,7 +401,7 @@ export function WritingIndex({
                   setQuery('')
                   setActiveTag(null)
                 }}
-                className="mt-4 inline-flex items-center gap-1.5 text-[0.9rem] font-medium text-coral-ink link-underline"
+                className="mt-4 inline-flex items-center gap-1.5 text-[0.9rem] font-medium text-coral-ink link-underline cursor-pointer"
               >
                 Clear filters
               </button>
@@ -336,10 +419,12 @@ export function WritingIndex({
 
 function TopicChip({
   label,
+  count,
   active,
   onClick,
 }: {
   label: string
+  count?: number
   active: boolean
   onClick: () => void
 }) {
@@ -349,13 +434,23 @@ function TopicChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[0.8rem] font-medium transition-colors',
+        'shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 font-mono text-[0.76rem] font-medium transition-all duration-200 cursor-pointer',
         active
-          ? 'bg-coral-deep text-white shadow-paper'
+          ? 'bg-ink text-paper shadow-paper'
           : 'bg-card text-ink-soft ring-1 ring-rule hover:text-ink hover:ring-coral/50'
       )}
     >
-      {label === 'All' ? label : `#${label}`}
+      <span>{label}</span>
+      {count !== undefined && count > 0 && label !== 'All' ? (
+        <span
+          className={cn(
+            'ml-1.5 font-mono text-[0.68rem] tabular-nums',
+            active ? 'text-paper/80' : 'text-ink-soft/70'
+          )}
+        >
+          {count}
+        </span>
+      ) : null}
     </button>
   )
 }

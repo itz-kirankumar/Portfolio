@@ -30,7 +30,7 @@ export function PointOfView({ pov }: { pov: PovContent }) {
   if (!pov.items.length) return null
 
   return (
-    <Section id="point-of-view" tone="paper" className="paper-grain">
+    <Section id="point-of-view" tone="paper" className="paper-grain" compact>
       <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         <div className="lg:sticky lg:top-28 lg:self-start">
           <SectionHead
@@ -76,7 +76,7 @@ export function Contrasts({ contrasts }: { contrasts: ContrastsContent }) {
   if (!contrasts.items.length) return null
 
   return (
-    <Section tone="deep">
+    <Section tone="deep" compact>
       <SectionHead eyebrow={contrasts.eyebrow} heading={contrasts.heading} />
 
       <ul className="mt-10 divide-y divide-rule border-y border-rule">
@@ -109,7 +109,7 @@ export function Gallery({ gallery }: { gallery: GalleryContent }) {
   if (!gallery.photos.length) return null
 
   return (
-    <Section tone="paper">
+    <Section tone="paper" compact>
       <SectionHead eyebrow={gallery.eyebrow} heading={gallery.heading} />
 
       <ul className="mt-14 grid grid-cols-2 gap-8 sm:gap-10 lg:grid-cols-4">
@@ -132,10 +132,11 @@ export function Gallery({ gallery }: { gallery: GalleryContent }) {
 /* ---------------------------------------------------------------- Writing --- */
 
 export function Writing({ writing }: { writing: WritingContent }) {
-  const hasPosts = writing.posts.length > 0
+  const posts = writing.posts.slice(0, 3)
+  const hasPosts = posts.length > 0
 
   return (
-    <Section id="writing" tone="deep">
+    <Section id="writing" tone="deep" compact>
       <div className="grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
         <SectionHead
           eyebrow={writing.eyebrow}
@@ -147,7 +148,7 @@ export function Writing({ writing }: { writing: WritingContent }) {
         <div>
           {hasPosts ? (
             <ul className="divide-y divide-rule border-y border-rule">
-              {writing.posts.map((post, i) => (
+              {posts.map((post, i) => (
                 <Reveal as="li" kind="fade" delay={i * 55} key={post.href + post.title}>
                   <a
                     href={post.href}
@@ -216,7 +217,7 @@ export function OneCard({ oneCard }: { oneCard: OneCardContent }) {
   if (!oneCard.bullets.length) return null
 
   return (
-    <Section id="about" tone="paper">
+    <Section id="about" tone="paper" compact>
       <div className="mx-auto max-w-3xl">
         <Reveal kind="up">
           <NotebookCard>
@@ -252,7 +253,7 @@ export function OneCard({ oneCard }: { oneCard: OneCardContent }) {
 
 export function Closing({ closing, meta }: { closing: ClosingContent; meta: Meta }) {
   return (
-    <Section id="contact" tone="deep" className="paper-grain">
+    <Section id="contact" tone="deep" className="paper-grain" compact>
       <div className="mx-auto max-w-2xl text-center">
         <Eyebrow className="mb-6 text-center">get in touch</Eyebrow>
 

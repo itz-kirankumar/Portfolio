@@ -58,13 +58,17 @@ export function Highlight({
  */
 export function marked(text: string): React.ReactNode {
   if (!text.includes('*')) return text
-  return text.split(/(\*[^*]+\*)/g).map((chunk, i) =>
-    chunk.startsWith('*') && chunk.endsWith('*') && chunk.length > 2 ? (
-      <Highlight key={i}>{chunk.slice(1, -1)}</Highlight>
+  return text.split(/(\*[^*]+\*[.,!?;:…]*)/g).map((chunk, i) => {
+    const match = chunk.match(/^\*([^*]+)\*([.,!?;:…]*)$/)
+    return match ? (
+      <span key={i} className="whitespace-nowrap">
+        <Highlight>{match[1]}</Highlight>
+        {match[2]}
+      </span>
     ) : (
       chunk
     )
-  )
+  })
 }
 
 /* ----------------------------------------------------------------- Tape --- */
@@ -290,6 +294,7 @@ export function Section({
   className,
   tone = 'paper',
   bleed = false,
+  compact = false,
 }: {
   id?: string
   children: React.ReactNode
@@ -297,12 +302,15 @@ export function Section({
   tone?: 'paper' | 'deep' | 'dark'
   /** Skip the gutter — for sections that manage their own width. */
   bleed?: boolean
+  /** Tighter vertical rhythm for long-form pages with many sections. */
+  compact?: boolean
 }) {
   return (
     <section
       id={id}
       className={cn(
-        'scroll-mt-24 py-16 sm:py-24 lg:py-32',
+        'scroll-mt-24',
+        compact ? 'py-14 sm:py-20 lg:py-24' : 'py-16 sm:py-24 lg:py-32',
         tone === 'paper' && 'bg-paper',
         tone === 'deep' && 'bg-paper-deep',
         tone === 'dark' && 'bg-slate-deep text-paper',

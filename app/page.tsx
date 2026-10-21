@@ -28,6 +28,12 @@ import { getCachedTheme } from '@/lib/theme'
 
 export const revalidate = 3600
 
+const articleDateFormat = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+})
+
 export async function generateMetadata(): Promise<Metadata> {
   const { meta, hero } = await getCachedSiteContent()
   const title = `${meta.name}`
@@ -42,7 +48,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import { MEDIA_COLLECTION, mediaSchema } from '@/lib/schemas/media'
-import { DEFAULT_SECTION_ORDER } from '@/lib/schemas/theme'
 
 export default async function HomePage() {
   const [content, theme, allPosts, allServices, allMedia] = await Promise.all([
@@ -58,12 +63,14 @@ export default async function HomePage() {
   const publishedPosts = allPosts
     .filter(p => p.status === 'published')
     .sort((a, b) => (b.publishedAt || b.createdAt) - (a.publishedAt || a.createdAt))
-    .slice(0, 5)
+    .slice(0, 3)
     .map(p => ({
       title: p.title,
       blurb: p.excerpt,
       href: `/writing/${p.slug}`,
-      date: new Date(p.publishedAt || p.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      date: p.publishedAt || p.createdAt
+        ? articleDateFormat.format(new Date(p.publishedAt || p.createdAt))
+        : '',
     }))
 
   if (publishedPosts.length > 0) {
@@ -145,7 +152,7 @@ export default async function HomePage() {
         {isVisible('ways') && <Ways ways={content.ways} />}
 
         {activeServices.length > 0 && isVisible('services') && (
-          <Section id="services" tone="deep">
+          <Section id="services" tone="deep" compact>
             <SectionHead 
               eyebrow="Offerings" 
               heading="Ways we can work together" 

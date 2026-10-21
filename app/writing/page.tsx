@@ -4,6 +4,7 @@ import { getCachedSiteContent } from '@/lib/site'
 import { Section } from '@/components/ui/primitives'
 import { safeList } from '@/lib/store'
 import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
+import { normalizeTags } from '@/lib/tags'
 import { WritingIndex, type WritingIndexPost } from '@/components/site/WritingIndex'
 
 export const revalidate = 3600
@@ -42,7 +43,7 @@ export default async function WritingIndexPage() {
         title: p.title,
         excerpt: p.excerpt,
         coverUrl: p.coverUrl,
-        tags: p.tags,
+        tags: normalizeTags(p.tags),
         readingMinutes: Math.max(1, p.readingMinutes),
         dateLabel: d ? dateFmt.format(d) : '',
         year: d ? d.getFullYear() : new Date().getFullYear(),

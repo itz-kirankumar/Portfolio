@@ -21,7 +21,7 @@ export function Audiences({ audiences }: { audiences: AudiencesContent }) {
   if (!audiences.items.length) return null
 
   return (
-    <Section id="audiences" tone="deep">
+    <Section id="audiences" tone="deep" compact>
       <SectionHead
         eyebrow={audiences.eyebrow}
         heading={audiences.heading}
@@ -83,33 +83,31 @@ export function Ways({ ways }: { ways: WaysContent }) {
   if (!ways.items.length) return null
 
   return (
-    <Section id="how-i-work" tone="paper">
+    <Section id="how-i-work" tone="paper" compact>
       <SectionHead eyebrow={ways.eyebrow} heading={ways.heading} />
 
-      <ol className="mt-12 grid gap-px overflow-hidden rounded-lg bg-rule ring-1 ring-rule md:grid-cols-3">
+      <ol className="mt-12 divide-y divide-rule border-y border-rule">
         {ways.items.map((w, i) => (
-          <Reveal as="li" kind="up" delay={i * 80} key={w.number + w.title} className="bg-card">
-            <div className="flex h-full flex-col p-7 lg:p-8">
-              <p className="font-mono text-[0.9rem] font-medium tracking-[0.1em] text-coral-ink">
+          <Reveal as="li" kind="up" delay={i * 60} key={w.number + w.title}>
+            <div className="grid gap-x-6 gap-y-3 py-7 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:gap-x-8 lg:grid-cols-[5rem_minmax(0,1fr)_minmax(16rem,0.8fr)] lg:items-start lg:py-8">
+              <span className="font-mono text-[0.78rem] font-medium tracking-[0.14em] text-coral-ink">
                 {w.number}
-                <span aria-hidden="true" className="mx-2 text-rule">
-                  —
-                </span>
-                <span className="uppercase tracking-[0.16em] text-ink-soft">{w.title}</span>
-              </p>
+              </span>
 
-              <p className="mt-5 text-[0.95rem] leading-relaxed text-ink">{w.body}</p>
+              <div className="sm:col-start-2 lg:col-start-auto">
+                <h3 className="font-display text-[1.25rem] font-semibold tracking-[-0.02em] text-ink">
+                  {w.title}
+                </h3>
+                <p className="mt-2 max-w-[62ch] text-[0.96rem] leading-relaxed text-ink">
+                  {w.body}
+                </p>
+              </div>
 
               {w.bullets.length ? (
-                <ul className="mt-6 space-y-1.5 border-t border-rule pt-5">
+                <ul className="space-y-2 sm:col-start-2 lg:col-start-auto lg:pt-1">
                   {w.bullets.map((b) => (
-                    <li
-                      key={b}
-                      className="flex gap-2 text-[0.85rem] leading-snug text-ink-soft"
-                    >
-                      <span aria-hidden="true" className="text-coral">
-                        ·
-                      </span>
+                    <li key={b} className="flex gap-2.5 text-[0.86rem] leading-relaxed text-ink-soft">
+                      <span aria-hidden="true" className="mt-[0.65em] size-1 shrink-0 rounded-full bg-coral" />
                       {b}
                     </li>
                   ))}
@@ -160,7 +158,7 @@ export function Ventures({ ventures }: { ventures: VenturesContent }) {
   if (!ventures.items.length) return null
 
   return (
-    <Section id="ventures" tone="deep">
+    <Section id="ventures" tone="deep" compact>
       <SectionHead
         eyebrow={ventures.eyebrow}
         heading={ventures.heading}
@@ -273,7 +271,7 @@ export function Projects({ projects }: { projects: ProjectsContent }) {
   if (!projects.items.length) return null
 
   return (
-    <Section id="projects" tone="paper">
+    <Section id="projects" tone="paper" compact>
       <SectionHead eyebrow={projects.eyebrow} heading={projects.heading} />
 
       <ul className="mt-12 grid gap-5 sm:grid-cols-2">
