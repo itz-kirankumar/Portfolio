@@ -42,13 +42,14 @@ export async function postComment(postId: string, name: string, text: string) {
 }
 
 
-export async function likeComment(commentId: string) {
+export async function likeComment(commentId: string, postId?: string) {
   try {
     const db = getAdminDb()
     const ref = db.collection(COMMENTS_COLLECTION).doc(commentId)
     await ref.update({
       likes: (await import('firebase-admin/firestore')).FieldValue.increment(1)
     })
+    if (postId) revalidatePath('/writing/' + postId)
     return { ok: true }
   } catch (err: any) {
     console.error('Failed to like comment:', err)

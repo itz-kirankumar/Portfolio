@@ -39,6 +39,8 @@ export async function savePost(id: string, data: any) {
     await putDoc(POSTS_COLLECTION, docId, postSchema, parsed.data)
     
     revalidatePath('/admin/publishing')
+    revalidatePath('/writing')
+    revalidatePath(`/writing/${docId}`)
     return { success: true, id: docId }
 
   } catch (error: any) {

@@ -24,6 +24,18 @@ const nextConfig: NextConfig = {
   // Required to use firebase-admin in API routes
   serverExternalPackages: ['firebase-admin'],
 
+  // Preserve the existing /writing/<slug>?preview=true URLs: serve them from
+  // the dynamic owner-preview route without changing the address bar.
+  async rewrites() {
+    return [
+      {
+        source: '/writing/:slug',
+        has: [{ type: 'query' as const, key: 'preview', value: 'true' }],
+        destination: '/preview/writing/:slug',
+      },
+    ]
+  },
+
   async headers() {
     return [
       {

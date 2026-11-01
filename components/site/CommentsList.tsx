@@ -37,7 +37,7 @@ function CommentItem({
     setHasLiked(true)
     localStorage.setItem(`liked_comment_${c.id}`, 'true')
     
-    const res = await likeComment(c.id)
+    const res = await likeComment(c.id, postId)
     if (!res.ok) {
       // Revert if failed
       setLikes(prev => prev - 1)

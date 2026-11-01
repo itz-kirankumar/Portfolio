@@ -72,6 +72,7 @@ export async function publishSite(): Promise<SaveResult> {
     revalidateTag(SITE_CACHE_TAG, 'max')
     revalidatePath('/')
     revalidatePath('/admin')
+    revalidatePath('/writing', 'layout')
     return { ok: true, savedAt: Date.now() }
   } catch (err) {
     console.error('[admin] publish failed:', err)
