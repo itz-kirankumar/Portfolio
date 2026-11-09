@@ -73,7 +73,7 @@ export function SocialFeed({
       <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
         Around the web
       </h2>
-      <div className="mt-8 grid gap-8 lg:grid-cols-2">
+      <div className="mt-8 grid items-start gap-8 lg:grid-cols-2">
         {xHandle && (
           <div className="rounded-2xl border border-rule bg-card p-5">
             <div className="mb-4 flex items-center justify-between">
