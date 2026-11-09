@@ -29,31 +29,15 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
       </Reveal>
 
       <Reveal kind="up" delay={60}>
-        <h1 className={`font-anton uppercase text-balance-tight text-[clamp(3.2rem,10.5vw,8.75rem)] leading-[0.92] tracking-[0.005em] text-ink ${isStacked ? 'mx-auto' : ''}`}>
+        <h1 className={`font-display text-balance-tight text-[clamp(2.9rem,8vw,6rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-ink ${isStacked ? 'mx-auto' : ''}`}>
           {hero.headlineBefore}{' '}
           {hero.headlineHighlight ? (
-            <span className="relative inline-block text-coral">
+            <Highlight>
               <RotatingHighlight
                 base={hero.headlineHighlight}
                 variants={['then ship it', 'then count it', 'then show it']}
               />
-              {/* hand-drawn scribble underline */}
-              <svg
-                aria-hidden="true"
-                className="absolute -bottom-[0.08em] left-0 h-[0.14em] w-full text-coral"
-                viewBox="0 0 300 12"
-                preserveAspectRatio="none"
-              >
-                <path
-                  d="M3 8 Q 40 2, 78 7 T 152 7 T 226 6 T 297 7"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                  opacity="0.85"
-                />
-              </svg>
-            </span>
+            </Highlight>
           ) : null}
           {hero.headlineAfter}
         </h1>

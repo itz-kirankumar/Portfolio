@@ -1,6 +1,6 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from 'next'
-import { Bricolage_Grotesque, Inter, JetBrains_Mono, Caveat, Anton } from 'next/font/google'
+import { Bricolage_Grotesque, Inter, JetBrains_Mono, Caveat } from 'next/font/google'
 import './globals.css'
 
 /* Variable builds — omitting `weight` ships one file per family instead of one
@@ -27,14 +27,6 @@ const jetbrains = JetBrains_Mono({
 const caveat = Caveat({
   subsets: ['latin'],
   variable: '--font-caveat',
-  display: 'swap',
-  preload: false,
-})
-
-const anton = Anton({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-anton',
   display: 'swap',
   preload: false,
 })
@@ -100,7 +92,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} ${inter.variable} ${jetbrains.variable} ${caveat.variable} ${anton.variable}`}
+      className={`${bricolage.variable} ${inter.variable} ${jetbrains.variable} ${caveat.variable}`}
       suppressHydrationWarning
     >
       <head>
