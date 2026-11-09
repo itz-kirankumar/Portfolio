@@ -74,6 +74,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import { NewsletterPopup } from '@/components/site/NewsletterPopup'
+import { ChatWidget } from '@/components/site/ChatWidget'
 import { Tracker } from '@/components/site/Tracker'
 import { ThemeProvider } from '@/components/site/ThemeProvider'
 import { getCachedTheme } from '@/lib/theme'
@@ -85,6 +86,7 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const theme = await getCachedTheme()
+  const { meta } = await getCachedSiteContent()
 
   return (
     <html
@@ -113,6 +115,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="bg-paper text-ink font-sans antialiased" suppressHydrationWarning>
         <Tracker />
         {children}
+        <ChatWidget resumeUrl={meta.resumeUrl ?? ''} email={meta.email} />
         <NewsletterPopup />
       </body>
     </html>
