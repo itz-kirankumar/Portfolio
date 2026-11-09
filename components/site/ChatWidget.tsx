@@ -50,10 +50,10 @@ function answer(q: string, resumeUrl: string, email: string): Msg {
     return { from: 'bot', text: `The fastest way to reach Kiran is email: ${email}. The contact section on the homepage has the same details.`, links: [{ href: `mailto:${email}`, label: 'Email Kiran' }, { href: '/#contact', label: 'Contact section' }] }
   }
   if (/service|consult|offer|price|pricing|book/.test(lower)) {
-    return { from: 'bot', text: 'Kiran offers product and strategy services — details and booking live on the services page.', links: [{ href: '/services', label: 'See services' }] }
+    return { from: 'bot', text: 'Kiran offers product and strategy services. Details and booking live on the services page.', links: [{ href: '/services', label: 'See services' }] }
   }
   if (/writing|article|blog|canvas|newsletter|post/.test(lower)) {
-    return { from: 'bot', text: 'Kiran writes The Indian Canvas series and essays on the writing page — new pieces appear there automatically as they publish.', links: [{ href: '/writing', label: 'Read the writing' }] }
+    return { from: 'bot', text: 'Kiran writes The Indian Canvas series and essays on the writing page. New pieces appear there automatically as they publish.', links: [{ href: '/writing', label: 'Read the writing' }] }
   }
   if (/who|background|bio|about|operator|education|masters/.test(lower)) {
     return { from: 'bot', text: 'Kiran is a 0→1 operator across strategy, GTM and AI, based in Gurgaon, India. The about section on the homepage has the full picture.', links: [{ href: '/#about', label: 'About Kiran' }] }
@@ -77,9 +77,9 @@ function answer(q: string, resumeUrl: string, email: string): Msg {
     }
   }
   if (/built|build|project|venture|work/.test(lower)) {
-    return { from: 'bot', text: `Kiran's ventures, products, tools and research each have a story page — ${DEFAULT_WORKS.length} of them on the works index.`, links: [{ href: '/work', label: 'Browse all works' }] }
+    return { from: 'bot', text: `Kiran's ventures, products, tools and research each have a story page. ${DEFAULT_WORKS.length} of them on the works index.`, links: [{ href: '/work', label: 'Browse all works' }] }
   }
-  return { from: 'bot', text: `I can answer from what's public on this site — Kiran's work, writing, services and contact. For anything else, email him directly: ${email}`, links: [{ href: `mailto:${email}`, label: 'Email Kiran' }] }
+  return { from: 'bot', text: `I can answer from what's public on this site: Kiran's work, writing, services and contact. For anything else, email him directly: ${email}`, links: [{ href: `mailto:${email}`, label: 'Email Kiran' }] }
 }
 
 export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: string }) {
@@ -87,7 +87,7 @@ export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: str
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
   const [msgs, setMsgs] = useState<Msg[]>([
-    { from: 'bot', text: "Hi! Ask me anything about Kiran — his work, writing, services, or grab his résumé. I answer from the public content of this site." },
+    { from: 'bot', text: "Hi! Ask me anything about Kiran: his work, writing, services, or grab his résumé. I answer from the public content of this site." },
   ])
   const endRef = useRef<HTMLDivElement>(null)
 

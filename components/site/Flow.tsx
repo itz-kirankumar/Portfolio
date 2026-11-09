@@ -156,7 +156,7 @@ export function FlowWall({
         <SectionHead
           eyebrow="the wall"
           heading="Everything I build and write, *always in motion*"
-          intro="Projects, ventures, tools and essays — new writing flows in as it publishes, new works join as they ship. Hover a lane to slow it down; open any card for the full story."
+          intro="Projects, ventures, tools and essays. New writing flows in as it publishes, new works join as they ship. Hover a lane to slow it down; open any card for the full story."
         />
         <p className="mt-6">
           <Link
@@ -170,7 +170,7 @@ export function FlowWall({
 
       <div className="space-y-4 pb-14 sm:pb-20">
         {works.length ? (
-          <Lane count={works.length} label="Works — projects, ventures and tools">
+          <Lane count={works.length} label="Works: projects, ventures and tools">
             {works.map((w) => (
               <li key={w.id} className="list-none">
                 <WorkCard work={w} />

@@ -12,7 +12,7 @@ export const DEFAULT_CONTENT: SiteContent = {
   /* ------------------------------------------------------------- identity */
   meta: {
     name: 'Kiran Kumar G',
-    descriptor: '0→1 operator — strategy, go-to-market and operations.',
+    descriptor: '0→1 operator: strategy, go-to-market and operations.',
     email: 'kiran.kumar2028@mastersunion.org',
     phone: '+91 9092112941',
     location: 'Gurgaon, India',
@@ -48,7 +48,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     headlineHighlight: 'then prove it',
     headlineAfter: '.',
     subhead:
-      'I take products from zero to paying users — and then show you the funnel, the cohort and the unit economics that got them there. Most recently: an EdTech SaaS from an empty Notion doc to a 12,000-member community and 600+ paying users.',
+      'I take products from zero to paying users, and then show you the funnel, the cohort and the unit economics that got them there. Most recently: an EdTech SaaS from an empty Notion doc to a 12,000-member community and 600+ paying users.',
     primaryCta: { label: 'Work with me', href: '#contact' },
     secondaryCta: { label: 'See the ventures', href: '#ventures' },
     portrait: {
@@ -57,7 +57,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       caption: 'still shipping',
       rotate: -3,
     },
-    scribble: 'hi — I build things\nand then count them',
+    scribble: 'hi, I build things\nand then count them',
   },
 
   /* ---------------------------------------------------------------- creds */
@@ -65,8 +65,8 @@ export const DEFAULT_CONTENT: SiteContent = {
     label: 'receipts',
     items: [
       { text: 'Silver Medal · BRICS Future Skills, international final', year: '2024' },
-      { text: "Masters' Union — Young Leaders Cohort, merit scholarship", year: '2026' },
-      { text: 'Patent filed — AI product size recognition', year: '2023' },
+      { text: "Masters' Union, Young Leaders Cohort, merit scholarship", year: '2026' },
+      { text: 'Patent filed: AI product size recognition', year: '2023' },
       { text: 'Best Paper · ICA6NT, LLM resource allocation for Beyond 5G', year: '2025' },
       { text: 'Top 160 of 3.42M+ on Unstop', year: '2024' },
       { text: 'McKinsey Forward Program', year: '2025' },
@@ -148,7 +148,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       {
         number: '01',
         title: 'Build',
-        body: 'I join as an operator and own an outcome end to end — usually 0→1 GTM, pricing, or the activation and retention loop. Founder-adjacent, hands in the product.',
+        body: 'I join as an operator and own an outcome end to end, usually 0→1 GTM, pricing, or the activation and retention loop. Founder-adjacent, hands in the product.',
         bullets: ['Full-time or embedded', 'Own a metric, not a task list', 'Weekly operating cadence'],
       },
       {
@@ -160,7 +160,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       {
         number: '03',
         title: 'Teach',
-        body: 'Workshops and sessions for student builders and early teams on going from an idea to first paying users — the unglamorous parts that nobody puts in a case study.',
+        body: 'Workshops and sessions for student builders and early teams on going from an idea to first paying users, the unglamorous parts that nobody puts in a case study.',
         bullets: ['Campuses and cohorts', 'Live teardowns', 'Free for student groups'],
       },
     ],
@@ -185,7 +185,7 @@ export const DEFAULT_CONTENT: SiteContent = {
         name: 'rdfctest.in',
         url: 'https://rdfctest.in',
         role: 'Co-Founder · Strategy & Growth',
-        period: "Jul '24 — Dec '25",
+        period: "Jul '24 - Dec '25",
         place: 'Remote',
         summary:
           'An exam-prep EdTech SaaS. I owned strategy end to end: the community that became the top of the funnel, the pricing that converted it, and the loops that kept people coming back.',
@@ -194,7 +194,7 @@ export const DEFAULT_CONTENT: SiteContent = {
           'Ran GTM and pricing experiments that converted 12K members into 600+ paid users at 5%',
           'Shipped activation and retention loops that held 1,100+ monthly actives and lifted 30-day retention',
           'Drove cross-functional execution across engineering, content and marketing on a weekly cadence',
-          'Owned unit economics and budgets — every experiment had a cost and a payback number',
+          'Owned unit economics and budgets: every experiment had a cost and a payback number',
         ],
         metrics: [
           { value: '12K', label: 'community' },
@@ -209,10 +209,10 @@ export const DEFAULT_CONTENT: SiteContent = {
         name: 'The Bowl and Beyond',
         url: '',
         role: 'Co-Founder',
-        period: "Aug '26 — Present",
+        period: "Aug '26 - Present",
         place: 'Gurgaon',
         summary:
-          'A purpose-led food brand built on a 1:5 community meal model — every bowl sold funds five meals. Currently in early operations.',
+          'A purpose-led food brand built on a 1:5 community meal model: every bowl sold funds five meals. Currently in early operations.',
         outcomes: [
           'Took the brand 0→1: positioning, naming, and the 1:5 community meal model',
           'Validated demand through customer discovery before spending on inventory',
@@ -236,7 +236,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       {
         title: 'Customizable Security Automation System',
         kind: 'AI · Computer vision',
-        period: "Jun '24 — Mar '25",
+        period: "Jun '24 - Mar '25",
         body: 'An AI surveillance system that recognises 20+ object classes at 95%+ accuracy, with configurable automation and alert logic for residential, industrial and wildlife deployments.',
         highlights: ['95%+ accuracy', '20+ object classes', 'Configurable alert logic'],
         badge: '',
@@ -283,7 +283,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       {
         number: '02',
         title: 'Set a cadence, not a deadline',
-        body: 'A weekly loop — decide, ship, look at the number, decide again — beats a heroic quarter every time. The cadence is the thing that keeps working after I leave.',
+        body: 'A weekly loop (decide, ship, look at the number, decide again) beats a heroic quarter every time. The cadence is the thing that keeps working after I leave.',
       },
       {
         number: '03',
@@ -298,7 +298,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       {
         number: '05',
         title: 'Build the retention loop early',
-        body: 'Acquisition without retention is a bucket with a hole and a bigger tap. The loop — the reason someone comes back in week three — is a product decision, not a campaign.',
+        body: 'Acquisition without retention is a bucket with a hole and a bigger tap. The loop, the reason someone comes back in week three, is a product decision, not a campaign.',
       },
       {
         number: '06',
@@ -335,7 +335,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     eyebrow: 'writing',
     heading: 'Notes from building.',
     intro:
-      'Short pieces on going 0→1 — funnels, pricing, retention, and the parts of operating nobody writes case studies about.',
+      'Short pieces on going 0→1: funnels, pricing, retention, and the parts of operating nobody writes case studies about.',
     posts: [],
     cta: { label: 'Follow along on LinkedIn', href: 'https://www.linkedin.com/in/iamkirankumarg/' },
   },
@@ -344,7 +344,7 @@ export const DEFAULT_CONTENT: SiteContent = {
   oneCard: {
     heading: 'Why me, on one card',
     bullets: [
-      'I have done the 0→1 twice, with the numbers to show for it — 12K community, 600+ paying users, 5% conversion.',
+      'I have done the 0→1 twice, with the numbers to show for it: 12K community, 600+ paying users, 5% conversion.',
       'I am equally comfortable in a pricing model and in a Python notebook, so I do not need a translator between strategy and engineering.',
       'I default to written clarity: one page, one metric, one date. Everything else is negotiable.',
       'I take ownership of the outcome, not the task list. If the number does not move, that is mine.',
@@ -355,7 +355,7 @@ export const DEFAULT_CONTENT: SiteContent = {
   /* --------------------------------------------------------------- closing */
   closing: {
     heading: "Let's build",
-    body: 'If you are taking something from zero to one — or trying to work out why it stalled at one — I would like to hear about it. Short email, no deck required.',
+    body: 'If you are taking something from zero to one, or trying to work out why it stalled at one, I would like to hear about it. Short email, no deck required.',
     primaryCta: { label: 'kiran.kumar2028@mastersunion.org', href: 'mailto:kiran.kumar2028@mastersunion.org' },
     secondaryCta: { label: '+91 9092112941', href: 'tel:+919092112941' },
     note: 'I reply to everything within two days.',

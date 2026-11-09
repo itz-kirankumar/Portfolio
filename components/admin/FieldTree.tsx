@@ -338,7 +338,7 @@ function ArrayField({
 
       {value.length === 0 ? (
         <p className="rounded-md border border-dashed border-rule px-3 py-3 text-[0.82rem] text-ink-soft">
-          Empty — this part of the site renders nothing until you add something.
+          Empty. This part of the site renders nothing until you add something.
         </p>
       ) : null}
 
