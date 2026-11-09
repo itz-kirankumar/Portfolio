@@ -4,7 +4,7 @@ import { getTickItems } from '@/lib/ticker'
 import { getCachedSiteContent } from '@/lib/site'
 import { Section } from '@/components/ui/primitives'
 import { safeList } from '@/lib/store'
-import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
+import { POSTS_COLLECTION, postSchema, readingMinutes } from '@/lib/schemas/post'
 import { normalizeTags } from '@/lib/tags'
 import { NewsletterInline } from '@/components/site/NewsletterPopup'
 import { WritingIndex, type WritingIndexPost } from '@/components/site/WritingIndex'
@@ -47,7 +47,7 @@ export default async function WritingIndexPage() {
         excerpt: p.excerpt,
         coverUrl: p.coverUrl,
         tags: normalizeTags(p.tags),
-        readingMinutes: Math.max(1, p.readingMinutes),
+        readingMinutes: readingMinutes(p.html || ''),
         dateLabel: d ? dateFmt.format(d) : '',
         year: d ? d.getFullYear() : new Date().getFullYear(),
       }
