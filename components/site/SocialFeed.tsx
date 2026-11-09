@@ -2,8 +2,9 @@
 
 // "Around the web" section. X uses the official free timeline embed (public
 // posts, auto-updating, capped at 3, site-dark theme). When X's syndication
-// service refuses to serve (it rate-limits some IPs), the card collapses to
-// a compact profile link instead of a blank shell. LinkedIn has no free
+// service refuses to serve (it rate-limits some IPs), the whole X card is
+// removed and the LinkedIn side closes the gap - Kiran's call, no dead
+// placeholder. LinkedIn has no free
 // automated profile feed, so its side is a curated pair of site-styled cards
 // with real excerpts, dates, and source links - never labeled "latest".
 
@@ -53,7 +54,7 @@ export function SocialFeed({
     document.body.appendChild(s)
     // If the widget leaves the bare link after 6s, or its timeline iframe
     // renders collapsed (X rate-limits some IPs to a 0-height shell), treat
-    // as failed and collapse to a compact profile card.
+    // as failed and drop the X card entirely (no placeholder).
     const t = setTimeout(() => {
       const frame = xRef.current?.querySelector<HTMLIFrameElement>(
         'iframe[src*="syndication.twitter.com"]',
@@ -90,34 +91,20 @@ export function SocialFeed({
       <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
         Around the web
       </h2>
-      <div className="mt-8 grid items-start gap-8 lg:grid-cols-2">
-        {xHandle && (
+      <div className={`mt-8 grid items-start gap-8 ${xFailed ? '' : 'lg:grid-cols-2'}`}>
+        {xHandle && !xFailed && (
           <div className="rounded-2xl border border-rule bg-card p-5">
             {cardHead('On X', `https://x.com/${xHandle}`, `@${xHandle}`)}
             <div ref={xRef}>
-              {xFailed ? (
-                <a
-                  href={`https://x.com/${xHandle}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center justify-between gap-3 rounded-xl border border-rule bg-paper-deep/40 px-4 py-4 transition hover:border-coral/50"
-                >
-                  <span className="text-sm text-ink">Latest posts on X</span>
-                  <span className="font-mono text-xs text-coral-ink">
-                    @{xHandle} ↗
-                  </span>
-                </a>
-              ) : (
-                <a
-                  className="twitter-timeline"
-                  data-theme="dark"
-                  data-tweet-limit="3"
-                  data-chrome="noheader nofooter noborders transparent"
-                  href={`https://x.com/${xHandle}?ref_src=twsrc%5Etfw`}
-                >
-                  Posts by @{xHandle}
-                </a>
-              )}
+              <a
+                className="twitter-timeline"
+                data-theme="dark"
+                data-tweet-limit="3"
+                data-chrome="noheader nofooter noborders transparent"
+                href={`https://x.com/${xHandle}?ref_src=twsrc%5Etfw`}
+              >
+                Posts by @{xHandle}
+              </a>
             </div>
           </div>
         )}
