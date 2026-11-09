@@ -159,14 +159,18 @@ export default async function HomePage() {
           linkedinProfileUrl="https://www.linkedin.com/in/iamkirankumarg/"
           linkedinPosts={[
             {
-              urn: 'urn:li:activity:7518994437042044928',
-              label: 'Are you a real student at Masters Union, or is it just good marketing?',
+              title: 'Are you a real student at Masters Union, or is it just good marketing?',
               date: 'Oct 22, 2026',
+              excerpt:
+                "Someone recently asked me this after reading about my experience of Term 01 at Masters' Union. And honestly, I think it's a fair question.",
+              url: 'https://www.linkedin.com/posts/iamkirankumarg_are-you-a-real-student-at-masters-union-activity-7518994437042044928-rISy',
             },
             {
-              urn: 'urn:li:activity:7507751820883255298',
-              label: "Term 01 at Masters' Union: My Honest Experience",
+              title: "Term 01 at Masters' Union: My Honest Experience",
               date: 'Sep 21, 2026',
+              excerpt:
+                "After receiving quite a few DMs about Masters' Union, I thought it was time to share my experience, the good, the questions, and everything in between.",
+              url: 'https://www.linkedin.com/posts/iamkirankumarg_term-01-at-masters-union-my-honest-experience-activity-7507751820883255298-jNRN',
             },
           ]}
         />

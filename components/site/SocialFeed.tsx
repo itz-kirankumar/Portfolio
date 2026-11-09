@@ -1,9 +1,11 @@
 'use client'
 
-// "Latest posts" section: live X timeline (official free embed, public posts
-// only) plus optional curated LinkedIn per-post embeds (official, public).
-// LinkedIn offers no free automated profile feed, so LinkedIn posts are a
-// curated list of official embeds; X updates automatically.
+// "Around the web" section. X uses the official free timeline embed (public
+// posts, auto-updating, capped at 3, site-dark theme). When X's syndication
+// service refuses to serve (it rate-limits some IPs), the card collapses to
+// a compact profile link instead of a blank shell. LinkedIn has no free
+// automated profile feed, so its side is a curated pair of site-styled cards
+// with real excerpts, dates, and source links - never labeled "latest".
 
 import { useEffect, useRef, useState } from 'react'
 
@@ -13,12 +15,11 @@ declare global {
   }
 }
 
-export type LinkedInEmbed = {
-  /** Post URN, e.g. urn:li:activity:7518994437042044928 */
-  urn: string
-  label?: string
-  /** Display date, e.g. "Oct 22, 2026" */
-  date?: string
+export type LinkedInPostCard = {
+  title: string
+  date: string
+  excerpt: string
+  url: string
 }
 
 export function SocialFeed({
@@ -28,7 +29,7 @@ export function SocialFeed({
 }: {
   xHandle?: string
   linkedinProfileUrl?: string
-  linkedinPosts?: LinkedInEmbed[]
+  linkedinPosts?: LinkedInPostCard[]
 }) {
   const xRef = useRef<HTMLDivElement>(null)
   const [xFailed, setXFailed] = useState(false)
@@ -65,6 +66,22 @@ export function SocialFeed({
 
   if (!xHandle && !linkedinProfileUrl && linkedinPosts.length === 0) return null
 
+  const cardHead = (label: string, href: string, cta: string) => (
+    <div className="mb-5 flex items-center justify-between">
+      <h3 className="font-mono text-xs uppercase tracking-widest text-ink-soft">
+        {label}
+      </h3>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-mono text-xs text-coral-ink hover:underline"
+      >
+        {cta} ↗
+      </a>
+    </div>
+  )
+
   return (
     <section id="latest" className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
       <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-ink-soft">
@@ -76,26 +93,14 @@ export function SocialFeed({
       <div className="mt-8 grid items-start gap-8 lg:grid-cols-2">
         {xHandle && (
           <div className="rounded-2xl border border-rule bg-card p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-mono text-xs uppercase tracking-widest text-ink-soft">
-                On X
-              </h3>
-              <a
-                href={`https://x.com/${xHandle}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-xs text-coral-ink hover:underline"
-              >
-                @{xHandle} ↗
-              </a>
-            </div>
+            {cardHead('On X', `https://x.com/${xHandle}`, `@${xHandle}`)}
             <div ref={xRef}>
               {xFailed ? (
                 <a
                   href={`https://x.com/${xHandle}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between gap-3 rounded-xl border border-rule bg-paper-deep/40 px-4 py-3 transition hover:border-coral/50"
+                  className="group flex items-center justify-between gap-3 rounded-xl border border-rule bg-paper-deep/40 px-4 py-4 transition hover:border-coral/50"
                 >
                   <span className="text-sm text-ink">Latest posts on X</span>
                   <span className="font-mono text-xs text-coral-ink">
@@ -105,7 +110,8 @@ export function SocialFeed({
               ) : (
                 <a
                   className="twitter-timeline"
-                  data-tweet-limit="5"
+                  data-theme="dark"
+                  data-tweet-limit="3"
                   data-chrome="noheader nofooter noborders transparent"
                   href={`https://x.com/${xHandle}?ref_src=twsrc%5Etfw`}
                 >
@@ -117,50 +123,29 @@ export function SocialFeed({
         )}
         {linkedinProfileUrl && (
           <div className="rounded-2xl border border-rule bg-card p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-mono text-xs uppercase tracking-widest text-ink-soft">
-                Selected LinkedIn posts
-              </h3>
-              <a
-                href={linkedinProfileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-xs text-coral-ink hover:underline"
-              >
-                Profile ↗
-              </a>
-            </div>
-            {linkedinPosts.length > 0 ? (
-              <div className="flex flex-col gap-6">
-                {linkedinPosts.map((p) => (
-                  <div key={p.urn}>
-                    <p className="mb-2 font-mono text-[11px] text-ink-soft">
-                      {p.label}
-                      {p.date ? ` - ${p.date}` : ''}
-                    </p>
-                    <iframe
-                      src={`https://www.linkedin.com/embed/feed/update/${encodeURIComponent(p.urn)}`}
-                      title={p.label ?? 'LinkedIn post'}
-                      className="h-[570px] w-full border-0"
-                      loading="lazy"
-                      allowFullScreen
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-ink-soft">
+            {cardHead('Selected LinkedIn posts', linkedinProfileUrl, 'Profile')}
+            <div className="flex flex-col gap-4">
+              {linkedinPosts.map((p) => (
                 <a
-                  className="text-coral-ink underline"
-                  href={linkedinProfileUrl}
+                  key={p.url}
+                  href={p.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="group rounded-xl border border-rule bg-paper-deep/40 p-4 transition hover:border-coral/50"
                 >
-                  Read the latest posts on LinkedIn
+                  <p className="font-mono text-[11px] text-ink-soft">{p.date}</p>
+                  <p className="mt-1.5 font-medium leading-snug text-ink group-hover:text-coral-ink">
+                    {p.title}
+                  </p>
+                  <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-ink-soft">
+                    {p.excerpt}
+                  </p>
+                  <p className="mt-2 font-mono text-xs text-coral-ink">
+                    Read on LinkedIn ↗
+                  </p>
                 </a>
-                .
-              </p>
-            )}
+              ))}
+            </div>
           </div>
         )}
       </div>
