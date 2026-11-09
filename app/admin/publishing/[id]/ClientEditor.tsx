@@ -98,6 +98,10 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
     }
   }, [data.doc, data.html, contentDirty, id])
 
+  // Remount the editor only when its content must be hard-reset from the
+  // outside (discard draft) or when editing a different post. Never key on
+  // autosave state: a remount mid-keystroke drops in-flight characters.
+  const [editorEpoch, setEditorEpoch] = useState(0)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -192,6 +196,7 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
                       setDraftBaseline({ html: initialData.html || '', doc: initialData.doc || '' })
                       setHasStoredDraft(false)
                       setDraftSavedAt(0)
+                      setEditorEpoch(e => e + 1)
                       useToast.getState().toast('Draft discarded - showing the published version')
                       router.refresh()
                     } else {
@@ -207,7 +212,7 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
           )}
 
           <Tiptap
-            key={hasStoredDraft ? `draft-${draftSavedAt}` : 'published'}
+            key={`${id}-${editorEpoch}`}
             initialContent={data.doc}
             onChange={(html, doc) => update({ html, doc })}
           />
