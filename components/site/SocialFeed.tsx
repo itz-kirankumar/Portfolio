@@ -111,7 +111,7 @@ export function SocialFeed({
         {linkedinProfileUrl && (
           <div className="rounded-2xl border border-rule bg-card p-5">
             {cardHead('Selected LinkedIn posts', linkedinProfileUrl, 'Profile')}
-            <div className="flex flex-col gap-4">
+            <div className={`gap-4 ${xFailed ? 'grid sm:grid-cols-2' : 'flex flex-col'}`}>
               {linkedinPosts.map((p) => (
                 <a
                   key={p.url}
