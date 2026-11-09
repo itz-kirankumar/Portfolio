@@ -35,7 +35,7 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
             <Highlight>
               <RotatingHighlight
                 base={hero.headlineHighlight}
-                variants={['then ship it.', 'then count it.', 'then show it.']}
+                variants={['then ship it', 'then count it', 'then show it']}
               />
             </Highlight>
           ) : null}
