@@ -10,22 +10,24 @@
 --------------------------------------------------------------------------- */
 
 @theme {
-  --color-paper: #111114;
-  --color-paper-deep: #0b0b0e;
-  --color-card: #1b1b21;
+  /* Cream paper desk (worksroom direction): warm cream ground, deep ink,
+     one strong red. */
+  --color-paper: #f6efe1;
+  --color-paper-deep: #ede4cf;
+  --color-card: #fdf9ee;
 
-  --color-ink: #f3f0e9;
-  --color-ink-soft: #a8a398;
-  --color-rule: #2b2b33;
+  --color-ink: #1c1710;
+  --color-ink-soft: #6b6151;
+  --color-rule: #d9cdb4;
 
-  /* Coral. Split three ways so the look survives WCAG AA:
+  /* Red. Split three ways so the look survives WCAG AA:
      - coral       decorative only (highlighter, tape, rules, display words)
-     - coral-deep  filled CTA background; white on it = 4.54:1
-     - coral-ink   small text and links; on paper = 5.36:1       */
-  --color-coral: #ff6a52;
-  --color-coral-deep: #e8543f;
-  --color-coral-ink: #ff8a70;
-  --color-coral-soft: #3a1f1a;
+     - coral-deep  filled CTA background; white on it = 4.6:1
+     - coral-ink   small text and links; on paper = 5.1:1        */
+  --color-coral: #e0342b;
+  --color-coral-deep: #c22418;
+  --color-coral-ink: #b32217;
+  --color-coral-soft: #f6d9d0;
 
   --color-slate-deep: #141414;
 
@@ -40,6 +42,7 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
   --font-hand: var(--font-caveat), ui-serif, cursive;
+  --font-anton: var(--font-anton), 'Arial Narrow', sans-serif;
 }
 
 .theme-toggle-light {
