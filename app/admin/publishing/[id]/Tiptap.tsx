@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
+import { BubbleMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import Link from '@tiptap/extension-link'
@@ -357,6 +358,27 @@ export function Tiptap({
         </MenuButton>
       </div>
       
+      {/* Selection bubble: the discoverable way to link/format marked text
+          (the fixed toolbar alone was being missed). */}
+      <BubbleMenu
+        editor={editor}
+        className="flex items-center gap-0.5 rounded-lg border border-rule bg-card p-1 shadow-lg"
+      >
+        <MenuButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')}>
+          <Bold className="size-4" />
+        </MenuButton>
+        <MenuButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')}>
+          <Italic className="size-4" />
+        </MenuButton>
+        <MenuButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')}>
+          <UnderlineIcon className="size-4" />
+        </MenuButton>
+        <div className="w-px h-5 bg-rule mx-0.5" />
+        <MenuButton onClick={setLink} active={editor.isActive('link')}>
+          <LinkIcon className="size-4" />
+        </MenuButton>
+      </BubbleMenu>
+
       <div className="p-4 sm:p-6 flex-1 bg-paper cursor-text overflow-y-auto" onClick={() => editor.commands.focus()}>
         <EditorContent editor={editor} />
       </div>
