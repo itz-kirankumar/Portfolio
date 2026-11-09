@@ -3,7 +3,7 @@ import { useUI as useToast } from '@/lib/store/ui'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { saveBooking, deleteBooking } from '../actions'
+import { saveBooking, deleteBooking, resendInvite } from '../actions'
 import { bookingSchema } from '@/lib/schemas/booking'
 import AutoForm from '@/app/admin/[section]/AutoForm'
 
@@ -56,6 +56,33 @@ export default function BookingEditor({ id, initialData }: { id: string, initial
         loading={loading} 
         error={error} 
       />
+      {initialData?.status === 'confirmed' && initialData?.inviteStatus === 'failed' && (
+        <div className="mt-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 flex items-center justify-between gap-4">
+          <p className="text-[0.85rem] text-amber-900">
+            This booking is paid and confirmed, but its calendar invite failed
+            {initialData?.inviteError ? `: ${initialData.inviteError}` : '.'} The guest has no Meet link yet.
+          </p>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={async () => {
+              setLoading(true)
+              setError(null)
+              const res = await resendInvite(id)
+              setLoading(false)
+              if (res.ok) {
+                useToast.getState().toast('Invite sent')
+                router.refresh()
+              } else {
+                setError(res.error || 'Failed to send invite')
+              }
+            }}
+            className="shrink-0 rounded-md bg-amber-600 px-3 py-1.5 text-[0.82rem] font-medium text-white hover:bg-amber-700 disabled:opacity-50"
+          >
+            Resend invite
+          </button>
+        </div>
+      )}
       <div className="mt-8 pt-6 border-t border-red-100 flex justify-end">
         <button
           onClick={handleDelete}

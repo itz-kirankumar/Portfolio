@@ -96,7 +96,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
               <div className="flex justify-center md:justify-end md:shrink-0">
                 <Button href={bookNowUrl} variant="solid" size="lg" className="w-full sm:w-auto">
-                  {service.type === 'digital_download' ? 'Get it now' : 'Book Now'}
+                  {service.type === 'digital_download' ? 'Get it now' : (service.bookingOpen ? 'Book Now' : 'Booking opens soon')}
                 </Button>
               </div>
             </div>
@@ -128,7 +128,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         <Reveal kind="up" delay={180}>
           <div className="mt-16 text-center">
             <Button href={bookNowUrl} variant="solid" size="lg">
-              {service.type === 'digital_download' ? 'Get it now' : 'Book Now'}
+              {service.type === 'digital_download' ? 'Get it now' : (service.bookingOpen ? 'Book Now' : 'Booking opens soon')}
             </Button>
           </div>
         </Reveal>

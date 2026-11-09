@@ -55,6 +55,12 @@ export const bookingSchema = z.object({
   }),
 
   cancelReason: str.max(500).default(''),
+  /** Invite delivery state, visible in admin so a paid booking can never
+   *  silently go unfulfilled. */
+  inviteStatus: z.enum(['none', 'sent', 'failed']).default('none'),
+  inviteError: str.max(500).default(''),
+  inviteEventId: str.max(120).default(''),
+  meetLink: str.max(300).default(''),
   createdAt: z.number().int().default(0),
   updatedAt: z.number().int().default(0),
 })

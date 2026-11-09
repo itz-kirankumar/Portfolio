@@ -58,14 +58,27 @@ export async function verifyPayment(
     })
     if (invite.ok) {
       await ref.update({
+        inviteStatus: 'sent',
         inviteEventId: invite.eventId || '',
         meetLink: invite.meetLink || '',
+        inviteError: '',
         updatedAt: Date.now(),
       })
     } else {
+      // Visible, recoverable admin state - never a silently unfulfilled payment.
+      await ref.update({
+        inviteStatus: 'failed',
+        inviteError: String(invite.error || 'unknown').slice(0, 500),
+        updatedAt: Date.now(),
+      })
       console.error('Calendar invite failed for booking', bookingId, invite.error)
     }
-  } catch (e) {
+  } catch (e: any) {
+    await ref.update({
+      inviteStatus: 'failed',
+      inviteError: String(e?.message || e).slice(0, 500),
+      updatedAt: Date.now(),
+    }).catch(() => {})
     console.error('Calendar invite error for booking', bookingId, e)
   }
 
