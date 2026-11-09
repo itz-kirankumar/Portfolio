@@ -1,6 +1,6 @@
 import { Button, NotebookCard } from '@/components/ui/primitives'
 import Reveal from '@/components/ui/Reveal'
-import { Service, formatPrice, occupiedMins } from '@/lib/schemas/service'
+import { Service, formatPrice } from '@/lib/schemas/service'
 
 export function ServicesList({ services }: { services: Service[] }) {
   if (!services.length) {
@@ -25,7 +25,7 @@ export function ServicesList({ services }: { services: Service[] }) {
                     </a>
                   </h3>
                   <span className="rounded-full bg-coral-soft px-2.5 py-1 font-mono text-[0.62rem] uppercase tracking-[0.14em] text-coral-ink">
-                    {occupiedMins(service)} mins
+                    {service.durationMins} mins
                   </span>
                 </div>
 

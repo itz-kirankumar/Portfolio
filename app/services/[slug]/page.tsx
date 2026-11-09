@@ -4,7 +4,7 @@ import { safeGet, safeList } from '@/lib/store'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
 import { Button, Section, NotebookCard } from '@/components/ui/primitives'
 import Reveal from '@/components/ui/Reveal'
-import { formatPrice, occupiedMins } from '@/lib/schemas/service'
+import { formatPrice } from '@/lib/schemas/service'
 
 export const revalidate = 3600
 
@@ -83,7 +83,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                 </p>
                 {service.type !== 'digital_download' && (
                   <p className="mt-2 font-mono text-xs uppercase tracking-widest text-ink-soft">
-                    {occupiedMins(service)} minute session
+                    {service.durationMins} minute session
                   </p>
                 )}
               </div>
