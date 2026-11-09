@@ -140,18 +140,6 @@
   }
 }
 
-/* Ruled-paper background, like a notebook page. */
-@utility notebook-rules {
-  background-image: repeating-linear-gradient(
- to bottom,
-    transparent 0,
-    transparent 1.6875rem,
-    var(--color-rule) 1.6875rem,
-    var(--color-rule) calc(1.6875rem + 1px)
-  );
-  background-position: 0 0.5rem;
-}
-
 /* Hand-drawn marker sweep behind inline text. */
 @utility marker-sweep {
   position: relative;

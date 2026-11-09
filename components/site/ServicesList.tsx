@@ -20,7 +20,7 @@ export function ServicesList({ services }: { services: Service[] }) {
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-3">
                   <h3 className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink">
-                    <a href={`/services/${service.slug}`} className="hover:text-coral transition-colors">
+                    <a href={`/services/${service.slug}/book`} className="hover:text-coral transition-colors">
                       {service.title}
                     </a>
                   </h3>
@@ -62,11 +62,11 @@ export function ServicesList({ services }: { services: Service[] }) {
                 </div>
 
                 <Button
-                  href={`/services/${service.slug}`}
+                  href={`/services/${service.slug}/book`}
                   variant="solid"
                   className="w-full sm:w-auto"
                 >
-                  View details
+                  Book now
                 </Button>
               </div>
             </div>

@@ -177,7 +177,9 @@ export function StickyNote({
 
 /* --------------------------------------------------------- NotebookCard --- */
 
-/** Spiral-bound page: binding holes down the left, faint rules behind the text. */
+/** Plain content card. (The spiral binding, punched holes and ruled lines
+    were removed site-wide at the owner's request; the name stays so every
+    call site keeps working.) */
 export function NotebookCard({
   children,
   className,
@@ -188,25 +190,11 @@ export function NotebookCard({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-r-lg bg-card shadow-lift ring-1 ring-rule',
+        'rounded-xl bg-card px-6 py-8 shadow-lift ring-1 ring-rule sm:px-10 sm:py-10',
         className
       )}
     >
-      {/* binding gutter */}
-      <div aria-hidden="true" className="absolute inset-y-0 left-0 w-12 bg-paper-deep/70">
-        <div className="absolute inset-y-0 right-0 w-px bg-coral/40" />
-        <div className="flex h-full flex-col items-center justify-evenly py-8">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <span
-              key={i}
-              className="block size-2.5 rounded-full bg-paper shadow-[inset_0_1px_2px_rgba(26,24,21,0.25)] ring-1 ring-rule"
-            />
-          ))}
-        </div>
-      </div>
-      <div className="notebook-rules relative pl-16 pr-6 py-8 sm:pl-20 sm:pr-10 sm:py-10">
-        {children}
-      </div>
+      {children}
     </div>
   )
 }

@@ -1,10 +1,7 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { safeGet, safeList } from '@/lib/store'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
-import { Button, Section, NotebookCard } from '@/components/ui/primitives'
-import Reveal from '@/components/ui/Reveal'
-import { formatPrice } from '@/lib/schemas/service'
 
 export const revalidate = 3600
 
@@ -58,81 +55,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
     notFound()
   }
 
-  const bookNowUrl = service.paymentMode === 'link' ? service.paymentLinkUrl : `/services/${service.slug}/book`
-
-  return (
-    <Section tone="paper">
-      <div className="mx-auto max-w-3xl">
-        <Reveal kind="up">
-          <div className="mb-10 text-center">
-            <h1 className="font-display text-[clamp(2rem,5vw,3.5rem)] font-semibold leading-tight tracking-[-0.02em] text-ink">
-              {service.title}
-            </h1>
-            <p className="mt-4 text-lg text-ink-soft max-w-xl mx-auto">
-              {service.summary}
-            </p>
-          </div>
-        </Reveal>
-
-        <Reveal kind="up" delay={60}>
-          <NotebookCard className="mb-10">
-            <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
-              <div className="flex-1 text-center md:text-left">
-                {service.mrpInPaise > service.priceInPaise && (
-                  <p className="mb-1 font-mono text-xs uppercase tracking-widest text-ink-soft">
-                    <span className="line-through">{formatPrice(service.mrpInPaise, service.currency)}</span>
-                    <span className="ml-2 rounded-full bg-coral-soft px-2 py-0.5 text-[0.62rem] text-coral-ink">Launch offer</span>
-                  </p>
-                )}
-                <p className="font-display text-4xl font-semibold text-ink">
-                  {formatPrice(service.priceInPaise, service.currency)}
-                </p>
-                {service.type !== 'digital_download' && (
-                  <p className="mt-2 font-mono text-xs uppercase tracking-widest text-ink-soft">
-                    {service.durationMins} minute session
-                  </p>
-                )}
-              </div>
-
-              <div className="flex justify-center md:justify-end md:shrink-0">
-                <Button href={bookNowUrl} variant="solid" size="lg" className="w-full sm:w-auto">
-                  {service.type === 'digital_download' ? 'Get it now' : (service.bookingOpen ? 'Book Now' : 'Booking opens soon')}
-                </Button>
-              </div>
-            </div>
-
-            {service.highlights.length > 0 ? (
-              <div className="mt-8 border-t border-rule pt-8">
-                <ul className="grid gap-4 sm:grid-cols-2">
-                  {service.highlights.map((h, i) => (
-                    <li key={i} className="flex gap-3 text-[0.95rem] leading-relaxed text-ink-soft">
-                      <span aria-hidden="true" className="mt-2 h-px w-3 shrink-0 bg-coral" />
-                      {h}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-          </NotebookCard>
-        </Reveal>
-
-        {service.body ? (
-          <Reveal kind="up" delay={120}>
-            <div 
-              className="prose prose-lg prose-ink mx-auto"
-              dangerouslySetInnerHTML={{ __html: service.body }} 
-            />
-          </Reveal>
-        ) : null}
-
-        <Reveal kind="up" delay={180}>
-          <div className="mt-16 text-center">
-            <Button href={bookNowUrl} variant="solid" size="lg">
-              {service.type === 'digital_download' ? 'Get it now' : (service.bookingOpen ? 'Book Now' : 'Booking opens soon')}
-            </Button>
-          </div>
-        </Reveal>
-      </div>
-    </Section>
-  )
+  // No intermediate details page: selecting a service goes straight to the
+  // combined booking screen, which carries the details alongside slot picking.
+  redirect(`/services/${service!.slug}/book`)
 }
