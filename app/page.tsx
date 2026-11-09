@@ -157,6 +157,16 @@ export default async function HomePage() {
         <SocialFeed
           xHandle={meta.twitterHandle?.replace(/^@/, '') || 'imkirankumarg'}
           linkedinProfileUrl="https://www.linkedin.com/in/iamkirankumarg/"
+          linkedinPosts={[
+            {
+              urn: 'urn:li:share:7518994437042044928',
+              label: 'Are you a real student at Masters Union, or is it just good marketing?',
+            },
+            {
+              urn: 'urn:li:share:7507751820883255298',
+              label: "Term 01 at Masters' Union: My Honest Experience",
+            },
+          ]}
         />
         {isVisible('oneCard') && <OneCard oneCard={content.oneCard} />}
         {isVisible('closing') && <Closing closing={content.closing} meta={meta} />}
