@@ -55,7 +55,7 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
                 />
               </svg>
             </span>
-            <span className="align-baseline text-[0.5em] text-coral">{hero.headlineAfter?.replace(/^\s+/, '')}</span>
+            <span className="align-baseline">{hero.headlineAfter?.replace(/^\s+/, '')}</span>
             </span>
           ) : (
             hero.headlineAfter
