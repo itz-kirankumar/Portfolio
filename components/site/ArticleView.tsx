@@ -68,7 +68,8 @@ export async function buildArticleMetadata(slug: string): Promise<Metadata> {
   const { meta } = await getCachedSiteContent()
   const title = `${post.title} - ${meta.name}`
 
-  const ogUrl = new URL('/api/og', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000')
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kirankumarg.me'
+  const ogUrl = new URL('/api/og', siteUrl)
   ogUrl.searchParams.set('title', post.title)
   if (post.coverUrl) {
     ogUrl.searchParams.set('cover', post.coverUrl)
@@ -77,6 +78,9 @@ export async function buildArticleMetadata(slug: string): Promise<Metadata> {
   return {
     title,
     description: post.excerpt,
+    alternates: {
+      canonical: `${siteUrl}/writing/${slug}`,
+    },
     openGraph: {
       title,
       description: post.excerpt,
@@ -125,8 +129,42 @@ export function ArticleView({
       })
     : isPreview ? 'Preview Mode' : ''
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kirankumarg.me'
+  const articleUrl = `${siteUrl}/writing/${post.id}`
+  // Structured data for the public article only - previews must not emit it.
+  // Every field comes straight from the stored post and owner meta.
+  const articleJsonLd = isPreview ? null : {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt || undefined,
+    url: articleUrl,
+    mainEntityOfPage: articleUrl,
+    image: post.coverUrl || undefined,
+    datePublished: post.publishedAt > 0 ? new Date(post.publishedAt).toISOString() : undefined,
+    dateModified: post.updatedAt > 0 ? new Date(post.updatedAt).toISOString() : undefined,
+    inLanguage: 'en',
+    wordCount: post.html
+      ? post.html.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length
+      : undefined,
+    keywords: post.tags.length ? post.tags.join(', ') : undefined,
+    author: {
+      '@type': 'Person',
+      name: meta.name,
+      url: siteUrl,
+    },
+  }
+
   return (
     <>
+      {articleJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(articleJsonLd).replace(/</g, '\\u003c'),
+          }}
+        />
+      )}
       <UtilityBar utility={content.utility} />
       <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} />
       <ReadingProgress />

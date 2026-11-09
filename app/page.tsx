@@ -107,7 +107,11 @@ export default async function HomePage() {
     telephone: meta.phone || undefined,
     url: process.env.NEXT_PUBLIC_SITE_URL || undefined,
     image: content.hero.portrait.src || undefined,
-    sameAs: [meta.linkedin].filter(Boolean),
+    sameAs: [
+      meta.linkedin,
+      // twitterHandle stores "@handle"; sameAs wants the profile URL.
+      meta.twitterHandle ? `https://x.com/${meta.twitterHandle.replace(/^@/, '')}` : undefined,
+    ].filter(Boolean),
     address: meta.location ? { '@type': 'PostalAddress', addressLocality: meta.location } : undefined,
     jobTitle: 'Founder & Product Strategy',
     knowsAbout: [

@@ -3,6 +3,8 @@ import { PAGES_COLLECTION, pageSchema } from '@/lib/schemas/page'
 import Link from 'next/link'
 import { Plus, LayoutTemplate } from 'lucide-react'
 import { PageHeader, EmptyState, BTN_PRIMARY } from '@/components/admin/ui'
+import { ListItemActions } from '@/components/admin/ListItemActions'
+import { deletePage, setPageStatus } from './actions'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Custom Pages' }
@@ -42,8 +44,8 @@ export default async function CustomPagesAdmin() {
         <div className="mt-6 rounded-lg border border-rule bg-card shadow-sm">
           <ul className="divide-y divide-rule">
             {pages.map((p) => (
-              <li key={p.id} className="transition hover:bg-paper-deep/50">
-                <Link href={`/admin/pages/${p.id}`} className="flex items-center gap-4 px-5 py-4">
+              <li key={p.id} className="flex items-center gap-2 px-5 py-4 transition hover:bg-paper-deep/50">
+                <Link href={`/admin/pages/${p.id}`} className="flex flex-1 items-center gap-4 min-w-0">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-[0.95rem] text-ink truncate">
                       {p.title || 'Untitled Page'}
@@ -61,6 +63,16 @@ export default async function CustomPagesAdmin() {
                     </span>
                   </div>
                 </Link>
+                <div className="shrink-0">
+                  <ListItemActions
+                    kindLabel="page"
+                    title={p.title || 'Untitled Page'}
+                    status={p.status}
+                    liveHref={p.status === 'published' ? `/${p.slug || p.id}` : undefined}
+                    onToggleStatus={setPageStatus.bind(null, p.id, p.status === 'published' ? 'draft' : 'published')}
+                    onDelete={deletePage.bind(null, p.id, p.slug || p.id)}
+                  />
+                </div>
               </li>
             ))}
           </ul>

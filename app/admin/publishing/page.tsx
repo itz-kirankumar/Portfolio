@@ -3,6 +3,8 @@ import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
 import Link from 'next/link'
 import { Plus, PenLine } from 'lucide-react'
 import { PageHeader, EmptyState, BTN_PRIMARY } from '@/components/admin/ui'
+import { ListItemActions } from '@/components/admin/ListItemActions'
+import { deletePost, setPostStatus } from './actions'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Publishing' }
@@ -42,8 +44,8 @@ export default async function PublishingPage() {
         <div className="mt-6 rounded-lg border border-rule bg-card shadow-sm">
           <ul className="divide-y divide-rule">
             {posts.map((post) => (
-              <li key={post.id} className="transition hover:bg-paper-deep/50">
-                <Link href={`/admin/publishing/${post.id}`} className="flex items-center gap-4 px-5 py-4">
+              <li key={post.id} className="flex items-center gap-2 px-5 py-4 transition hover:bg-paper-deep/50">
+                <Link href={`/admin/publishing/${post.id}`} className="flex flex-1 items-center gap-4 min-w-0">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-[0.95rem] text-ink truncate">
                       {post.title || 'Untitled Post'}
@@ -65,6 +67,16 @@ export default async function PublishingPage() {
                     </span>
                   </div>
                 </Link>
+                <div className="shrink-0">
+                  <ListItemActions
+                    kindLabel="post"
+                    title={post.title || 'Untitled Post'}
+                    status={post.status}
+                    liveHref={post.status === 'published' ? `/writing/${post.id}` : undefined}
+                    onToggleStatus={setPostStatus.bind(null, post.id, post.status === 'published' ? 'draft' : 'published')}
+                    onDelete={deletePost.bind(null, post.id)}
+                  />
+                </div>
               </li>
             ))}
           </ul>

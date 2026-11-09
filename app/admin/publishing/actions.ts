@@ -55,6 +55,46 @@ export async function discardDraft(id: string) {
   }
 }
 
+/**
+ * One-click publish/unpublish from the list. Status-only update: it never
+ * touches title/body/slug/draft fields, and it never moves publishedAt -
+ * the first publish stamps it, later toggles keep it, so edit/unpublish
+ * cycles cannot change the public archive's order or dates (owner's rule).
+ */
+export async function setPostStatus(id: string, next: 'draft' | 'published') {
+  if (!(await getOwnerSession())) {
+    return { success: false, error: 'Not authorised.' }
+  }
+  if (next !== 'draft' && next !== 'published') {
+    return { success: false, error: 'Unsupported status.' }
+  }
+  try {
+    const db = getAdminDb()
+    const ref = db.collection(POSTS_COLLECTION).doc(id)
+    const snap = await ref.get()
+    if (!snap.exists) {
+      return { success: false, error: 'Post not found - it may have been deleted.' }
+    }
+    const current = snap.data() as { status?: string; publishedAt?: number }
+    if (current.status === next) {
+      return { success: true }
+    }
+    const update: Record<string, unknown> = { status: next, updatedAt: Date.now() }
+    if (next === 'published' && !current.publishedAt) {
+      update.publishedAt = Date.now()
+    }
+    await ref.update(update)
+    revalidatePath('/admin/publishing')
+    revalidatePath('/writing')
+    revalidatePath(`/writing/${id}`)
+    revalidatePath('/')
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error updating post status:', error)
+    return { success: false, error: error.message || 'Failed to update status' }
+  }
+}
+
 export async function deletePost(id: string) {
   if (!(await getOwnerSession())) {
     return { success: false, error: 'Not authorised.' }

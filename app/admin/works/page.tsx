@@ -1,6 +1,8 @@
 import { safeList } from '@/lib/store'
 import { WORKS_COLLECTION, workSchema, KIND_LABEL, STATUS_LABEL } from '@/lib/schemas/work'
 import { PageHeader, EmptyState, BTN_PRIMARY } from '@/components/admin/ui'
+import { ListItemActions } from '@/components/admin/ListItemActions'
+import { deleteWork } from './actions'
 import Link from 'next/link'
 import { Plus, Rocket } from 'lucide-react'
 
@@ -41,9 +43,9 @@ export default async function WorksPage() {
         <div className="mt-6 rounded-lg border border-rule bg-card shadow-sm">
           <ul className="divide-y divide-rule">
             {works.map((work) => (
-              <li key={work.id} className="transition hover:bg-paper-deep/50">
-                <Link href={`/admin/works/${work.id}`} className="flex items-center justify-between gap-4 px-5 py-4">
-                  <div>
+              <li key={work.id} className="flex items-center gap-2 px-5 py-4 transition hover:bg-paper-deep/50">
+                <Link href={`/admin/works/${work.id}`} className="flex flex-1 items-center justify-between gap-4 min-w-0">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-3">
                       <p className="font-medium text-[0.95rem] text-ink">{work.title}</p>
                       {work.featured && (
@@ -61,6 +63,15 @@ export default async function WorksPage() {
                     /work/{work.slug}
                   </div>
                 </Link>
+                <div className="shrink-0">
+                  <ListItemActions
+                    kindLabel="work"
+                    title={work.title}
+                    status={work.status}
+                    liveHref={`/work/${work.slug}`}
+                    onDelete={deleteWork.bind(null, work.id)}
+                  />
+                </div>
               </li>
             ))}
           </ul>
