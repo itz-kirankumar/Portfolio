@@ -3,14 +3,16 @@ import { safeList } from '@/lib/store'
 import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
 import { PAGES_COLLECTION, pageSchema } from '@/lib/schemas/page'
+import { getWorks } from '@/lib/works'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kirankumarg.com'
 
-  const [posts, services, pages] = await Promise.all([
+  const [posts, services, pages, works] = await Promise.all([
     safeList(POSTS_COLLECTION, postSchema),
     safeList(SERVICES_COLLECTION, serviceSchema),
     safeList(PAGES_COLLECTION, pageSchema),
+    getWorks(),
   ])
 
   const publishedPosts = posts.filter(p => p.status === 'published')
@@ -22,7 +24,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 1,
     },
+    {
+      url: `${base}/work`,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
   ]
+
+  works.forEach((work) => {
+    sitemap.push({
+      url: `${base}/work/${work.slug}`,
+      lastModified: new Date(work.updatedAt || Date.now()),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    })
+  })
 
   publishedPosts.forEach((post) => {
     sitemap.push({

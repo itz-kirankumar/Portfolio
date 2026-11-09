@@ -260,3 +260,37 @@
     border-bottom: 1px solid var(--color-rule) !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Flowing wall (components/site/Flow.tsx). Pure CSS marquee: each lane renders
+   its content twice inside a width:max-content track and translates -50%, so
+   the loop is seamless. --flow-duration is set per lane from item count. The
+   global prefers-reduced-motion rule above already flattens these.
+--------------------------------------------------------------------------- */
+
+@keyframes flow-x {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.flow-track {
+  display: flex;
+  width: max-content;
+  animation: flow-x var(--flow-duration, 45s) linear infinite;
+  will-change: transform;
+}
+
+.flow-track--reverse {
+  animation-direction: reverse;
+}
+
+.flow-row:hover .flow-track,
+.flow-row:focus-within .flow-track {
+  animation-play-state: paused;
+}
+
+.flow-mask {
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}

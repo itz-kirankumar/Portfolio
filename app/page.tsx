@@ -12,6 +12,8 @@ import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
 import { SiteFooter, SiteNav, UtilityBar } from '@/components/site/Chrome'
 import { CredPills, Hero, ProofStrip } from '@/components/site/Hero'
+import { FlowWall, type FlowPost } from '@/components/site/Flow'
+import { getWorks } from '@/lib/works'
 import { Audiences, Projects, Ventures, Ways } from '@/components/site/Work'
 import { ServicesList } from '@/components/site/ServicesList'
 import { Section, SectionHead } from '@/components/ui/primitives'
@@ -50,12 +52,13 @@ export async function generateMetadata(): Promise<Metadata> {
 import { MEDIA_COLLECTION, mediaSchema } from '@/lib/schemas/media'
 
 export default async function HomePage() {
-  const [content, theme, allPosts, allServices, allMedia] = await Promise.all([
+  const [content, theme, allPosts, allServices, allMedia, allWorks] = await Promise.all([
     getCachedSiteContent(),
     getCachedTheme(),
     safeList(POSTS_COLLECTION, postSchema),
     safeList(SERVICES_COLLECTION, serviceSchema),
-    safeList(MEDIA_COLLECTION, mediaSchema)
+    safeList(MEDIA_COLLECTION, mediaSchema),
+    getWorks(),
   ])
   const { meta } = content
 
@@ -81,6 +84,28 @@ export default async function HomePage() {
   const activeServices = allServices
     .filter(s => s.active)
     .sort((a, b) => a.order - b.order)
+
+  // The flowing wall: latest published writing + all works + a ticker of
+  // everything in motion. Fed automatically — new posts and works appear on
+  // the next revalidate.
+  const flowPosts: FlowPost[] = allPosts
+    .filter(p => p.status === 'published')
+    .sort((a, b) => (b.publishedAt || b.createdAt) - (a.publishedAt || a.createdAt))
+    .slice(0, 10)
+    .map(p => ({
+      title: p.title,
+      href: `/writing/${p.slug}`,
+      date: p.publishedAt || p.createdAt
+        ? articleDateFormat.format(new Date(p.publishedAt || p.createdAt))
+        : '',
+    }))
+
+  const tickItems = [
+    ...content.ventures.items.map(v => v.name),
+    ...activeServices.map(s => s.title),
+    ...allWorks.filter(w => w.status === 'building').map(w => `building: ${w.title}`),
+    content.utility.status,
+  ].filter(Boolean)
 
   // Featured Media
   const featuredMedia = allMedia.filter(m => m.featured)
@@ -146,6 +171,7 @@ export default async function HomePage() {
 
       <main>
         {isVisible('hero') && <Hero hero={content.hero} meta={meta} layout={theme.heroLayout} />}
+        <FlowWall works={allWorks} posts={flowPosts} tickItems={tickItems} />
         {isVisible('creds') && <CredPills creds={content.creds} />}
         {isVisible('proof') && <ProofStrip proof={content.proof} />}
         {isVisible('audiences') && <Audiences audiences={content.audiences} />}

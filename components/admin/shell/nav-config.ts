@@ -17,6 +17,7 @@ import {
   Mail,
   Palette,
   PenLine,
+  Rocket,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -89,6 +90,13 @@ export const NAV: NavGroup[] = [
         hint: 'Blog posts and newsletters',
         matchNested: true,
       },
+      {
+        href: '/admin/works',
+        label: 'Works',
+        icon: Rocket,
+        hint: 'The wall: projects, ventures, tools',
+        matchNested: true,
+      },
     ],
   },
   {
@@ -141,6 +149,7 @@ export const CREATE_ACTIONS: { href: string; label: string; hint: string }[] = [
   { href: '/admin/media?new=upload', label: 'Upload', hint: 'Image, PDF or video' },
   { href: '/admin/media?new=embed', label: 'Embed', hint: 'YouTube, Instagram, LinkedIn, map' },
   { href: '/admin/services/new', label: 'Service', hint: 'A new bookable offering' },
+  { href: '/admin/works/new', label: 'Work', hint: 'A project for the wall' },
 ]
 
 export function isActive(pathname: string, item: NavItem): boolean {
