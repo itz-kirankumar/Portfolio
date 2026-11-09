@@ -14,6 +14,7 @@ export function RazorpayClient({
   contactName,
   slug,
   bookingId,
+  receiptToken,
   razorpayKeyId
 }: {
   orderId: string
@@ -24,6 +25,7 @@ export function RazorpayClient({
   contactName: string
   slug: string
   bookingId: string
+  receiptToken: string
   razorpayKeyId: string
 }) {
   const router = useRouter()
@@ -57,7 +59,10 @@ export function RazorpayClient({
               response.razorpay_order_id,
               response.razorpay_signature
             )
-            router.push(`/services/${slug}/book/success`)
+            const q = receiptToken
+              ? `?b=${encodeURIComponent(bookingId)}&k=${encodeURIComponent(receiptToken)}`
+              : ''
+            router.push(`/services/${slug}/book/success${q}`)
           } catch (err: any) {
             setError(err.message || 'Payment verification failed')
             setLoading(false)
@@ -92,7 +97,7 @@ export function RazorpayClient({
         document.body.removeChild(script)
       }
     }
-  }, [orderId, razorpayKeyId, amount, currency, name, email, contactName, slug, bookingId, router])
+  }, [orderId, razorpayKeyId, amount, currency, name, email, contactName, slug, bookingId, receiptToken, router])
 
   if (error) {
     return (

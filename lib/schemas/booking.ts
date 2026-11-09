@@ -57,6 +57,10 @@ export const bookingSchema = z.object({
   cancelReason: str.max(500).default(''),
   /** Invite delivery state, visible in admin so a paid booking can never
    *  silently go unfulfilled. */
+  /** Unguessable receipt key for the post-payment confirmation page. The
+   *  booking id is deterministic ({serviceId}__{startISO}), so id alone must
+   *  never authorise showing booking state - the success page requires this. */
+  receiptToken: str.max(80).default(''),
   inviteStatus: z.enum(['none', 'sent', 'failed']).default('none'),
   inviteError: str.max(500).default(''),
   inviteEventId: str.max(120).default(''),

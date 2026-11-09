@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import { notFound, redirect } from 'next/navigation'
 import { safeGet, safeList, createStrict } from '@/lib/store'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
@@ -170,6 +171,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
     }
     
     const docId = bookingId(service!.id, startISO)
+    const receiptTokenValue = crypto.randomBytes(20).toString('hex')
     
     await createStrict(BOOKINGS_COLLECTION, docId, bookingSchema, {
       serviceId: service!.id,
@@ -182,6 +184,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
       tz: availability.tz || 'Asia/Kolkata',
       durationMins: service!.type === 'digital_download' ? 0 : service!.durationMins,
       status: 'pending',
+      receiptToken: receiptTokenValue,
       payment: {
         mode: service!.paymentMode,
         amount: service!.priceInPaise,
@@ -195,10 +198,10 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
     })
 
     if (service!.paymentMode === 'razorpay') {
-      redirect(`/services/${slug}/book/${docId}/checkout`)
+      redirect(`/services/${slug}/book/${docId}/checkout?k=${receiptTokenValue}`)
     }
 
-    redirect(`/services/${slug}/book/success`)
+    redirect(`/services/${slug}/book/success?b=${docId}&k=${receiptTokenValue}`)
   }
 
   return (
@@ -326,7 +329,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                     Continue
                   </button>
                   <p className="mt-3 text-center text-xs leading-relaxed text-ink-soft">
-                    You can reschedule your call once. Refunds are not available.
+                    You can reschedule your call once. Refunds are not available. To reschedule, email <a href="mailto:kiran.kumar2028@mastersunion.org" className="link-underline">kiran.kumar2028@mastersunion.org</a>.
                   </p>
                 </div>
               </form>
