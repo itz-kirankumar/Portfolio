@@ -52,6 +52,10 @@ export const serviceSchema = z.object({
   paymentLinkUrl: str.max(2000).default(''),
 
   active: z.boolean().default(true),
+  /** Master switch for taking bookings. Stays off until availability hours are
+   *  owner-confirmed, fulfilment is verified end-to-end, and the invite copy
+   *  is approved. The public page shows an honest notice while off. */
+  bookingOpen: z.boolean().default(false),
   /** Manual ordering on /services. Lower first. */
   order: z.number().int().min(0).max(999).default(100),
 

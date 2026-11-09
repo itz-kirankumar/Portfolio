@@ -131,6 +131,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
 
   // A paid booking promises a Meet invite by email. Until the calendar
   // connection can actually create that invite, do not take money.
+  const bookingClosed = !service.bookingOpen
   const paidButNoInvite = service.paymentMode === 'razorpay' && service.priceInPaise > 0
     ? !(await hasCalendarWriteScope())
     : false
@@ -206,7 +207,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
 
         <Reveal kind="up" delay={60}>
           <NotebookCard className="mt-10">
-            {paidButNoInvite ? (
+            {(bookingClosed || paidButNoInvite) ? (
               <div className="text-center py-8">
                 <p className="font-display text-xl font-semibold text-ink">Booking opens again shortly</p>
                 <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">

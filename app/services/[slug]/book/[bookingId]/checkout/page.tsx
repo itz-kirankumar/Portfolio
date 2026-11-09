@@ -64,7 +64,7 @@ export default async function CheckoutPage({
 
   // Do not collect payment while the calendar connection cannot create the
   // promised Meet invite. The pending booking stays untouched and recoverable.
-  if (!(await hasCalendarWriteScope())) {
+  if (!service.bookingOpen || !(await hasCalendarWriteScope())) {
     return (
       <>
         <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} tickItems={tickItems} />
