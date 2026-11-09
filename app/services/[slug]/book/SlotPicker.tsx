@@ -2,27 +2,17 @@
 
 import React, { useState, useMemo, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Globe } from 'lucide-react'
+import { generateSlotsByVisitorDate } from '@/lib/slots'
 
-const DAY_NAMES = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
-
-function addMinutes(date: Date, mins: number) {
-  return new Date(date.getTime() + mins * 60000)
-}
-
-function parseTime(timeStr: string, baseDate: Date) {
-  const [h, m] = timeStr.split(':').map(Number)
-  const d = new Date(baseDate)
-  d.setHours(h, m, 0, 0)
-  return d
-}
-
-function dateStrOf(d: Date) {
-  return [
-    d.getFullYear(),
-    String(d.getMonth() + 1).padStart(2, '0'),
-    String(d.getDate()).padStart(2, '0')
-  ].join('-')
-}
+/**
+ * Availability ranges are owner wall-clock ("18:00" in availability.tz, e.g.
+ * Asia/Kolkata). Visitors can be anywhere, so every slot is an absolute
+ * instant (see lib/slots.ts). Chips group by the VISITOR's local date and
+ * times render visitor-local, so a 21:00 IST slot correctly lands on the
+ * next day for a visitor ahead of IST. What is submitted is the instant
+ * itself (epoch ms) - wall-time strings would be re-parsed in yet another
+ * timezone on the server.
+ */
 
 function gmtLabel() {
   const offsetMin = -new Date().getTimezoneOffset()
@@ -37,100 +27,24 @@ function gmtLabel() {
 export function SlotPicker({ service, availability, upcomingBookings }: { service: any, availability: any, upcomingBookings: any[] }) {
   const [mounted, setMounted] = useState(false)
   const [selectedDateStr, setSelectedDateStr] = useState('')
-  const [selectedTime, setSelectedTime] = useState('')
+  const [selectedStartMs, setSelectedStartMs] = useState(0)
   const dateRowRef = useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Generate available dates based on horizonDays and leadTime
-  const availableDates = useMemo(() => {
-    if (!mounted) return []
-    const dates = []
-    
-    // We'll generate the next horizonDays
-    for (let i = 0; i <= availability.horizonDays; i++) {
-      const d = new Date()
-      d.setDate(d.getDate() + i)
-      d.setHours(0, 0, 0, 0)
-      
-      const dateStr = dateStrOf(d)
+  // All bookable slots across the horizon, grouped by visitor-local date.
+  const slotsByDate = useMemo(
+    () => (mounted ? generateSlotsByVisitorDate(availability, service, upcomingBookings, Date.now()) : new Map()),
+    [mounted, availability, service, upcomingBookings]
+  )
 
-      const override = availability.dateOverrides?.[dateStr]
-
-      if (override) {
-        if (override.ranges && override.ranges.length > 0) {
-          dates.push(d)
-        }
-        continue
-      }
-
-      const dayName = DAY_NAMES[d.getDay()]
-      const rules = availability.weekly[dayName]
-      
-      if (rules?.enabled && rules?.ranges?.length > 0) {
-        dates.push(d)
-      }
-    }
-    return dates
-  }, [availability, mounted])
-
-  const selectedDate = useMemo(() => {
-    if (!selectedDateStr) return null
-    return availableDates.find(d => dateStrOf(d) === selectedDateStr)
-  }, [selectedDateStr, availableDates])
-
-  const availableSlots = useMemo(() => {
-    if (!selectedDate) return []
-    const now = new Date()
-    const leadTimeMs = availability.leadTimeHours * 3600000
-    
-    const dStr = dateStrOf(selectedDate)
-    
-    const override = availability.dateOverrides?.[dStr]
-    
-    let ranges = []
-    if (override) {
-      ranges = override.ranges || []
-    } else {
-      const dayName = DAY_NAMES[selectedDate.getDay()]
-      const rules = availability.weekly[dayName]
-      if (rules?.enabled) {
-        ranges = rules.ranges || []
-      }
-    }
-
-    if (ranges.length === 0) return []
-
-    const slots: Date[] = []
-    const step = availability.slotStepMins
-    const duration = service.durationMins
-
-    for (const range of ranges) {
-      let current = parseTime(range.start, selectedDate)
-      const end = parseTime(range.end, selectedDate)
-
-      while (addMinutes(current, duration) <= end) {
-        // Check lead time
-        if (current.getTime() - now.getTime() > leadTimeMs) {
-          // Check overlap
-          const slotStart = current.getTime()
-          const slotEnd = slotStart + (duration + (service.bufferMins || 0)) * 60000
-          
-          const hasOverlap = upcomingBookings.some(b => {
-            return (slotStart < b.end && slotEnd > b.start)
-          })
-
-          if (!hasOverlap) {
-            slots.push(new Date(current))
-          }
-        }
-        current = addMinutes(current, step)
-      }
-    }
-    return slots
-  }, [selectedDate, availability, service, upcomingBookings, mounted])
+  const availableDates = useMemo(() => [...slotsByDate.keys()].sort(), [slotsByDate])
+  const availableSlots = useMemo(
+    () => (selectedDateStr ? slotsByDate.get(selectedDateStr) ?? [] : []),
+    [slotsByDate, selectedDateStr]
+  )
 
   const scrollDates = (dir: number) => {
     dateRowRef.current?.scrollBy({ left: dir * 220, behavior: 'smooth' })
@@ -146,12 +60,9 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
 
   return (
     <div className="space-y-6">
-      {/* Form values for the server action. Invisible-but-validatable text
-          inputs (the established pattern here) so native required validation
-          blocks submission until a date and slot are picked. */}
-      <input type="text" name="date" value={selectedDateStr} readOnly required
-        className="absolute left-0 top-0 opacity-0 w-1 h-1 -z-10" tabIndex={-1} aria-hidden="true" />
-      <input type="text" name="time" value={selectedTime} readOnly required
+      {/* The booking is the instant, not a wall-time string. Invisible but
+          natively validated so submission blocks until a slot is picked. */}
+      <input type="text" name="startMs" value={selectedStartMs ? String(selectedStartMs) : ''} readOnly required
         className="absolute left-0 top-0 opacity-0 w-1 h-1 -z-10" tabIndex={-1} aria-hidden="true" />
 
       <div>
@@ -169,14 +80,14 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
           </div>
         </div>
         <div ref={dateRowRef} className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {availableDates.map(d => {
-            const val = dateStrOf(d)
+          {availableDates.map(val => {
+            const d = new Date(val + 'T12:00:00')
             const isSelected = selectedDateStr === val
             return (
               <button
                 key={val}
                 type="button"
-                onClick={() => { setSelectedDateStr(val); setSelectedTime('') }}
+                onClick={() => { setSelectedDateStr(val); setSelectedStartMs(0) }}
                 className={`shrink-0 rounded-lg border px-3.5 py-2 text-center transition-colors ${
                   isSelected
                     ? 'border-coral bg-coral-soft text-coral-ink'
@@ -192,6 +103,9 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
               </button>
             )
           })}
+          {availableDates.length === 0 && (
+            <p className="text-sm text-ink-soft py-2">No open dates in the next {availability.horizonDays} days.</p>
+          )}
         </div>
       </div>
 
@@ -201,25 +115,19 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
           {availableSlots.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {availableSlots.map(slot => {
-                const timeStr = [
-                  String(slot.getHours()).padStart(2, '0'),
-                  String(slot.getMinutes()).padStart(2, '0')
-                ].join(':')
-                
-                const isSelected = selectedTime === timeStr
-                
+                const isSelected = selectedStartMs === slot.startMs
                 return (
                   <button
-                    key={timeStr}
+                    key={slot.startMs}
                     type="button"
-                    onClick={() => setSelectedTime(timeStr)}
+                    onClick={() => setSelectedStartMs(slot.startMs)}
                     className={`rounded-lg border px-3.5 py-2 text-sm font-mono transition-colors ${
                       isSelected 
                         ? 'border-coral bg-coral-soft text-coral-ink' 
                         : 'border-rule bg-paper text-ink hover:border-coral'
                     }`}
                   >
-                    {slot.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(slot.startMs).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                   </button>
                 )
               })}

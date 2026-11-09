@@ -147,16 +147,22 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
     let endISO = new Date().toISOString()
 
     if (service!.type !== 'digital_download') {
-      const dateStr = formData.get('date') as string
-      const timeStr = formData.get('time') as string
-      
-      if (!name || !email || !dateStr || !timeStr) {
+      // The picker submits an absolute instant (epoch ms). Wall-time strings
+      // would be re-parsed here in the server's timezone, silently moving
+      // the meeting. Bounds-check against the availability horizon.
+      const startMs = Number(formData.get('startMs'))
+
+      if (!name || !email || !Number.isFinite(startMs) || startMs <= 0) {
         throw new Error('Please fill all required fields')
       }
+      const nowMs = Date.now()
+      const maxMs = nowMs + (availability.horizonDays + 2) * 86400000
+      if (startMs < nowMs || startMs > maxMs) {
+        throw new Error('That slot is outside the bookable window')
+      }
 
-      const start = new Date(`${dateStr}T${timeStr}:00`)
-      startISO = start.toISOString()
-      endISO = new Date(start.getTime() + service!.durationMins * 60000).toISOString()
+      startISO = new Date(startMs).toISOString()
+      endISO = new Date(startMs + service!.durationMins * 60000).toISOString()
     } else {
       if (!name || !email) {
         throw new Error('Please fill all required fields')
@@ -173,7 +179,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
       notes,
       startISO,
       endISO,
-      tz: 'UTC',
+      tz: availability.tz || 'Asia/Kolkata',
       durationMins: service!.type === 'digital_download' ? 0 : service!.durationMins,
       status: 'pending',
       payment: {
