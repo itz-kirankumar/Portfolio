@@ -7,6 +7,7 @@
 
 import { safeList } from '@/lib/store'
 import { DEFAULT_WORKS } from '@/lib/default-works'
+import { getGitHubWorks } from '@/lib/github-works'
 import { WORKS_COLLECTION, workSchema, type Work } from '@/lib/schemas/work'
 
 function sortWorks(works: Work[]): Work[] {
@@ -19,7 +20,9 @@ function sortWorks(works: Work[]): Work[] {
 /** All works, featured first then by manual order. Falls back to the seed. */
 export async function getWorks(): Promise<Work[]> {
   const stored = await safeList(WORKS_COLLECTION, workSchema)
-  return sortWorks(stored.length > 0 ? stored : DEFAULT_WORKS)
+  const curated = stored.length > 0 ? stored : DEFAULT_WORKS
+  const auto = await getGitHubWorks(curated)
+  return sortWorks([...curated, ...auto])
 }
 
 /** One work by slug, for /work/[slug]. Seed works resolve too. */
