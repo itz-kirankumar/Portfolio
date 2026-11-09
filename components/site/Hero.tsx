@@ -32,7 +32,6 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
         <h1 className={`font-anton uppercase text-balance-tight text-[clamp(3.2rem,10.5vw,8.75rem)] leading-[0.92] tracking-[0.005em] text-ink ${isStacked ? 'mx-auto' : ''}`}>
           {hero.headlineBefore}{' '}
           {hero.headlineHighlight ? (
-            <span className="whitespace-nowrap">
             <span className="relative inline-block text-coral">
               <RotatingHighlight
                 base={hero.headlineHighlight}
@@ -55,11 +54,8 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
                 />
               </svg>
             </span>
-            <span className="align-baseline">{hero.headlineAfter?.replace(/^\s+/, '')}</span>
-            </span>
-          ) : (
-            hero.headlineAfter
-          )}
+          ) : null}
+          {hero.headlineAfter}
         </h1>
       </Reveal>
 
