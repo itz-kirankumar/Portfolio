@@ -19,6 +19,7 @@ import { getTickItems } from '@/lib/ticker'
 import { ServicesList } from '@/components/site/ServicesList'
 import { Section, SectionHead } from '@/components/ui/primitives'
 import { Closing, OneCard, Writing } from '@/components/site/Voice'
+import { SocialFeed } from '@/components/site/SocialFeed'
 import { getCachedSiteContent } from '@/lib/site'
 import { getCachedTheme } from '@/lib/theme'
 
@@ -153,6 +154,10 @@ export default async function HomePage() {
         )}
 
         {isVisible('writing') && <Writing writing={content.writing} />}
+        <SocialFeed
+          xHandle={meta.twitterHandle?.replace(/^@/, '') || 'imkirankumarg'}
+          linkedinProfileUrl="https://www.linkedin.com/in/iamkirankumarg/"
+        />
         {isVisible('oneCard') && <OneCard oneCard={content.oneCard} />}
         {isVisible('closing') && <Closing closing={content.closing} meta={meta} />}
       </main>

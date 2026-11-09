@@ -118,7 +118,7 @@ function CommentItem({
 
           {/* Reply Form */}
           {isReplying && (
-            <form onSubmit={submitReply} className="mt-4 bg-paper-deep/50 p-4 rounded-lg border border-rule animate-in fade-in slide-in-from-top-2">
+            <form data-clarity-mask="true" onSubmit={submitReply} className="mt-4 bg-paper-deep/50 p-4 rounded-lg border border-rule animate-in fade-in slide-in-from-top-2">
               <div className="mb-3">
                 <input 
                   type="text" 
@@ -237,6 +237,7 @@ export function CommentsList({ postId, initialComments = [] }: { postId: string,
 
       {/* Progressive composer: one calm line that expands when engaged. */}
       <form
+        data-clarity-mask="true"
         onSubmit={handleSubmit}
         className={`mb-8 rounded-2xl border bg-card transition-all duration-300 ${composerOpen || text ? 'border-coral/40 p-4 sm:p-5' : 'border-rule p-3 sm:p-4'}`}
       >

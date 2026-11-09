@@ -31,6 +31,7 @@ export function NewsletterInline() {
           </p>
         </div>
         <form
+          data-clarity-mask="true"
           className="flex w-full max-w-sm flex-col gap-2.5 sm:flex-row sm:gap-2"
           action={async (formData) => {
             setStatus('loading')
@@ -118,6 +119,7 @@ export function NewsletterPopup() {
         Occasional emails about what I'm building, what worked, and what broke.
       </p>
       <form
+        data-clarity-mask="true"
         className="mt-4 flex flex-col gap-3"
         action={async (formData) => {
           setStatus('loading')

@@ -135,6 +135,7 @@ export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: str
         <div
           role="dialog"
           aria-label="Ask about Kiran"
+          data-clarity-mask="true"
           className="fixed bottom-[5.5rem] right-5 z-[70] flex h-[28rem] w-[min(22rem,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-rule bg-card shadow-2xl shadow-black/50"
         >
           <div className="border-b border-rule bg-paper-deep px-4 py-3">
@@ -201,6 +202,7 @@ export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: str
           </div>
 
           <form
+            data-clarity-mask="true"
             className="flex items-center gap-2 border-t border-rule px-3 py-2.5"
             onSubmit={(e) => {
               e.preventDefault()

@@ -32,6 +32,7 @@ const caveat = Caveat({
 })
 
 import { getCachedSiteContent } from '@/lib/site'
+import { ClarityLoader } from '@/components/site/ClarityLoader'
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getCachedSiteContent()
@@ -113,12 +114,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         )}
       </head>
       <body className="bg-paper text-ink font-sans antialiased" suppressHydrationWarning>
-        {/* Microsoft Clarity, portfolio project only (kirankumarg.me). */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","zath09upbe");`,
-          }}
-        />
+        <ClarityLoader />
         <Tracker />
         {children}
         <NewsletterPopup />

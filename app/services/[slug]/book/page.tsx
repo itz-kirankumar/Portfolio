@@ -199,7 +199,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
 
         <Reveal kind="up" delay={60}>
           <NotebookCard className="mt-10">
-            <form action={handleBook} className="flex flex-col gap-6">
+            <form data-clarity-mask="true" action={handleBook} className="flex flex-col gap-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-ink mb-1.5">
                   Name <span className="text-coral">*</span>
