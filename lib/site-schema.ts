@@ -33,6 +33,8 @@ const meta = z.object({
   location: str.max(80),
   linkedin: url.max(500),
   resumeUrl: url.max(1000),
+  /** Public X handle ("@name"). Feeds sameAs structured data and twitter cards. */
+  twitterHandle: str.max(40).optional(),
 })
 
 const utility = z.object({
