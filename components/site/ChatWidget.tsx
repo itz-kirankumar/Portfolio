@@ -85,6 +85,7 @@ function answer(q: string, resumeUrl: string, email: string): Msg {
 export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: string }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [hidden, setHidden] = useState(false)
   const [input, setInput] = useState('')
   const [msgs, setMsgs] = useState<Msg[]>([
     { from: 'bot', text: "Hi! Ask me anything about Kiran: his work, writing, services, or grab his résumé. I answer from the public content of this site." },
@@ -102,6 +103,25 @@ export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: str
     return () => {
       document.body.dataset.chatOpen = ''
     }
+  }, [open])
+
+  // A fixed launcher will always cover *something* on a long page. So it
+  // gets out of the way: scrolling down (reading) hides it, scrolling up
+  // (navigating) brings it back. While the panel is open it never hides.
+  useEffect(() => {
+    if (open) {
+      setHidden(false)
+      return
+    }
+    let lastY = window.scrollY
+    const onScroll = () => {
+      const y = window.scrollY
+      if (y > lastY + 4 && y > 140) setHidden(true)
+      else if (y < lastY - 4 || y <= 140) setHidden(false)
+      lastY = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [open])
 
   const send = (text: string) => {
@@ -122,7 +142,7 @@ export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: str
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? 'Close chat' : 'Ask about Kiran'}
-        className="fixed bottom-4 right-4 z-[70] flex h-12 w-12 items-center justify-center rounded-full bg-coral text-paper-deep shadow-lg shadow-black/40 transition hover:bg-coral-deep focus-visible:outline-2 focus-visible:outline-coral-ink sm:bottom-5 sm:right-5 sm:h-14 sm:w-14"
+        className={`fixed bottom-4 right-4 z-[70] flex h-12 w-12 items-center justify-center rounded-full bg-coral text-paper-deep shadow-lg shadow-black/40 transition-all duration-300 hover:bg-coral-deep focus-visible:outline-2 focus-visible:outline-coral-ink sm:bottom-5 sm:right-5 sm:h-14 sm:w-14 ${hidden ? 'pointer-events-none translate-y-20 opacity-0' : ''}`}
       >
         {open ? (
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
