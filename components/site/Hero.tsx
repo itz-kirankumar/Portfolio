@@ -28,7 +28,7 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
       </Reveal>
 
       <Reveal kind="up" delay={60}>
-        <h1 className={`font-display text-balance-tight text-[clamp(2.9rem,9vw,7rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-ink ${isStacked ? 'mx-auto' : ''}`}>
+        <h1 className={`font-display text-balance-tight text-[clamp(2.9rem,8vw,6rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-ink ${isStacked ? 'mx-auto' : ''}`}>
           {hero.headlineBefore}{' '}
           {hero.headlineHighlight ? (
             <Highlight>{hero.headlineHighlight}</Highlight>
