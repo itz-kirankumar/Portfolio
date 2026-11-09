@@ -25,6 +25,8 @@ export async function saveService(id: string, data: any) {
     revalidatePath('/')
     revalidatePath('/admin/services')
     revalidatePath('/services')
+    revalidatePath(`/services/${docId}`)
+    revalidatePath(`/services/${docId}/book`)
     revalidatePath(`/admin/services/${docId}`)
     return { ok: true, id: docId }
   } catch (err: any) {
@@ -43,5 +45,7 @@ export async function deleteService(id: string) {
   revalidatePath('/')
   revalidatePath('/admin/services')
   revalidatePath('/services')
+  revalidatePath(`/services/${id}`)
+  revalidatePath(`/services/${id}/book`)
   return { ok: true }
 }
