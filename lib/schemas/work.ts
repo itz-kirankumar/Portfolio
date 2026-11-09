@@ -40,6 +40,11 @@ export const workSchema = z.object({
   body: z.string().max(30_000).default(''),
 
   coverUrl: url.default(''),
+  /** Extra product screenshots shown after the story on /work/[slug]. Alt doubles as the visible caption. */
+  gallery: z
+    .array(z.object({ src: url, alt: str.max(200).default('') }))
+    .max(12)
+    .default([]),
   /** Public live site. Empty hides the button. */
   liveUrl: url.default(''),
   /** Public source repository only — never link a private repo here. */

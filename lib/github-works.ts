@@ -100,6 +100,7 @@ export async function getGitHubWorks(existing: Work[]): Promise<Work[]> {
           `This entry is generated automatically from the public ${GITHUB_USER} GitHub profile. Last public update ${monthYear(r.pushed_at)}; the repository is the source of truth.`,
         ].join('\n\n'),
         coverUrl: `https://opengraph.githubassets.com/1/${GITHUB_USER}/${r.name}`,
+        gallery: [],
         liveUrl,
         sourceUrl: r.html_url,
         tags: ['open source'],

@@ -148,6 +148,27 @@ export default async function WorkDetailPage({ params }: { params: Promise<{ slu
               </ul>
             ) : null}
 
+            {work.gallery.length ? (
+              <ul className="mt-10 space-y-6">
+                {work.gallery.map((g) => (
+                  <li key={g.src}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={g.src}
+                      alt={g.alt}
+                      loading="lazy"
+                      className="w-full rounded-xl ring-1 ring-rule"
+                    />
+                    {g.alt ? (
+                      <p className="mt-2 font-mono text-[0.64rem] uppercase tracking-[0.12em] text-ink-soft">
+                        {g.alt}
+                      </p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
             {work.tags.length ? (
               <ul className="mt-8 flex flex-wrap gap-1.5">
                 {work.tags.map((t) => (
