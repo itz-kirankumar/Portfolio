@@ -325,6 +325,9 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                   >
                     Continue
                   </button>
+                  <p className="mt-3 text-center text-xs leading-relaxed text-ink-soft">
+                    You can reschedule your call once. Refunds are not available.
+                  </p>
                 </div>
               </form>
               )}

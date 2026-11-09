@@ -118,6 +118,10 @@ export default async function CheckoutPage({
                 intro={`You are booking ${service.title} for ${new Date(booking.startISO).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`}
               />
               
+              <p className="mt-6 text-xs leading-relaxed text-ink-soft">
+                You can reschedule your call once. Refunds are not available.
+              </p>
+
               <div className="mt-8 border-t border-rule pt-8">
                 <RazorpayClient
                   orderId={orderId}
