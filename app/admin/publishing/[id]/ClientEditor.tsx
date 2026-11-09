@@ -34,7 +34,7 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
       error: '',
     }
   })
-  const [initialSnap] = useState<Partial<Post>>(() => shape(initialData))
+  const [initialSnap, setInitialSnap] = useState<Partial<Post>>(() => shape(initialData))
   // The editor opens the private draft when one exists; otherwise the
   // published body. Autosave only ever writes the draft - the public article
   // changes only on an explicit "Save changes".
@@ -67,6 +67,7 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
   })
 
   const [saving, setSaving] = useState(false)
+  const [savedAt, setSavedAt] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [issues, setIssues] = useState<string[]>([])
   
@@ -144,7 +145,9 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
       result = await savePost(savePayload.slug || id, savePayload)
     } catch (e: any) {
       setSaving(false)
-      setError(e?.message ? `Save failed: ${e.message}` : 'Save failed - the request never completed. Check the connection and retry.')
+      const msg = e?.message ? `Save failed: ${e.message}` : 'Save failed - the request never completed. Check the connection and retry.'
+      setError(msg)
+      useToast.getState().toast(msg, 'error')
       return
     }
 
@@ -153,6 +156,15 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
       if (!isAutoSave) {
         useToast.getState().toast('Saved successfully!')
       }
+      // Re-baseline: the saved payload is the new "clean" state, so dirty
+      // flips off. Edits typed while the save was in flight keep dirty on,
+      // because data has moved past savePayload.
+      setInitialSnap(shape(savePayload))
+      setSavedAt(Date.now())
+      // Cancel a queued autosave: the explicit save already persisted this
+      // content and cleared the server-side draft, so a late saveDraft would
+      // resurrect a phantom "stored draft".
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
       // The server cleared the draft and published this content atomically.
       setDraftBaseline({ html: savePayload.html || '', doc: savePayload.doc || '' })
       setHasStoredDraft(false)
@@ -162,7 +174,11 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
       }
       router.refresh()
     } else {
-      setError(result.error || 'Unknown error occurred')
+      const msg = result.error || 'Unknown error occurred'
+      setError(msg)
+      // The inline error box sits above the bar and is easy to miss; a save
+      // that did not happen must be unmissable.
+      useToast.getState().toast(`Save failed: ${msg}`, 'error')
       if (result.issues) {
         setIssues(result.issues)
       }
@@ -353,9 +369,10 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
         dirty={dirty}
         saving={saving}
         onSave={() => handleSave(false)}
-        onReset={() => setData(initialData)}
+        onReset={() => setData(initialSnap)}
         error={error}
         issues={issues}
+        savedAt={savedAt}
       />
 
       <Modal
