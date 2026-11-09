@@ -20,6 +20,7 @@ import { ServicesList } from '@/components/site/ServicesList'
 import { Section, SectionHead } from '@/components/ui/primitives'
 import { Closing, OneCard, Writing } from '@/components/site/Voice'
 import { SocialFeed } from '@/components/site/SocialFeed'
+import { getLatestXPosts } from '@/lib/x-feed'
 import { getCachedSiteContent } from '@/lib/site'
 import { getCachedTheme } from '@/lib/theme'
 
@@ -156,6 +157,7 @@ export default async function HomePage() {
         {isVisible('writing') && <Writing writing={content.writing} />}
         <SocialFeed
           xHandle={meta.twitterHandle?.replace(/^@/, '') || 'imkirankumarg'}
+          xPosts={await getLatestXPosts(meta.twitterHandle?.replace(/^@/, '') || 'imkirankumarg')}
           linkedinProfileUrl="https://www.linkedin.com/in/iamkirankumarg/"
           linkedinPosts={[
             {

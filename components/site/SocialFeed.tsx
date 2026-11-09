@@ -1,20 +1,11 @@
-'use client'
+// "Around the web" section. X posts come from a server-fetched free mirror
+// feed (see lib/x-feed.ts) that runs some hours behind the live profile, so
+// the card says "Recent", every card carries its real date, and a dead or
+// stale feed hides the card entirely - Kiran's rule, no dead placeholder. LinkedIn has no free reliable profile feed, so its side is a
+// curated pair of site-styled cards with real excerpts, dates, and source
+// links - labeled "Selected", never "latest".
 
-// "Around the web" section. X uses the official free timeline embed (public
-// posts, auto-updating, capped at 3, site-dark theme). When X's syndication
-// service refuses to serve (it rate-limits some IPs), the whole X card is
-// removed and the LinkedIn side closes the gap - Kiran's call, no dead
-// placeholder. LinkedIn has no free
-// automated profile feed, so its side is a curated pair of site-styled cards
-// with real excerpts, dates, and source links - never labeled "latest".
-
-import { useEffect, useRef, useState } from 'react'
-
-declare global {
-  interface Window {
-    twttr?: { widgets?: { load: (el?: HTMLElement | null) => void } }
-  }
-}
+import type { XPost } from '@/lib/x-feed'
 
 export type LinkedInPostCard = {
   title: string
@@ -25,47 +16,17 @@ export type LinkedInPostCard = {
 
 export function SocialFeed({
   xHandle,
+  xPosts = [],
   linkedinProfileUrl,
   linkedinPosts = [],
 }: {
   xHandle?: string
+  xPosts?: XPost[]
   linkedinProfileUrl?: string
   linkedinPosts?: LinkedInPostCard[]
 }) {
-  const xRef = useRef<HTMLDivElement>(null)
-  const [xFailed, setXFailed] = useState(false)
-
-  useEffect(() => {
-    if (!xHandle) return
-    const existing = document.querySelector<HTMLScriptElement>(
-      'script[src="https://platform.x.com/widgets.js"]',
-    )
-    const load = () => window.twttr?.widgets?.load(xRef.current)
-    if (existing) {
-      load()
-      return
-    }
-    const s = document.createElement('script')
-    s.src = 'https://platform.x.com/widgets.js'
-    s.async = true
-    s.charset = 'utf-8'
-    s.onload = load
-    s.onerror = () => setXFailed(true)
-    document.body.appendChild(s)
-    // If the widget leaves the bare link after 6s, or its timeline iframe
-    // renders collapsed (X rate-limits some IPs to a 0-height shell), treat
-    // as failed and drop the X card entirely (no placeholder).
-    const t = setTimeout(() => {
-      const frame = xRef.current?.querySelector<HTMLIFrameElement>(
-        'iframe[src*="syndication.twitter.com"]',
-      )
-      const h = frame?.getBoundingClientRect().height ?? 0
-      if (!frame || h < 100) setXFailed(true)
-    }, 6000)
-    return () => clearTimeout(t)
-  }, [xHandle])
-
-  if (!xHandle && !linkedinProfileUrl && linkedinPosts.length === 0) return null
+  const showX = Boolean(xHandle) && xPosts.length > 0
+  if (!showX && !linkedinProfileUrl && linkedinPosts.length === 0) return null
 
   const cardHead = (label: string, href: string, cta: string) => (
     <div className="mb-5 flex items-center justify-between">
@@ -91,27 +52,35 @@ export function SocialFeed({
       <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
         Around the web
       </h2>
-      <div className={`mt-8 grid items-start gap-8 ${xFailed ? '' : 'lg:grid-cols-2'}`}>
-        {xHandle && !xFailed && (
+      <div className={`mt-8 grid items-start gap-8 ${showX ? 'lg:grid-cols-2' : ''}`}>
+        {showX && (
           <div className="rounded-2xl border border-rule bg-card p-5">
-            {cardHead('On X', `https://x.com/${xHandle}`, `@${xHandle}`)}
-            <div ref={xRef}>
-              <a
-                className="twitter-timeline"
-                data-theme="dark"
-                data-tweet-limit="3"
-                data-chrome="noheader nofooter noborders transparent"
-                href={`https://x.com/${xHandle}?ref_src=twsrc%5Etfw`}
-              >
-                Posts by @{xHandle}
-              </a>
+            {cardHead('Recent on X', `https://x.com/${xHandle}`, `@${xHandle}`)}
+            <div className="flex flex-col gap-4">
+              {xPosts.map((p) => (
+                <a
+                  key={p.url}
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group rounded-xl border border-rule bg-paper-deep/40 p-4 transition hover:border-coral/50"
+                >
+                  <p className="font-mono text-[11px] text-ink-soft">{p.date}</p>
+                  <p className="mt-1.5 line-clamp-4 text-sm leading-relaxed text-ink">
+                    {p.text}
+                  </p>
+                  <p className="mt-2 font-mono text-xs text-coral-ink">
+                    Read on X ↗
+                  </p>
+                </a>
+              ))}
             </div>
           </div>
         )}
         {linkedinProfileUrl && (
           <div className="rounded-2xl border border-rule bg-card p-5">
             {cardHead('Selected LinkedIn posts', linkedinProfileUrl, 'Profile')}
-            <div className={`gap-4 ${xFailed ? 'grid sm:grid-cols-2' : 'flex flex-col'}`}>
+            <div className={`gap-4 ${showX ? 'flex flex-col' : 'grid sm:grid-cols-2'}`}>
               {linkedinPosts.map((p) => (
                 <a
                   key={p.url}
