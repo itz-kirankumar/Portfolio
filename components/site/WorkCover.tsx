@@ -10,14 +10,20 @@ import type { Work } from '@/lib/schemas/work'
 
 export function WorkCover({ work, className }: { work: Work; className?: string }) {
   if (work.coverUrl) {
+    // GitHub's OpenGraph cards carry the full repo identity; cropping them
+    // (object-cover) cuts the project name, so show the whole card.
+    const isRepoCard = work.coverUrl.includes('opengraph.githubassets.com')
     return (
-      <div className={cn('overflow-hidden bg-paper-deep', className)}>
+      <div className={cn('overflow-hidden', isRepoCard ? 'bg-white' : 'bg-paper-deep', className)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={work.coverUrl}
           alt={`${work.title} preview`}
           loading="lazy"
-          className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          className={cn(
+            'size-full transition-transform duration-500 group-hover:scale-[1.03]',
+            isRepoCard ? 'object-contain' : 'object-cover'
+          )}
         />
       </div>
     )

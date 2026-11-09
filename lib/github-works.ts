@@ -87,7 +87,9 @@ export async function getGitHubWorks(existing: Work[]): Promise<Work[]> {
         title: r.name,
         tagline: what ?? 'Open-source repository',
         kind: 'experiment',
-        status: 'live',
+        // A public repo with recent commits is not a launched product -
+        // 'building' is the only truthful status the enum offers here.
+        status: 'building',
         period: `Active ${monthYear(r.pushed_at)}`,
         summary: what
           ? `${what} Public repository, listed automatically from the GitHub profile this site links to.`
