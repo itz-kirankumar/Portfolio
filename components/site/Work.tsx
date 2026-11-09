@@ -146,12 +146,14 @@ const STATUS_STYLE: Record<string, string> = {
   live: 'bg-coral-soft text-coral-ink',
   building: 'bg-coral-soft text-coral-ink',
   closed: 'bg-paper-deep text-ink-soft',
+  repository: 'bg-paper-deep text-ink-soft',
 }
 
 const STATUS_LABEL: Record<string, string> = {
   live: 'live',
   building: 'building now',
   closed: 'wound down',
+  repository: 'public repo',
 }
 
 export function Ventures({ ventures }: { ventures: VenturesContent }) {

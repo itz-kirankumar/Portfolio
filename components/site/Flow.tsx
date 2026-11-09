@@ -31,6 +31,7 @@ const STATUS_DOT: Record<string, string> = {
   live: 'bg-emerald-500',
   building: 'bg-coral',
   closed: 'bg-ink-soft/50',
+  repository: 'bg-ink-soft/50',
 }
 
 function WorkCard({ work }: { work: Work }) {

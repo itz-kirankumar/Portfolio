@@ -87,16 +87,17 @@ export async function getGitHubWorks(existing: Work[]): Promise<Work[]> {
         title: r.name,
         tagline: what ?? 'Open-source repository',
         kind: 'experiment',
-        // A public repo with recent commits is not a launched product -
-        // 'building' is the only truthful status the enum offers here.
-        status: 'building',
-        period: `Active ${monthYear(r.pushed_at)}`,
+        // A public repo with recent commits is not a launched product and
+        // a push is not active building - neutral 'repository' status, and
+        // the date is when the repo was last updated, nothing more.
+        status: 'repository',
+        period: `Updated ${monthYear(r.pushed_at)}`,
         summary: what
           ? `${what} Public repository, listed automatically from the GitHub profile this site links to.`
           : 'Public repository, listed automatically from the GitHub profile this site links to.',
         body: [
           what ?? 'An open-source repository.',
-          `This entry is generated automatically from the public ${GITHUB_USER} GitHub profile. Last public commit ${monthYear(r.pushed_at)}; the repository is the source of truth.`,
+          `This entry is generated automatically from the public ${GITHUB_USER} GitHub profile. Last public update ${monthYear(r.pushed_at)}; the repository is the source of truth.`,
         ].join('\n\n'),
         coverUrl: `https://opengraph.githubassets.com/1/${GITHUB_USER}/${r.name}`,
         liveUrl,

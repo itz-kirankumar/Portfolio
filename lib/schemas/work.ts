@@ -13,7 +13,7 @@ import { z } from 'zod'
 export const WORK_KINDS = ['product', 'venture', 'tool', 'research', 'experiment'] as const
 export type WorkKind = (typeof WORK_KINDS)[number]
 
-export const WORK_STATUSES = ['live', 'building', 'closed'] as const
+export const WORK_STATUSES = ['live', 'building', 'closed', 'repository'] as const
 export type WorkStatus = (typeof WORK_STATUSES)[number]
 
 const str = z.string().trim()
@@ -77,4 +77,5 @@ export const STATUS_LABEL: Record<WorkStatus, string> = {
   live: 'live',
   building: 'building now',
   closed: 'wound down',
+  repository: 'public repo',
 }
