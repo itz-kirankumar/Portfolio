@@ -31,10 +31,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
+  // Only emit lastModified for dates that are real; some records carry
+  // junk timestamps (e.g. 2) that render as 1970-01-01 to crawlers.
+  const validDate = (value: unknown): Date | undefined => {
+    const d = value ? new Date(value as string | number) : undefined
+    return d && !isNaN(+d) && +d > 946684800000 ? d : undefined
+  }
+
   works.forEach((work) => {
     sitemap.push({
       url: `${base}/work/${work.slug}`,
-      lastModified: new Date(work.updatedAt || Date.now()),
+      lastModified: validDate(work.updatedAt),
       changeFrequency: 'monthly',
       priority: 0.7,
     })
@@ -43,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   publishedPosts.forEach((post) => {
     sitemap.push({
       url: `${base}/writing/${post.slug}`,
-      lastModified: new Date(post.updatedAt || Date.now()),
+      lastModified: validDate(post.updatedAt),
       changeFrequency: 'monthly',
       priority: 0.8,
     })
@@ -60,7 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   pages.forEach((page) => {
     sitemap.push({
       url: `${base}/${page.slug}`,
-      lastModified: new Date(page.updatedAt || Date.now()),
+      lastModified: validDate(page.updatedAt),
       changeFrequency: 'monthly',
       priority: 0.6,
     })
