@@ -9,6 +9,7 @@ import { Section, NotebookCard, SectionHead } from '@/components/ui/primitives'
 import Razorpay from 'razorpay'
 import { RazorpayClient } from '../../RazorpayClient'
 import { getAdminDb } from '@/lib/admin'
+import { hasCalendarWriteScope } from '@/lib/calendar-scope'
 
 export default async function CheckoutPage({ 
   params 
@@ -51,6 +52,30 @@ export default async function CheckoutPage({
                   align="center"
                   heading="Payment is being connected"
                   intro={`Your ${service.title} slot request is saved. Online payment goes live here shortly; check back in a bit, or reach out directly and we'll sort it manually.`}
+                />
+              </NotebookCard>
+            </div>
+          </Section>
+        </main>
+        <SiteFooter footer={content.footer} meta={meta} />
+      </>
+    )
+  }
+
+  // Do not collect payment while the calendar connection cannot create the
+  // promised Meet invite. The pending booking stays untouched and recoverable.
+  if (!(await hasCalendarWriteScope())) {
+    return (
+      <>
+        <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} tickItems={tickItems} />
+        <main className="min-h-[80vh] flex flex-col justify-center bg-paper">
+          <Section tone="paper">
+            <div className="mx-auto max-w-xl text-center">
+              <NotebookCard>
+                <SectionHead
+                  align="center"
+                  heading="Payment opens again shortly"
+                  intro={`Your ${service.title} slot request is saved. Online payment is briefly paused while the calendar connection is upgraded, so no payment is taken until your invite can be delivered as promised. This link keeps working - please check back in a little while.`}
                 />
               </NotebookCard>
             </div>

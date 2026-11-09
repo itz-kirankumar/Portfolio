@@ -7,6 +7,7 @@ import { bookingId } from '@/lib/ids'
 import { Section, NotebookCard, SectionHead } from '@/components/ui/primitives'
 import Reveal from '@/components/ui/Reveal'
 import { SlotPicker } from './SlotPicker'
+import { hasCalendarWriteScope } from '@/lib/calendar-scope'
 
 export default async function BookPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -128,6 +129,12 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
     redirect(service.paymentLinkUrl)
   }
 
+  // A paid booking promises a Meet invite by email. Until the calendar
+  // connection can actually create that invite, do not take money.
+  const paidButNoInvite = service.paymentMode === 'razorpay' && service.priceInPaise > 0
+    ? !(await hasCalendarWriteScope())
+    : false
+
     async function handleBook(formData: FormData) {
     'use server'
     const name = formData.get('name') as string
@@ -199,6 +206,16 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
 
         <Reveal kind="up" delay={60}>
           <NotebookCard className="mt-10">
+            {paidButNoInvite ? (
+              <div className="text-center py-8">
+                <p className="font-display text-xl font-semibold text-ink">Booking opens again shortly</p>
+                <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">
+                  Online booking for this session is briefly paused while the calendar connection is upgraded,
+                  so that every confirmed slot comes with its video-call invite as promised. No payment is taken
+                  while this notice is up. Please check back in a little while.
+                </p>
+              </div>
+            ) : (
             <form data-clarity-mask="true" action={handleBook} className="flex flex-col gap-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-ink mb-1.5">
@@ -255,6 +272,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
                 </button>
               </div>
             </form>
+            )}
           </NotebookCard>
         </Reveal>
       </div>

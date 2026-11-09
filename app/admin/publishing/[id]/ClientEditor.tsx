@@ -4,7 +4,7 @@ import { useUI as useToast } from '@/lib/store/ui'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Field, Input, Textarea, Toggle, SaveBar, Panel, Modal } from '@/components/admin/ui'
-import { savePost, deletePost } from '../actions'
+import { savePost, deletePost, saveDraft, discardDraft } from '../actions'
 import { Tiptap } from './Tiptap'
 import type { Post } from '@/lib/schemas/post'
 
@@ -35,6 +35,14 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
     }
   })
   const [initialSnap] = useState<Partial<Post>>(() => shape(initialData))
+  // The editor opens the private draft when one exists; otherwise the
+  // published body. Autosave only ever writes the draft - the public article
+  // changes only on an explicit "Save changes".
+  const initialDoc = initialData.draftDoc || initialData.doc || ''
+  const initialHtml = initialData.draftHtml || initialData.html || ''
+  const [draftBaseline, setDraftBaseline] = useState<{ html: string; doc: string }>({ html: initialHtml, doc: initialDoc })
+  const [hasStoredDraft, setHasStoredDraft] = useState<boolean>(Boolean(initialData.draftDoc))
+  const [draftSavedAt, setDraftSavedAt] = useState<number>(initialData.draftUpdatedAt || 0)
   const [data, setData] = useState<Partial<Post>>({
     slug: initialData.slug || '',
     title: initialData.title || '',
@@ -46,8 +54,8 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
     // carry the stored timestamps through every save/autosave.
     publishedAt: initialData.publishedAt || 0,
     createdAt: initialData.createdAt || 0,
-    html: initialData.html || '',
-    doc: initialData.doc || '',
+    html: initialHtml,
+    doc: initialDoc,
     newsletter: initialData.newsletter || {
       enabled: false,
       subject: '',
@@ -64,23 +72,31 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
   
   const dirty = JSON.stringify(data) !== JSON.stringify(initialSnap)
 
-    // Auto-save logic
+    // Auto-save logic: content changes go to the PRIVATE DRAFT only.
+  // Publishing (html/doc) requires the explicit Save changes button.
+  const contentDirty = data.doc !== draftBaseline.doc || data.html !== draftBaseline.html
   const saveTimeoutRef = useRef<NodeJS.Timeout>(null)
-  
+
   useEffect(() => {
-    // Only auto-save if it's not a new post, is dirty, and not currently saving
-    if (id !== 'new' && dirty && !saving) {
+    // Only autosave existing posts, only when editor content changed.
+    if (id !== 'new' && contentDirty) {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
-      
-      saveTimeoutRef.current = setTimeout(() => {
-        handleSave(true)
-      }, 5000)
+
+      const payload = { html: data.html || '', doc: data.doc || '' }
+      saveTimeoutRef.current = setTimeout(async () => {
+        const res = await saveDraft(id, payload.html, payload.doc)
+        if (res.success) {
+          setDraftBaseline(payload)
+          setHasStoredDraft(true)
+          setDraftSavedAt(Date.now())
+        }
+      }, 3000)
     }
-    
+
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
     }
-  }, [data, dirty, id, saving])
+  }, [data.doc, data.html, contentDirty, id])
 
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -123,6 +139,10 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
       if (!isAutoSave) {
         useToast.getState().toast('Saved successfully!')
       }
+      // The server cleared the draft and published this content atomically.
+      setDraftBaseline({ html: savePayload.html || '', doc: savePayload.doc || '' })
+      setHasStoredDraft(false)
+      setDraftSavedAt(0)
       if (id === 'new') {
         router.push(`/admin/publishing/${savePayload.slug}`)
       }
@@ -154,10 +174,47 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
             className="text-2xl font-display font-semibold py-3"
           />
 
-          <Tiptap 
+          {id !== 'new' && (contentDirty || hasStoredDraft) && (
+            <div className="flex items-center justify-between gap-3 rounded-lg border border-coral/40 bg-coral-soft/40 px-4 py-2.5">
+              <p className="font-mono text-[0.68rem] uppercase tracking-[0.12em] text-coral-ink">
+                {contentDirty
+                  ? 'Editing - autosaves to a private draft'
+                  : `Private draft saved${draftSavedAt ? ' ' + new Date(draftSavedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''} - not public yet`}
+              </p>
+              {hasStoredDraft && !contentDirty && (
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={async () => {
+                    const res = await discardDraft(id)
+                    if (res.success) {
+                      update({ html: initialData.html || '', doc: initialData.doc || '' })
+                      setDraftBaseline({ html: initialData.html || '', doc: initialData.doc || '' })
+                      setHasStoredDraft(false)
+                      setDraftSavedAt(0)
+                      useToast.getState().toast('Draft discarded - showing the published version')
+                      router.refresh()
+                    } else {
+                      setError(res.error || 'Failed to discard draft')
+                    }
+                  }}
+                  className="shrink-0 rounded-md px-2.5 py-1 font-mono text-[0.66rem] uppercase tracking-[0.12em] text-red-500 transition hover:bg-red-500/10"
+                >
+                  Discard draft
+                </button>
+              )}
+            </div>
+          )}
+
+          <Tiptap
+            key={hasStoredDraft ? `draft-${draftSavedAt}` : 'published'}
             initialContent={data.doc}
             onChange={(html, doc) => update({ html, doc })}
           />
+
+          <p className="font-mono text-[0.66rem] uppercase tracking-[0.12em] text-ink-soft">
+            Typing autosaves to a private draft. Nothing goes live until you press Save changes.
+          </p>
           
           <Panel title="Excerpt">
             <Textarea

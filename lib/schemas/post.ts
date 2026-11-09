@@ -56,6 +56,14 @@ export const postSchema = z.object({
   /** Tiptap JSON, serialised. Round-trips the editor; never rendered. */
   doc: z.string().max(MAX_DOC).default(''),
 
+  /** Private working copy. Editor autosave writes here only; the public site
+   *  always reads html/doc above. An explicit "Save changes" copies the draft
+   *  into html/doc atomically and clears these three fields. */
+  draftHtml: z.string().max(MAX_HTML, { error: 'This draft is too long to store.' }).default(''),
+  draftDoc: z.string().max(MAX_DOC).default(''),
+  /** Epoch ms of the last autosave into the draft. 0 = no private draft. */
+  draftUpdatedAt: z.number().int().default(0),
+
   status: z.enum(POST_STATUSES).default('draft'),
   /** Epoch ms. 0 means never published. */
   publishedAt: z.number().int().min(0).default(0),
