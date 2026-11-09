@@ -95,7 +95,7 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
       {hero.scribble ? (
         <StickyNote
           rotate={4}
-          className="absolute -bottom-8 -left-6 z-30 max-w-[11rem] whitespace-pre-line sm:-left-10"
+          className="absolute -bottom-10 -left-8 z-30 max-w-[11rem] whitespace-pre-line sm:-left-14"
         >
           {hero.scribble}
         </StickyNote>
