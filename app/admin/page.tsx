@@ -22,7 +22,7 @@ import { safeCount, safeList } from '@/lib/store'
 import { BLOCKING_STATUSES, BOOKINGS_COLLECTION, bookingSchema } from '@/lib/schemas/booking'
 import { MEDIA_COLLECTION } from '@/lib/schemas/media'
 import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
-import { SERVICES_COLLECTION, formatPrice } from '@/lib/schemas/service'
+import { SERVICES_COLLECTION, formatPrice, serviceSchema } from '@/lib/schemas/service'
 import { SUBSCRIBERS_COLLECTION } from '@/lib/schemas/subscriber'
 import { timeAgo } from '@/lib/utils'
 
@@ -43,6 +43,15 @@ function startOfWeek(now: Date): Date {
   return new Date(mondayIstAsUtc - IST)
 }
 
+/** "Live" alone reads as "bookable"; say what is actually true. */
+function serviceHint(activeServices: { bookingOpen?: boolean }[]): string {
+  const n = activeServices.length
+  if (n === 0) return 'No services live yet'
+  const bookable = activeServices.filter((s) => s.bookingOpen).length
+  const noun = `${n} service${n === 1 ? '' : 's'} live`
+  return bookable > 0 ? `${noun}, ${bookable} bookable` : `${noun}, booking closed`
+}
+
 import { ANALYTICS_COLLECTION } from '@/lib/schemas/analytics'
 
 export default async function AdminDashboard() {
@@ -55,7 +64,7 @@ export default async function AdminDashboard() {
     drafts,
     subscribers,
     mediaCount,
-    services,
+    activeServices,
     future,
     paidThisWeek,
     recentPosts,
@@ -65,7 +74,13 @@ export default async function AdminDashboard() {
     safeCount(POSTS_COLLECTION, [['status', '==', 'draft']]),
     safeCount(SUBSCRIBERS_COLLECTION, [['status', '==', 'active']]),
     safeCount(MEDIA_COLLECTION),
-    safeCount(SERVICES_COLLECTION, [['active', '==', true]]),
+    // A list, not a count: bookability lives on each service (bookingOpen),
+    // and a second equality filter would need a composite index that
+    // safeCount would silently swallow as zero.
+    safeList(SERVICES_COLLECTION, serviceSchema, {
+      where: [['active', '==', true]],
+      limit: 200,
+    }),
     safeList(BOOKINGS_COLLECTION, bookingSchema, {
       where: [['startISO', '>=', nowISO]],
       orderBy: ['startISO', 'asc'],
@@ -131,11 +146,7 @@ export default async function AdminDashboard() {
         <StatCard
           label="Booked ahead"
           value={bookedLabel}
-          hint={
-            services > 0
-              ? `${services} service${services === 1 ? '' : 's'} live`
-              : 'No services live yet'
-          }
+          hint={serviceHint(activeServices)}
           href="/admin/bookings"
           tone={booked.length > 0 ? 'accent' : 'default'}
         />
