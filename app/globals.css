@@ -349,3 +349,8 @@
     text-decoration-color: var(--color-coral);
   }
 }
+
+/* Never stack the newsletter popup under/over the open chat widget. */
+body[data-chat-open='true'] .newsletter-popup {
+  display: none;
+}

@@ -93,6 +93,15 @@ export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: str
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [msgs, open])
 
+  // While the chat is open, hide the newsletter popup so the two never
+  // stack or cover each other's controls on narrow screens.
+  useEffect(() => {
+    document.body.dataset.chatOpen = open ? 'true' : ''
+    return () => {
+      document.body.dataset.chatOpen = ''
+    }
+  }, [open])
+
   const send = (text: string) => {
     const q = text.trim()
     if (!q) return

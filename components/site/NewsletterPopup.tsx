@@ -20,7 +20,7 @@ export function NewsletterPopup() {
 
   if (status === 'success') {
     return (
-      <div className="fixed bottom-6 left-6 z-50 w-80 rounded-xl bg-paper p-6 shadow-lift ring-1 ring-rule animate-in slide-in-from-bottom-5">
+      <div className="newsletter-popup fixed bottom-6 left-4 z-50 w-[calc(100vw-7rem)] max-w-80 sm:left-6 rounded-xl bg-paper p-6 shadow-lift ring-1 ring-rule animate-in slide-in-from-bottom-5">
         <button 
           onClick={() => setIsOpen(false)}
           className="absolute right-4 top-4 text-ink-soft hover:text-ink"
@@ -34,7 +34,7 @@ export function NewsletterPopup() {
   }
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 w-80 rounded-xl bg-paper p-6 shadow-lift ring-1 ring-rule animate-in slide-in-from-bottom-5">
+    <div className="newsletter-popup fixed bottom-6 left-4 z-50 w-[calc(100vw-7rem)] max-w-80 sm:left-6 rounded-xl bg-paper p-6 shadow-lift ring-1 ring-rule animate-in slide-in-from-bottom-5">
       <button 
         onClick={() => setIsOpen(false)}
         className="absolute right-4 top-4 text-ink-soft hover:text-ink"
