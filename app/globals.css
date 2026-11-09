@@ -331,8 +331,8 @@
 }
 
 .flow-mask {
-  mask-image: linear-gradient(to right, transparent, black 6%, black calc(100% - 9rem), transparent calc(100% - 5rem));
-  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black calc(100% - 9rem), transparent calc(100% - 5rem));
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
 }
 
 /* ---------------------------------------------------------------------------
