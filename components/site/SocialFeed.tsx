@@ -14,9 +14,11 @@ declare global {
 }
 
 export type LinkedInEmbed = {
-  /** Post URN, e.g. urn:li:share:7123456789012345678 or urn:li:ugcPost:... */
+  /** Post URN, e.g. urn:li:activity:7518994437042044928 */
   urn: string
   label?: string
+  /** Display date, e.g. "Oct 22, 2026" */
+  date?: string
 }
 
 export function SocialFeed({
@@ -63,7 +65,7 @@ export function SocialFeed({
         Elsewhere
       </p>
       <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-        Latest posts
+        Around the web
       </h2>
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         {xHandle && (
@@ -81,20 +83,19 @@ export function SocialFeed({
                 @{xHandle} ↗
               </a>
             </div>
-            <div ref={xRef} className="min-h-[12rem]">
+            <div ref={xRef}>
               {xFailed ? (
-                <p className="text-sm text-ink-soft">
-                  The live timeline could not load here.{' '}
-                  <a
-                    className="text-coral-ink underline"
-                    href={`https://x.com/${xHandle}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Read the latest posts on X
-                  </a>
-                  .
-                </p>
+                <a
+                  href={`https://x.com/${xHandle}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-rule bg-paper-deep/40 px-4 py-3 transition hover:border-coral/50"
+                >
+                  <span className="text-sm text-ink">Latest posts on X</span>
+                  <span className="font-mono text-xs text-coral-ink">
+                    @{xHandle} ↗
+                  </span>
+                </a>
               ) : (
                 <a
                   className="twitter-timeline"
@@ -112,7 +113,7 @@ export function SocialFeed({
           <div className="rounded-2xl border border-rule bg-card p-5">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-mono text-xs uppercase tracking-widest text-ink-soft">
-                On LinkedIn
+                Selected LinkedIn posts
               </h3>
               <a
                 href={linkedinProfileUrl}
@@ -126,14 +127,19 @@ export function SocialFeed({
             {linkedinPosts.length > 0 ? (
               <div className="flex flex-col gap-6">
                 {linkedinPosts.map((p) => (
-                  <iframe
-                    key={p.urn}
-                    src={`https://www.linkedin.com/embed/feed/update/${encodeURIComponent(p.urn)}`}
-                    title={p.label ?? 'LinkedIn post'}
-                    className="h-[570px] w-full border-0"
-                    loading="lazy"
-                    allowFullScreen
-                  />
+                  <div key={p.urn}>
+                    <p className="mb-2 font-mono text-[11px] text-ink-soft">
+                      {p.label}
+                      {p.date ? ` - ${p.date}` : ''}
+                    </p>
+                    <iframe
+                      src={`https://www.linkedin.com/embed/feed/update/${encodeURIComponent(p.urn)}`}
+                      title={p.label ?? 'LinkedIn post'}
+                      className="h-[570px] w-full border-0"
+                      loading="lazy"
+                      allowFullScreen
+                    />
+                  </div>
                 ))}
               </div>
             ) : (

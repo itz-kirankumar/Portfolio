@@ -161,10 +161,12 @@ export default async function HomePage() {
             {
               urn: 'urn:li:activity:7518994437042044928',
               label: 'Are you a real student at Masters Union, or is it just good marketing?',
+              date: 'Oct 22, 2026',
             },
             {
               urn: 'urn:li:activity:7507751820883255298',
               label: "Term 01 at Masters' Union: My Honest Experience",
+              date: 'Sep 21, 2026',
             },
           ]}
         />
