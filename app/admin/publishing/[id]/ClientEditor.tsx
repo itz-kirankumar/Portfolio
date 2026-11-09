@@ -136,8 +136,18 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
       setData(savePayload)
     }
 
-    const result = await savePost(savePayload.slug || id, savePayload)
-    
+    // A server-action call can reject outright (deploy cutover, dropped
+    // connection). Uncaught, saving stays true forever: a stuck "Saving…"
+    // with no error and no way to tell the save never happened.
+    let result: Awaited<ReturnType<typeof savePost>>
+    try {
+      result = await savePost(savePayload.slug || id, savePayload)
+    } catch (e: any) {
+      setSaving(false)
+      setError(e?.message ? `Save failed: ${e.message}` : 'Save failed - the request never completed. Check the connection and retry.')
+      return
+    }
+
     setSaving(false)
         if (result.success) {
       if (!isAutoSave) {
