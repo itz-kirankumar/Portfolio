@@ -55,14 +55,14 @@ function CommentItem({
 
   const submitReply = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!replyName.trim() || !replyText.trim()) return
+    if (!replyText.trim()) return
     setLoading(true)
     
     const newReply = { 
       id: Date.now().toString(), 
       postId, 
       parentId: c.id,
-      name: replyName, 
+      name: replyName.trim() || 'Anonymous', 
       text: replyText, 
       createdAt: Date.now(), 
       status: 'approved' as const,
@@ -126,7 +126,7 @@ function CommentItem({
                   value={replyName}
                   onChange={e => setReplyName(e.target.value)}
                   className="w-full rounded-md border border-rule bg-paper px-3 py-2 text-sm text-ink focus:border-coral focus:outline-none"
-                  placeholder="Your Name (Anonymous)"
+                  placeholder="Name (optional - posts as Anonymous)"
                 />
               </div>
               <div className="mb-3">
@@ -195,13 +195,13 @@ export function CommentsList({ postId, initialComments = [] }: { postId: string,
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim() || !text.trim()) return
+    if (!text.trim()) return
     setLoading(true)
     
     const newComment = { 
       id: Date.now().toString(), 
       postId, 
-      name, 
+      name: name.trim() || 'Anonymous', 
       text, 
       createdAt: Date.now(), 
       status: 'approved' as const,
@@ -211,6 +211,7 @@ export function CommentsList({ postId, initialComments = [] }: { postId: string,
     setComments([newComment, ...comments])
     setName('')
     setText('')
+    setComposerOpen(false)
     
     const res = await postComment(postId, newComment.name, newComment.text)
     if (!res.ok) {
@@ -228,64 +229,74 @@ export function CommentsList({ postId, initialComments = [] }: { postId: string,
   const rootComments = comments.filter(c => !c.parentId).sort((a, b) => b.createdAt - a.createdAt)
   const allReplies = comments.filter(c => c.parentId)
 
+  const [composerOpen, setComposerOpen] = useState(false)
+
   return (
     <div className="mt-16 text-left" id="comments">
-      <h3 className="font-display text-2xl font-bold text-ink mb-8">Responses ({comments.length})</h3>
-      
-      <form onSubmit={handleSubmit} className="mb-12 bg-card p-6 sm:p-8 rounded-2xl border border-rule shadow-sm">
-        <h4 className="font-semibold mb-4 text-ink">Join the conversation</h4>
-        <div className="grid grid-cols-1 gap-4 mb-4">
-          <div>
-            <input 
-              type="text" 
-              required 
+      <h3 className="font-display text-2xl font-bold text-ink mb-6">Responses{comments.length > 0 ? ` (${comments.length})` : ''}</h3>
+
+      {/* Progressive composer: one calm line that expands when engaged. */}
+      <form
+        onSubmit={handleSubmit}
+        className={`mb-8 rounded-2xl border bg-card transition-all duration-300 ${composerOpen || text ? 'border-coral/40 p-4 sm:p-5' : 'border-rule p-3 sm:p-4'}`}
+      >
+        <textarea
+          required
+          value={text}
+          onFocus={() => setComposerOpen(true)}
+          onChange={e => setText(e.target.value)}
+          rows={composerOpen || text ? 3 : 1}
+          className="w-full resize-y rounded-lg border border-rule bg-paper px-4 py-2.5 text-ink focus:border-coral focus:outline-none transition-all placeholder:text-ink-soft/60"
+          placeholder="Share your thoughts…"
+        />
+        {(composerOpen || text) && (
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center animate-in fade-in slide-in-from-top-1">
+            <input
+              type="text"
+              required
               value={name}
               onChange={e => setName(e.target.value)}
-              className="w-full rounded-lg border border-rule bg-paper px-4 py-2.5 text-ink focus:border-coral focus:ring-1 focus:ring-coral focus:outline-none transition-shadow"
-              placeholder="Your Name (Anonymous)"
+              className="w-full sm:max-w-[16rem] rounded-lg border border-rule bg-paper px-4 py-2 text-sm text-ink focus:border-coral focus:outline-none placeholder:text-ink-soft/60"
+              placeholder="Name (or stay Anonymous)"
             />
-          </div>
-          <div>
-            <textarea 
-              required 
-              value={text}
-              onChange={e => setText(e.target.value)}
-              className="w-full rounded-lg border border-rule bg-paper px-4 py-3 text-ink focus:border-coral focus:ring-1 focus:ring-coral focus:outline-none transition-shadow min-h-[100px]"
-              placeholder="What are your thoughts on this?"
-            />
-          </div>
-        </div>
-        <div className="flex justify-end">
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="rounded-full bg-coral px-6 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-coral-deep disabled:opacity-50 disabled:hover:translate-y-0 flex items-center gap-2 shadow-sm"
-          >
-            {loading ? <Loader2 className="size-4 animate-spin" /> : 'Post Response'}
-          </button>
-        </div>
-      </form>
-
-      <div className="bg-card rounded-2xl border border-rule p-6 sm:p-8 shadow-sm">
-        {rootComments.length > 0 ? (
-          <div>
-            {rootComments.map(c => (
-              <CommentItem 
-                key={c.id} 
-                c={c} 
-                postId={postId}
-                replies={allReplies.filter(r => r.parentId === c.id).sort((a, b) => a.createdAt - b.createdAt)} 
-                onReplyAdded={handleReplyAdded}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <MessageCircle className="size-12 text-rule mx-auto mb-4" />
-            <p className="text-ink-soft">No responses yet. Be the first to share your thoughts!</p>
+            <div className="flex items-center gap-2 sm:ml-auto">
+              <button
+                type="button"
+                onClick={() => { setComposerOpen(false); setText(''); }}
+                className="px-3 py-2 text-xs font-medium text-ink-soft hover:text-ink"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="rounded-full bg-coral px-5 py-2 text-sm font-medium text-white transition hover:bg-coral-deep disabled:opacity-50 flex items-center gap-2"
+              >
+                {loading ? <Loader2 className="size-4 animate-spin" /> : 'Post'}
+              </button>
+            </div>
           </div>
         )}
-      </div>
+      </form>
+
+      {rootComments.length > 0 ? (
+        <div className="bg-card rounded-2xl border border-rule p-5 sm:p-6">
+          {rootComments.map(c => (
+            <CommentItem
+              key={c.id}
+              c={c}
+              postId={postId}
+              replies={allReplies.filter(r => r.parentId === c.id).sort((a, b) => a.createdAt - b.createdAt)}
+              onReplyAdded={handleReplyAdded}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="flex items-center gap-2 text-sm text-ink-soft/70">
+          <MessageCircle className="size-4" />
+          No responses yet - yours could be the first.
+        </p>
+      )}
     </div>
   )
 }

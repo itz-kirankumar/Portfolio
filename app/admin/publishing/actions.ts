@@ -1,10 +1,29 @@
 "use server"
 
-import { putDoc } from '@/lib/store'
+import { putDoc, deleteDocById } from '@/lib/store'
 import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
 import { revalidatePath } from 'next/cache'
+import { getOwnerSession } from '@/lib/guard'
+
+export async function deletePost(id: string) {
+  if (!(await getOwnerSession())) {
+    return { success: false, error: 'Not authorised.' }
+  }
+  try {
+    await deleteDocById(POSTS_COLLECTION, id)
+    revalidatePath('/admin/publishing')
+    revalidatePath('/writing')
+    revalidatePath(`/writing/${id}`)
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to delete post' }
+  }
+}
 
 export async function savePost(id: string, data: any) {
+  if (!(await getOwnerSession())) {
+    return { success: false, error: 'Not authorised.' }
+  }
   try {
     // Auto-generate slug if empty
     if (!data.slug) {
