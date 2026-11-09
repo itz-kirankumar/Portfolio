@@ -13,6 +13,7 @@ export function WorkCover({ work, className }: { work: Work; className?: string 
     // GitHub's OpenGraph cards carry the full repo identity; cropping them
     // (object-cover) cuts the project name, so show the whole card.
     const isRepoCard = work.coverUrl.includes('opengraph.githubassets.com')
+    const isWorkflowCanvas = work.coverUrl.startsWith('/works/n8n/')
     return (
       <div className={cn('overflow-hidden', isRepoCard ? 'bg-[#121212]' : 'bg-paper-deep', className)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -25,7 +26,7 @@ export function WorkCover({ work, className }: { work: Work; className?: string 
             // GitHub's OpenGraph card is white-on-light; invert it into the
             // site's dark palette (hue-rotate keeps the accent colours true)
             // instead of dimming a white rectangle.
-            isRepoCard ? 'object-contain [filter:invert(0.93)_hue-rotate(180deg)_saturate(0.85)]' : 'object-cover'
+            isRepoCard ? 'object-contain [filter:invert(0.93)_hue-rotate(180deg)_saturate(0.85)]' : isWorkflowCanvas ? 'object-contain' : 'object-cover'
           )}
         />
       </div>
