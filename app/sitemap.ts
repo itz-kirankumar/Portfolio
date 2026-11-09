@@ -6,7 +6,7 @@ import { PAGES_COLLECTION, pageSchema } from '@/lib/schemas/page'
 import { getWorks } from '@/lib/works'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kirankumarg.com'
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kirankumarg.me'
 
   const [posts, services, pages, works] = await Promise.all([
     safeList(POSTS_COLLECTION, postSchema),

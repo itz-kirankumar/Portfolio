@@ -36,7 +36,7 @@ import { ClarityLoader } from '@/components/site/ClarityLoader'
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getCachedSiteContent()
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kirankumarg.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kirankumarg.me'
   
   return {
     metadataBase: new URL(siteUrl),

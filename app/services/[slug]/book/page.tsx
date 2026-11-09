@@ -209,7 +209,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
           <NotebookCard className="mt-10">
             {(bookingClosed || paidButNoInvite) ? (
               <div className="text-center py-8">
-                <p className="font-display text-xl font-semibold text-ink">Booking opens again shortly</p>
+                <p className="font-display text-xl font-semibold text-ink">Booking opens soon</p>
                 <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">
                   Online booking for this session opens soon - the schedule and session details are being
                   finalised. No payment is taken while this notice is up. Please check back shortly.

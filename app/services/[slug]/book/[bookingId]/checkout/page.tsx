@@ -74,7 +74,7 @@ export default async function CheckoutPage({
               <NotebookCard>
                 <SectionHead
                   align="center"
-                  heading="Payment opens again shortly"
+                  heading="Payment opens soon"
                   intro={`Your ${service.title} slot request is saved. Online payment opens soon while the session details are being finalised - no payment is taken until then. This link keeps working, so please check back shortly.`}
                 />
               </NotebookCard>
