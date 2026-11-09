@@ -10,22 +10,22 @@
 --------------------------------------------------------------------------- */
 
 @theme {
-  --color-paper: #fbf7f0;
-  --color-paper-deep: #f3ece0;
-  --color-card: #fffdf8;
+  --color-paper: #111114;
+  --color-paper-deep: #0b0b0e;
+  --color-card: #1b1b21;
 
-  --color-ink: #1a1815;
-  --color-ink-soft: #5a554c;
-  --color-rule: #e2d9ca;
+  --color-ink: #f3f0e9;
+  --color-ink-soft: #a8a398;
+  --color-rule: #2b2b33;
 
   /* Coral. Split three ways so the look survives WCAG AA:
      - coral       decorative only (highlighter, tape, rules, display words)
      - coral-deep  filled CTA background; white on it = 4.54:1
      - coral-ink   small text and links; on paper = 5.36:1       */
-  --color-coral: #e8543f;
-  --color-coral-deep: #d6402a;
-  --color-coral-ink: #b83a22;
-  --color-coral-soft: #fbe3dd;
+  --color-coral: #ff6a52;
+  --color-coral-deep: #e8543f;
+  --color-coral-ink: #ff8a70;
+  --color-coral-soft: #3a1f1a;
 
   --color-slate-deep: #141414;
 
@@ -64,7 +64,7 @@
   html {
   scroll-behavior: smooth;
     /* Sticky nav + in-page anchors */
-    scroll-padding-top: 5.5rem;
+    scroll-padding-top: 8rem;
     background-color: var(--color-paper);
     color: var(--color-ink);
     -webkit-tap-highlight-color: transparent;
@@ -96,12 +96,12 @@
     background: var(--color-paper-deep);
   }
   ::-webkit-scrollbar-thumb {
-    background: #cfc4b1;
+    background: #3a3a44;
     border-radius: 6px;
     border: 2px solid var(--color-paper-deep);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #b9ab94;
+    background: #4a4a56;
   }
 
   /* Kill every animation and transition for users who ask for it. Declared

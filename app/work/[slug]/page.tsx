@@ -9,7 +9,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getCachedSiteContent } from '@/lib/site'
 import { getWork, getWorks } from '@/lib/works'
-import { UtilityBar, SiteNav, SiteFooter } from '@/components/site/Chrome'
+import { WorkCover } from '@/components/site/WorkCover'
+import { SiteNav, SiteFooter } from '@/components/site/Chrome'
+import { getTickItems } from '@/lib/ticker'
 import { Section } from '@/components/ui/primitives'
 import { cn } from '@/lib/utils'
 import { KIND_LABEL, STATUS_LABEL } from '@/lib/schemas/work'
@@ -45,6 +47,7 @@ export default async function WorkDetailPage({ params }: { params: Promise<{ slu
   if (!work) notFound()
 
   const { meta } = content
+  const tickItems = await getTickItems()
   const paragraphs = work.body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
   const idx = all.findIndex((w) => w.id === work.id)
   const prev = idx > 0 ? all[idx - 1] : null
@@ -52,12 +55,12 @@ export default async function WorkDetailPage({ params }: { params: Promise<{ slu
 
   return (
     <>
-      <UtilityBar utility={content.utility} />
-      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} />
+      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} tickItems={tickItems} />
 
       <main>
         <Section tone="paper" compact>
-          <div className="max-w-3xl">
+          <WorkCover work={work} className="aspect-[21/9] w-full rounded-2xl ring-1 ring-rule" />
+          <div className="mt-10 max-w-3xl">
             <p className="font-mono text-[0.68rem] uppercase tracking-[0.16em] text-ink-soft">
               <Link href="/work" className="text-coral-ink hover:underline">
                 all works

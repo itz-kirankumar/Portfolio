@@ -3,7 +3,8 @@ import { safeGet } from '@/lib/store'
 import { BOOKINGS_COLLECTION, bookingSchema } from '@/lib/schemas/booking'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
 import { getCachedSiteContent } from '@/lib/site'
-import { UtilityBar, SiteNav, SiteFooter } from '@/components/site/Chrome'
+import { SiteNav, SiteFooter } from '@/components/site/Chrome'
+import { getTickItems } from '@/lib/ticker'
 import { Section, NotebookCard, SectionHead } from '@/components/ui/primitives'
 import Razorpay from 'razorpay'
 import { RazorpayClient } from '../../RazorpayClient'
@@ -28,6 +29,7 @@ export default async function CheckoutPage({
 
   const content = await getCachedSiteContent()
   const meta = content.meta
+  const tickItems = await getTickItems()
 
   let orderId = booking.payment?.orderId
 
@@ -40,8 +42,7 @@ export default async function CheckoutPage({
   if (!paymentsReady) {
     return (
       <>
-        <UtilityBar utility={content.utility} />
-        <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} />
+        <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} tickItems={tickItems} />
         <main className="min-h-[80vh] flex flex-col justify-center bg-paper">
           <Section tone="paper">
             <div className="mx-auto max-w-xl text-center">
@@ -80,8 +81,7 @@ export default async function CheckoutPage({
 
   return (
     <>
-      <UtilityBar utility={content.utility} />
-      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} />
+      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} tickItems={tickItems} />
       
       <main className="min-h-[80vh] flex flex-col justify-center bg-paper">
         <Section tone="paper">

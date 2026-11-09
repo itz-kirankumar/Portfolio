@@ -1,6 +1,7 @@
 // components/site/Hero.tsx
 
 import { Button, CredPill, Eyebrow, Highlight, Polaroid, StickyNote } from '@/components/ui/primitives'
+import { normalizeHref } from '@/lib/nav-href'
 import Reveal from '@/components/ui/Reveal'
 import type { CredsContent, HeroContent, Meta, ProofContent } from '@/types/site'
 
@@ -27,7 +28,7 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
       </Reveal>
 
       <Reveal kind="up" delay={60}>
-        <h1 className={`font-display text-balance-tight text-[clamp(2.6rem,7.6vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-ink ${isStacked ? 'mx-auto' : ''}`}>
+        <h1 className={`font-display text-balance-tight text-[clamp(2.9rem,9vw,7rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-ink ${isStacked ? 'mx-auto' : ''}`}>
           {hero.headlineBefore}{' '}
           {hero.headlineHighlight ? (
             <Highlight>{hero.headlineHighlight}</Highlight>
@@ -44,10 +45,10 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
 
       <Reveal kind="up" delay={180}>
         <div className={`mt-9 flex flex-wrap items-center gap-3 ${isStacked ? 'justify-center' : ''}`}>
-          <Button href={hero.primaryCta.href} variant="solid" size="lg">
+          <Button href={normalizeHref(hero.primaryCta.href)} variant="solid" size="lg">
             {hero.primaryCta.label}
           </Button>
-          <Button href={hero.secondaryCta.href} variant="outline" size="lg">
+          <Button href={normalizeHref(hero.secondaryCta.href)} variant="outline" size="lg">
             {hero.secondaryCta.label}
           </Button>
           {meta.resumeUrl ? (

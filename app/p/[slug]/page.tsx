@@ -2,7 +2,8 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { safeList } from '@/lib/store'
 import { PAGES_COLLECTION, pageSchema } from '@/lib/schemas/page'
-import { SiteFooter, SiteNav, UtilityBar } from '@/components/site/Chrome'
+import { SiteFooter, SiteNav } from '@/components/site/Chrome'
+import { getTickItems } from '@/lib/ticker'
 import { getCachedSiteContent } from '@/lib/site'
 
 export const revalidate = 3600
@@ -57,11 +58,11 @@ export default async function CustomPageRender({ params, searchParams }: Props) 
 
   const content = await getCachedSiteContent()
   const { meta } = content
+  const tickItems = await getTickItems()
 
   return (
     <>
-      <UtilityBar utility={content.utility} />
-      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} />
+      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} tickItems={tickItems} />
 
       <main className="min-h-screen bg-paper pb-16 pt-16 sm:pb-24 sm:pt-24 lg:pb-32 lg:pt-32">
         <article>

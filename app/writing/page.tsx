@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
-import { SiteFooter, SiteNav, UtilityBar } from '@/components/site/Chrome'
+import { SiteFooter, SiteNav } from '@/components/site/Chrome'
+import { getTickItems } from '@/lib/ticker'
 import { getCachedSiteContent } from '@/lib/site'
 import { Section } from '@/components/ui/primitives'
 import { safeList } from '@/lib/store'
@@ -28,6 +29,7 @@ const dateFmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric
 export default async function WritingIndexPage() {
   const content = await getCachedSiteContent()
   const { meta } = content
+  const tickItems = await getTickItems()
 
   const rawPosts = await safeList(POSTS_COLLECTION, postSchema, {
     where: [['status', '==', 'published']],
@@ -52,8 +54,7 @@ export default async function WritingIndexPage() {
 
   return (
     <>
-      <UtilityBar utility={content.utility} />
-      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} />
+      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} tickItems={tickItems} />
 
       <main className="min-h-screen">
         <Section tone="paper" className="paper-grain">

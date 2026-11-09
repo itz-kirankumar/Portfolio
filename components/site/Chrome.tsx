@@ -68,6 +68,38 @@ export function UtilityBar({ utility }: { utility: UtilityContent }) {
   )
 }
 
+/* --------------------------------------------------------------- Ticker --- */
+
+/* The always-on status strip: a black marquee pinned above the nav inside the
+   same sticky header, so it stays fixed while scrolling. Pure CSS animation;
+   the global prefers-reduced-motion rule flattens it. */
+export function StatusTicker({ items }: { items: string[] }) {
+  if (!items.length) return null
+  const seq = [...items, ...items]
+  return (
+    <div className="flow-row overflow-hidden bg-black py-2" aria-label="Status ticker">
+      <div
+        className="flow-track items-center"
+        style={{ ['--flow-duration' as string]: `${Math.max(28, items.length * 5)}s` }}
+      >
+        {[0, 1].map((half) => (
+          <ul key={half} aria-hidden={half === 1} className="flex shrink-0 items-center">
+            {seq.map((item, i) => (
+              <li
+                key={`${half}-${i}`}
+                className="flex shrink-0 items-center font-mono text-[0.64rem] uppercase tracking-[0.22em] text-white/75"
+              >
+                <span className="px-4">{item}</span>
+                <span aria-hidden="true" className="text-coral">✦</span>
+              </li>
+            ))}
+          </ul>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /* --------------------------------------------------------------- SiteNav --- */
 
 function ThemeToggle() {
@@ -104,24 +136,7 @@ function ThemeToggle() {
    CTA ('#contact') produced dead `/writing/[slug]#…` anchors on nested routes.
    These helpers normalise every shape so it resolves from any page. */
 
-function isExternal(href: string) {
-  return /^https?:|^mailto:|^tel:/.test(href)
-}
-
-/** Section anchors that have graduated to a dedicated page: the nav should
-    open that page, not scroll to the home-page teaser of the same name. The
-    stored nav still says '/#writing' (it lives in Firestore, not here), so the
-    remap happens at render time and needs no content edit. */
-const SECTION_ROUTES: Record<string, string> = {
-  '/#writing': '/writing',
-}
-
-/** Bare '#anchor' → '/#anchor' so it points at the home page from anywhere,
-    then redirect any anchor that now has a real page of its own. */
-function normalizeHref(href: string) {
-  const withSlash = href.startsWith('#') ? `/${href}` : href
-  return SECTION_ROUTES[withSlash] ?? withSlash
-}
+import { isExternal, normalizeHref } from '@/lib/nav-href'
 
 /** True when the link is the route the visitor is currently on. Home-page
     section anchors are never "page active" — they are parts of '/'. */
@@ -227,7 +242,7 @@ function SiteNavLink({
   )
 }
 
-export function SiteNav({ nav, resumeUrl, showThemeToggle }: { nav: NavContent; resumeUrl: string, showThemeToggle?: boolean }) {
+export function SiteNav({ nav, resumeUrl, showThemeToggle, tickItems = [] }: { nav: NavContent; resumeUrl: string, showThemeToggle?: boolean, tickItems?: string[] }) {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
@@ -258,14 +273,16 @@ export function SiteNav({ nav, resumeUrl, showThemeToggle }: { nav: NavContent; 
   )
 
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-50 transition-all duration-300',
-        scrolled
-          ? 'border-b border-rule bg-paper/85 backdrop-blur-md'
-          : 'border-b border-transparent bg-transparent'
-      )}
-    >
+    <header className="sticky top-0 z-50">
+      <StatusTicker items={tickItems} />
+      <div
+        className={cn(
+          'transition-all duration-300',
+          scrolled
+            ? 'border-b border-rule bg-paper/85 backdrop-blur-md'
+            : 'border-b border-transparent bg-paper/60 backdrop-blur-md'
+        )}
+      >
       <nav className="gutter flex h-16 items-center justify-between gap-6">
         {/* Logo: scroll to top on the home page, otherwise route home. */}
         {onHome ? (
@@ -368,6 +385,7 @@ export function SiteNav({ nav, resumeUrl, showThemeToggle }: { nav: NavContent; 
             />
           </li>
         </ul>
+      </div>
       </div>
     </header>
   )

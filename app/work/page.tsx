@@ -8,9 +8,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getCachedSiteContent } from '@/lib/site'
 import { getWorks } from '@/lib/works'
-import { UtilityBar, SiteNav, SiteFooter } from '@/components/site/Chrome'
+import { SiteNav, SiteFooter } from '@/components/site/Chrome'
+import { getTickItems } from '@/lib/ticker'
 import { Section, SectionHead } from '@/components/ui/primitives'
 import { cn } from '@/lib/utils'
+import { WorkCover } from '@/components/site/WorkCover'
 import { KIND_LABEL, STATUS_LABEL } from '@/lib/schemas/work'
 
 export const revalidate = 3600
@@ -29,11 +31,11 @@ const STATUS_DOT: Record<string, string> = {
 export default async function WorkIndexPage() {
   const [content, works] = await Promise.all([getCachedSiteContent(), getWorks()])
   const { meta } = content
+  const tickItems = await getTickItems()
 
   return (
     <>
-      <UtilityBar utility={content.utility} />
-      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} />
+      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} tickItems={tickItems} />
 
       <main>
         <Section tone="paper" compact>
@@ -48,8 +50,10 @@ export default async function WorkIndexPage() {
               <li key={w.id} className="h-full">
                 <Link
                   href={`/work/${w.slug}`}
-                  className="group flex h-full flex-col rounded-xl bg-card p-6 shadow-paper ring-1 ring-rule transition duration-300 hover:-translate-y-1 hover:shadow-lift"
+                  className="group flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-paper ring-1 ring-rule transition duration-300 hover:-translate-y-1 hover:shadow-lift hover:ring-coral/50"
                 >
+                  <WorkCover work={w} className="aspect-[16/10] w-full" />
+                  <div className="flex flex-1 flex-col p-6">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-ink-soft">
                       {KIND_LABEL[w.kind]}
@@ -90,6 +94,7 @@ export default async function WorkIndexPage() {
                       →
                     </span>
                   </span>
+                  </div>
                 </Link>
               </li>
             ))}

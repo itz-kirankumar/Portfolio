@@ -10,21 +10,15 @@ import type { Metadata } from 'next'
 import { safeList } from '@/lib/store'
 import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
-import { SiteFooter, SiteNav, UtilityBar } from '@/components/site/Chrome'
-import { CredPills, Hero, ProofStrip } from '@/components/site/Hero'
+import { SiteFooter, SiteNav } from '@/components/site/Chrome'
+import { Hero } from '@/components/site/Hero'
 import { FlowWall, type FlowPost } from '@/components/site/Flow'
 import { getWorks } from '@/lib/works'
-import { Audiences, Projects, Ventures, Ways } from '@/components/site/Work'
+import { getTickItems } from '@/lib/ticker'
+
 import { ServicesList } from '@/components/site/ServicesList'
 import { Section, SectionHead } from '@/components/ui/primitives'
-import {
-  Closing,
-  Contrasts,
-  Gallery,
-  OneCard,
-  PointOfView,
-  Writing,
-} from '@/components/site/Voice'
+import { Closing, OneCard, Writing } from '@/components/site/Voice'
 import { getCachedSiteContent } from '@/lib/site'
 import { getCachedTheme } from '@/lib/theme'
 
@@ -49,15 +43,13 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-import { MEDIA_COLLECTION, mediaSchema } from '@/lib/schemas/media'
 
 export default async function HomePage() {
-  const [content, theme, allPosts, allServices, allMedia, allWorks] = await Promise.all([
+  const [content, theme, allPosts, allServices, allWorks] = await Promise.all([
     getCachedSiteContent(),
     getCachedTheme(),
     safeList(POSTS_COLLECTION, postSchema),
     safeList(SERVICES_COLLECTION, serviceSchema),
-    safeList(MEDIA_COLLECTION, mediaSchema),
     getWorks(),
   ])
   const { meta } = content
@@ -98,33 +90,11 @@ export default async function HomePage() {
       date: p.publishedAt || p.createdAt
         ? articleDateFormat.format(new Date(p.publishedAt || p.createdAt))
         : '',
+      coverUrl: p.coverUrl || '',
     }))
 
-  const tickItems = [
-    ...content.ventures.items.map(v => v.name),
-    ...activeServices.map(s => s.title),
-    ...allWorks.filter(w => w.status === 'building').map(w => `building: ${w.title}`),
-    content.utility.status,
-  ].filter(Boolean)
+  const tickItems = await getTickItems()
 
-  // Featured Media
-  const featuredMedia = allMedia.filter(m => m.featured)
-  if (featuredMedia.length > 0) {
-    // If the gallery isn't configured, provide a default
-    if (!content.gallery) content.gallery = { eyebrow: 'Featured', heading: 'Gallery', photos: [] }
-    
-    // Convert Media items to Gallery Photos
-    const mappedPhotos = featuredMedia.map(m => ({
-      src: m.kind === 'embed' ? m.thumbUrl || m.url : m.url,
-      alt: m.alt || m.title || '',
-      caption: m.caption || m.title || '',
-      url: m.url,
-      kind: m.kind
-    }))
-    
-    // Append or prepend them to the existing static ones
-    content.gallery.photos = [...content.gallery.photos, ...mappedPhotos]
-  }
 
   const personJsonLd = {
     '@context': 'https://schema.org',
@@ -166,17 +136,11 @@ export default async function HomePage() {
         }}
       />
 
-      <UtilityBar utility={content.utility} />
-      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} showThemeToggle={theme.darkMode === 'toggle'} />
+      <SiteNav nav={content.nav} resumeUrl={meta.resumeUrl} showThemeToggle={theme.darkMode === 'toggle'} tickItems={tickItems} />
 
       <main>
         {isVisible('hero') && <Hero hero={content.hero} meta={meta} layout={theme.heroLayout} />}
-        <FlowWall works={allWorks} posts={flowPosts} tickItems={tickItems} />
-        {isVisible('creds') && <CredPills creds={content.creds} />}
-        {isVisible('proof') && <ProofStrip proof={content.proof} />}
-        {isVisible('audiences') && <Audiences audiences={content.audiences} />}
-        {isVisible('ways') && <Ways ways={content.ways} />}
-
+        <FlowWall works={allWorks} posts={flowPosts} />
         {activeServices.length > 0 && isVisible('services') && (
           <Section id="services" tone="deep" compact>
             <SectionHead 
@@ -188,11 +152,6 @@ export default async function HomePage() {
           </Section>
         )}
 
-        {isVisible('ventures') && <Ventures ventures={content.ventures} />}
-        {isVisible('projects') && <Projects projects={content.projects} />}
-        {isVisible('pov') && <PointOfView pov={content.pov} />}
-        {isVisible('contrasts') && <Contrasts contrasts={content.contrasts} />}
-        {isVisible('gallery') && <Gallery gallery={content.gallery} />}
         {isVisible('writing') && <Writing writing={content.writing} />}
         {isVisible('oneCard') && <OneCard oneCard={content.oneCard} />}
         {isVisible('closing') && <Closing closing={content.closing} meta={meta} />}

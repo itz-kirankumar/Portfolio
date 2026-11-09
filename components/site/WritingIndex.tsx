@@ -10,7 +10,7 @@
 // never calls toLocaleDateString: formatting here would read the client's
 // timezone and mismatch the prerendered HTML on hydration.
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Search, X } from 'lucide-react'
@@ -220,6 +220,13 @@ export function WritingIndex({
 }) {
   const [query, setQuery] = useState('')
   const [activeTag, setActiveTag] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+
+  // Searching or filtering always shows every match; pagination only governs
+  // the default, unfiltered archive view.
+  useEffect(() => {
+    setPage(1)
+  }, [query, activeTag])
 
   // Frequency count of each topic
   const tagCounts = useMemo(() => {
@@ -260,15 +267,22 @@ export function WritingIndex({
   const featured = isDefault && posts.length > 0 ? posts[0] : null
   const listPosts = featured ? filtered.filter((p) => p.slug !== featured.slug) : filtered
 
+  const PAGE_SIZE = 12
+  const pageCount = Math.max(1, Math.ceil(listPosts.length / PAGE_SIZE))
+  const currentPage = Math.min(page, pageCount)
+  const pagedPosts = isDefault
+    ? listPosts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+    : listPosts
+
   const groups = useMemo(() => {
     const byYear = new Map<number, WritingIndexPost[]>()
-    for (const p of listPosts) {
+    for (const p of pagedPosts) {
       const arr = byYear.get(p.year)
       if (arr) arr.push(p)
       else byYear.set(p.year, [p])
     }
     return [...byYear.entries()].sort((a, b) => b[0] - a[0])
-  }, [listPosts])
+  }, [pagedPosts])
 
   const total = posts.length
   const countLabel = isDefault
@@ -390,7 +404,34 @@ export function WritingIndex({
                 </section>
               ))}
             </div>
-          ) : (
+          ) : null}
+
+          {/* Pagination: default archive view only; search/filter shows all matches */}
+          {isDefault && pageCount > 1 ? (
+            <nav aria-label="Writing pages" className="mt-12 flex items-center justify-between border-t border-rule pt-6">
+              <button
+                type="button"
+                onClick={() => setPage((v) => Math.max(1, v - 1))}
+                disabled={currentPage <= 1}
+                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[0.9rem] font-medium text-coral-ink ring-1 ring-rule transition hover:ring-coral/50 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+              >
+                <span aria-hidden="true">←</span> Newer
+              </button>
+              <p className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-ink-soft">
+                Page {currentPage} of {pageCount}
+              </p>
+              <button
+                type="button"
+                onClick={() => setPage((v) => Math.min(pageCount, v + 1))}
+                disabled={currentPage >= pageCount}
+                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[0.9rem] font-medium text-coral-ink ring-1 ring-rule transition hover:ring-coral/50 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+              >
+                Older <span aria-hidden="true">→</span>
+              </button>
+            </nav>
+          ) : null}
+
+          {groups.length === 0 ? (
             <div className="mt-14 rounded-xl border border-dashed border-rule px-6 py-14 text-center">
               <p className="font-hand text-2xl leading-snug text-ink-soft">
                 Nothing matches that yet.
@@ -406,7 +447,7 @@ export function WritingIndex({
                 Clear filters
               </button>
             </div>
-          )}
+          ) : null}
         </>
       ) : (
         <div className="mt-14 rounded-xl border border-dashed border-rule px-6 py-14">
