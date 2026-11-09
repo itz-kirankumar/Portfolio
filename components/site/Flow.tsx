@@ -124,7 +124,7 @@ function Lane({
   label: string
 }) {
   return (
-    <div className="flow-row flow-mask overflow-hidden pr-20 sm:pr-24" aria-label={label}>
+    <div className="flow-row flow-mask overflow-hidden" aria-label={label}>
       <div
         className={cn('flow-track', reverse && 'flow-track--reverse')}
         style={{ ['--flow-duration' as string]: `${Math.max(30, count * 7)}s` }}
@@ -169,6 +169,7 @@ export function FlowWall({
       </Section>
 
       <div className="space-y-4 pb-14 sm:pb-20">
+        {/* lanes keep the bottom-right lane clear of the floating chat button */}
         {works.length ? (
           <Lane count={works.length} label="Works: projects, ventures and tools">
             {works.map((w) => (
