@@ -176,7 +176,7 @@ export function FlowWall({
         <SectionHead
           eyebrow="the wall"
           heading="Everything I build and write, *always in motion*"
-          intro="Projects, ventures, tools and essays — fed automatically by whatever ships most recently. Hover a lane to slow it down; open any card for the full story."
+          intro="Projects, ventures, tools and essays — new writing flows in as it publishes, new works join as they ship. Hover a lane to slow it down; open any card for the full story."
         />
         <p className="mt-6">
           <Link
