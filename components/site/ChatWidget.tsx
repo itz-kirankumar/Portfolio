@@ -15,6 +15,13 @@ type Msg = { from: 'bot' | 'me'; text: string; links?: { href: string; label: st
 
 const RESUME_VARIANTS = ['Product Manager', "Founder's Office / Strategy", 'Technical']
 
+/** Visitor-selectable résumé PDFs (public files under /resumes). */
+const RESUME_URLS: Record<string, string> = {
+  'Product Manager': '/resumes/kiran-kumar-g-product-manager.pdf',
+  "Founder's Office / Strategy": '/resumes/kiran-kumar-g-founders-office-strategy.pdf',
+  Technical: '/resumes/kiran-kumar-g-technical.pdf',
+}
+
 const STOP = new Set(['the', 'a', 'an', 'of', 'and', 'or', 'to', 'in', 'on', 'for', 'is', 'it', 'his', 'he', 'what', 'who', 'how', 'does', 'do', 'did', 'about', 'me', 'my', 'you', 'your', 'kiran', 'kumar', 'tell', 'show', 'with', 'has', 'have', 'that', 'this', 'at', 'by'])
 
 function tokens(q: string): string[] {
@@ -26,8 +33,9 @@ function answer(q: string, resumeUrl: string, email: string): Msg {
 
   const pickedVariant = RESUME_VARIANTS.find((v) => lower === v.toLowerCase())
   if (pickedVariant) {
-    return resumeUrl
-      ? { from: 'bot', text: `Here is Kiran's ${pickedVariant} résumé (PDF).`, links: [{ href: resumeUrl, label: `Download ${pickedVariant} résumé` }] }
+    const url = RESUME_URLS[pickedVariant] || resumeUrl
+    return url
+      ? { from: 'bot', text: `Here is Kiran's ${pickedVariant} résumé (PDF).`, links: [{ href: url, label: `Download ${pickedVariant} résumé` }] }
       : { from: 'bot', text: `The ${pickedVariant} résumé PDF is being finalized and isn't published yet. Email Kiran and he will send it: ${email}`, links: [{ href: `mailto:${email}?subject=${encodeURIComponent(`Résumé request (${pickedVariant})`)}`, label: 'Email Kiran' }] }
   }
   if (/resume|résumé|cv/.test(lower)) {

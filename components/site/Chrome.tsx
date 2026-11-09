@@ -136,7 +136,7 @@ function ThemeToggle() {
    CTA ('#contact') produced dead `/writing/[slug]#…` anchors on nested routes.
    These helpers normalise every shape so it resolves from any page. */
 
-import { isExternal, normalizeHref } from '@/lib/nav-href'
+import { isExternal, normalizeHref, normalizeNavLinks } from '@/lib/nav-href'
 
 /** True when the link is the route the visitor is currently on. Home-page
     section anchors are never "page active" — they are parts of '/'. */
@@ -304,7 +304,7 @@ export function SiteNav({ nav, resumeUrl, showThemeToggle, tickItems = [] }: { n
         )}
 
         <ul className="hidden items-center gap-7 md:flex">
-          {nav.links.map((link) => (
+          {normalizeNavLinks(nav.links).map((link) => (
             <li key={link.href + link.label}>
               <SiteNavLink href={link.href} label={link.label} newTab={link.newTab} variant="desktop" pathname={pathname} />
             </li>
@@ -363,7 +363,7 @@ export function SiteNav({ nav, resumeUrl, showThemeToggle, tickItems = [] }: { n
         )}
       >
         <ul className="gutter flex flex-col py-3">
-          {nav.links.map((link) => (
+          {normalizeNavLinks(nav.links).map((link) => (
             <li key={link.href + link.label}>
               <SiteNavLink href={link.href} label={link.label} newTab={link.newTab} variant="mobile" pathname={pathname} onNavigate={() => setOpen(false)} />
             </li>
