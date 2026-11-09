@@ -208,7 +208,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
 
           {/* Left: what this session is. Mirrors the reference layout Kiran
               picked: details and (real) testimonials left, booking right. */}
-          <Reveal kind="up">
+          <Reveal kind="up" className="min-w-0">
             <NotebookCard>
               <h1 className="font-display text-[clamp(1.6rem,3.5vw,2.25rem)] font-semibold leading-tight tracking-[-0.02em] text-ink">
                 {service.title}
@@ -260,7 +260,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
           </Reveal>
 
           {/* Right: the booking panel. The paid gate lives here, unchanged. */}
-          <Reveal kind="up" delay={60}>
+          <Reveal kind="up" delay={60} className="min-w-0">
             <NotebookCard>
               {(bookingClosed || paidButNoInvite) ? (
                 <div className="text-center py-8">
