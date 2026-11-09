@@ -1,4 +1,5 @@
 'use client'
+import { usePathname } from 'next/navigation'
 // components/site/ChatWidget.tsx
 //
 // A small visitor assistant pinned to the bottom-right of every page. It is
@@ -82,6 +83,7 @@ function answer(q: string, resumeUrl: string, email: string): Msg {
 }
 
 export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: string }) {
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
   const [msgs, setMsgs] = useState<Msg[]>([
@@ -110,6 +112,9 @@ export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: str
   }
 
   const chips = ['What has Kiran built?', 'Writing', 'Services', 'Résumé', 'Contact']
+
+  // Landing page only - the launcher shouldn't float over articles or the archive.
+  if (pathname !== '/') return null
 
   return (
     <>
