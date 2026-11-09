@@ -4,7 +4,8 @@ import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
 import { bookingSchema, BOOKINGS_COLLECTION } from '@/lib/schemas/booking'
 import { AVAILABILITY_COLLECTION, AVAILABILITY_DOC, availabilitySchema, DEFAULT_AVAILABILITY } from '@/lib/schemas/availability'
 import { bookingId } from '@/lib/ids'
-import { Section, NotebookCard, SectionHead } from '@/components/ui/primitives'
+import { formatPrice } from '@/lib/schemas/service'
+import { Section, NotebookCard } from '@/components/ui/primitives'
 import Reveal from '@/components/ui/Reveal'
 import { SlotPicker } from './SlotPicker'
 import { hasCalendarWriteScope } from '@/lib/calendar-scope'
@@ -196,85 +197,134 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
 
   return (
     <Section tone="paper">
-      <div className="mx-auto max-w-2xl">
-        <Reveal kind="up">
-          <SectionHead
-            align="center"
-            heading={service.type === 'digital_download' ? `Get ${service.title}` : `Book ${service.title}`}
-            intro={service.summary}
-          />
-        </Reveal>
+      <div className="mx-auto max-w-5xl">
+        <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
 
-        <Reveal kind="up" delay={60}>
-          <NotebookCard className="mt-10">
-            {(bookingClosed || paidButNoInvite) ? (
-              <div className="text-center py-8">
-                <p className="font-display text-xl font-semibold text-ink">Booking opens soon</p>
-                <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">
-                  Online booking for this session opens soon - the schedule and session details are being
-                  finalised. No payment is taken while this notice is up. Please check back shortly.
-                </p>
-              </div>
-            ) : (
-            <form data-clarity-mask="true" action={handleBook} className="flex flex-col gap-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-ink mb-1.5">
-                  Name <span className="text-coral">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  required
-                  className="w-full rounded-md border border-rule bg-paper px-4 py-2 text-ink shadow-sm focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
-                />
-              </div>
+          {/* Left: what this session is. Mirrors the reference layout Kiran
+              picked: details and (real) testimonials left, booking right. */}
+          <Reveal kind="up">
+            <NotebookCard>
+              <h1 className="font-display text-[clamp(1.6rem,3.5vw,2.25rem)] font-semibold leading-tight tracking-[-0.02em] text-ink">
+                {service.title}
+              </h1>
+              <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">
+                {service.summary}
+              </p>
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-ink mb-1.5">
-                  Email <span className="text-coral">*</span>
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  className="w-full rounded-md border border-rule bg-paper px-4 py-2 text-ink shadow-sm focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
-                />
+              <div className="mt-6 grid grid-cols-3 divide-x divide-rule rounded-xl border border-rule bg-paper-deep/40">
+                <div className="px-4 py-3">
+                  <p className="font-display text-lg font-semibold text-ink">
+                    {formatPrice(service.priceInPaise, service.currency)}
+                    {service.mrpInPaise > service.priceInPaise && (
+                      <span className="ml-2 align-middle font-mono text-xs font-normal text-ink-soft line-through">
+                        {formatPrice(service.mrpInPaise, service.currency)}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div className="px-4 py-3 flex items-center gap-1.5 text-sm text-ink">
+                  {service.type === 'digital_download' ? 'Instant download' : `${service.durationMins} mins`}
+                </div>
+                <div className="px-4 py-3 flex items-center gap-1.5 text-sm text-ink">
+                  {service.type === 'digital_download' ? 'Digital file' : 'Video Meeting'}
+                </div>
               </div>
 
-              {service.type !== 'digital_download' && (
-                <SlotPicker 
-                  service={service} 
-                  availability={availability} 
-                  upcomingBookings={upcomingBookings}
+              {service.highlights.length > 0 && (
+                <ul className="mt-6 space-y-3">
+                  {service.highlights.map((h, i) => (
+                    <li key={i} className="flex gap-3 text-[0.9rem] leading-relaxed text-ink-soft">
+                      <span aria-hidden="true" className="mt-2 h-px w-3 shrink-0 bg-coral" />
+                      {h}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {service.body && (
+                <div
+                  className="prose prose-stone mt-6 max-w-none text-[0.9rem] text-ink-soft"
+                  dangerouslySetInnerHTML={{ __html: service.body }}
                 />
               )}
 
-              <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-ink mb-1.5">
-                  {service.type === 'digital_download' ? 'Notes (Optional)' : 'What would you like to discuss?'}
-                </label>
-                <textarea
-                  id="notes"
-                  name="notes"
-                  rows={4}
-                  className="w-full rounded-md border border-rule bg-paper px-4 py-2 text-ink shadow-sm focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
-                ></textarea>
-              </div>
+              {/* Testimonials render here once real, post-call ones exist.
+                  None exist yet, so nothing renders - no placeholder quotes. */}
+            </NotebookCard>
+          </Reveal>
 
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] px-7 py-3.5 text-[1rem] bg-coral-deep text-white shadow-paper hover:-translate-y-0.5 hover:bg-coral-ink hover:shadow-lift"
-                >
-                  {service.type === 'digital_download' ? 'Proceed to Checkout' : 'Confirm Booking'}
-                </button>
-              </div>
-            </form>
-            )}
-          </NotebookCard>
-        </Reveal>
+          {/* Right: the booking panel. The paid gate lives here, unchanged. */}
+          <Reveal kind="up" delay={60}>
+            <NotebookCard>
+              {(bookingClosed || paidButNoInvite) ? (
+                <div className="text-center py-8">
+                  <p className="font-display text-xl font-semibold text-ink">Booking opens soon</p>
+                  <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">
+                    Online booking for this session opens soon - the schedule and session details are being
+                    finalised. No payment is taken while this notice is up. Please check back shortly.
+                  </p>
+                </div>
+              ) : (
+              <form data-clarity-mask="true" action={handleBook} className="flex flex-col gap-6">
+                {service.type !== 'digital_download' && (
+                  <SlotPicker
+                    service={service}
+                    availability={availability}
+                    upcomingBookings={upcomingBookings}
+                  />
+                )}
+
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-ink mb-1.5">
+                    Name <span className="text-coral">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    className="w-full rounded-md border border-rule bg-paper px-4 py-2 text-ink shadow-sm focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-ink mb-1.5">
+                    Email <span className="text-coral">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    className="w-full rounded-md border border-rule bg-paper px-4 py-2 text-ink shadow-sm focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="notes" className="block text-sm font-medium text-ink mb-1.5">
+                    {service.type === 'digital_download' ? 'Notes (Optional)' : 'What would you like to discuss?'}
+                  </label>
+                  <textarea
+                    id="notes"
+                    name="notes"
+                    rows={3}
+                    className="w-full rounded-md border border-rule bg-paper px-4 py-2 text-ink shadow-sm focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
+                  ></textarea>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] px-7 py-3.5 text-[1rem] bg-coral-deep text-white shadow-paper hover:-translate-y-0.5 hover:bg-coral-ink hover:shadow-lift"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </form>
+              )}
+            </NotebookCard>
+          </Reveal>
+        </div>
       </div>
     </Section>
   )

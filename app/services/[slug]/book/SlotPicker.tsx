@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
+import { ChevronLeft, ChevronRight, Globe } from 'lucide-react'
 
 const DAY_NAMES = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
@@ -15,10 +16,29 @@ function parseTime(timeStr: string, baseDate: Date) {
   return d
 }
 
+function dateStrOf(d: Date) {
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0')
+  ].join('-')
+}
+
+function gmtLabel() {
+  const offsetMin = -new Date().getTimezoneOffset()
+  const sign = offsetMin >= 0 ? '+' : '-'
+  const abs = Math.abs(offsetMin)
+  const h = Math.floor(abs / 60)
+  const m = abs % 60
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local time'
+  return `(GMT${sign}${h}${m ? ':' + String(m).padStart(2, '0') : ''}) ${tz}`
+}
+
 export function SlotPicker({ service, availability, upcomingBookings }: { service: any, availability: any, upcomingBookings: any[] }) {
   const [mounted, setMounted] = useState(false)
   const [selectedDateStr, setSelectedDateStr] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
+  const dateRowRef = useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
     setMounted(true)
@@ -35,11 +55,7 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
       d.setDate(d.getDate() + i)
       d.setHours(0, 0, 0, 0)
       
-      const dateStr = [
-        d.getFullYear(),
-        String(d.getMonth() + 1).padStart(2, '0'),
-        String(d.getDate()).padStart(2, '0')
-      ].join('-')
+      const dateStr = dateStrOf(d)
 
       const override = availability.dateOverrides?.[dateStr]
 
@@ -62,14 +78,7 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
 
   const selectedDate = useMemo(() => {
     if (!selectedDateStr) return null
-    return availableDates.find(d => {
-      const dStr = [
-        d.getFullYear(),
-        String(d.getMonth() + 1).padStart(2, '0'),
-        String(d.getDate()).padStart(2, '0')
-      ].join('-')
-      return dStr === selectedDateStr
-    })
+    return availableDates.find(d => dateStrOf(d) === selectedDateStr)
   }, [selectedDateStr, availableDates])
 
   const availableSlots = useMemo(() => {
@@ -77,11 +86,7 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
     const now = new Date()
     const leadTimeMs = availability.leadTimeHours * 3600000
     
-    const dStr = [
-      selectedDate.getFullYear(),
-      String(selectedDate.getMonth() + 1).padStart(2, '0'),
-      String(selectedDate.getDate()).padStart(2, '0')
-    ].join('-')
+    const dStr = dateStrOf(selectedDate)
     
     const override = availability.dateOverrides?.[dStr]
     
@@ -127,62 +132,74 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
     return slots
   }, [selectedDate, availability, service, upcomingBookings, mounted])
 
+  const scrollDates = (dir: number) => {
+    dateRowRef.current?.scrollBy({ left: dir * 220, behavior: 'smooth' })
+  }
+
   if (!mounted) {
     return (
-      <div className="space-y-6 border-t border-rule pt-6 mt-6">
-        <div className="h-[70px] bg-paper-deep rounded-md animate-pulse border border-rule"></div>
+      <div className="space-y-6">
+        <div className="h-[76px] bg-paper-deep rounded-xl animate-pulse border border-rule"></div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 border-t border-rule pt-6 mt-6">
+    <div className="space-y-6">
+      {/* Form values for the server action. Invisible-but-validatable text
+          inputs (the established pattern here) so native required validation
+          blocks submission until a date and slot are picked. */}
+      <input type="text" name="date" value={selectedDateStr} readOnly required
+        className="absolute left-0 top-0 opacity-0 w-1 h-1 -z-10" tabIndex={-1} aria-hidden="true" />
+      <input type="text" name="time" value={selectedTime} readOnly required
+        className="absolute left-0 top-0 opacity-0 w-1 h-1 -z-10" tabIndex={-1} aria-hidden="true" />
+
       <div>
-        <label className="block text-sm font-medium text-ink mb-1.5">
-          Select Date <span className="text-coral">*</span>
-        </label>
-        <select
-          required
-          name="date"
-          value={selectedDateStr}
-          onChange={e => {
-            setSelectedDateStr(e.target.value)
-            setSelectedTime('')
-          }}
-          className="w-full rounded-md border border-rule bg-paper px-4 py-2 text-ink shadow-sm focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
-        >
-          <option value="" disabled>Select a date...</option>
+        <div className="flex items-center justify-between mb-2.5">
+          <span className="text-sm font-medium text-ink">When should we meet?</span>
+          <div className="flex gap-1">
+            <button type="button" onClick={() => scrollDates(-1)} aria-label="Earlier dates"
+              className="rounded-full border border-rule bg-paper p-1 text-ink-soft transition hover:border-coral hover:text-coral">
+              <ChevronLeft className="size-3.5" />
+            </button>
+            <button type="button" onClick={() => scrollDates(1)} aria-label="Later dates"
+              className="rounded-full border border-rule bg-paper p-1 text-ink-soft transition hover:border-coral hover:text-coral">
+              <ChevronRight className="size-3.5" />
+            </button>
+          </div>
+        </div>
+        <div ref={dateRowRef} className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {availableDates.map(d => {
-            const val = [
-              d.getFullYear(),
-              String(d.getMonth() + 1).padStart(2, '0'),
-              String(d.getDate()).padStart(2, '0')
-            ].join('-')
+            const val = dateStrOf(d)
+            const isSelected = selectedDateStr === val
             return (
-              <option key={val} value={val}>
-                {d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-              </option>
+              <button
+                key={val}
+                type="button"
+                onClick={() => { setSelectedDateStr(val); setSelectedTime('') }}
+                className={`shrink-0 rounded-lg border px-3.5 py-2 text-center transition-colors ${
+                  isSelected
+                    ? 'border-coral bg-coral-soft text-coral-ink'
+                    : 'border-rule bg-paper text-ink hover:border-coral'
+                }`}
+              >
+                <span className="block text-[0.7rem] font-medium">
+                  {d.toLocaleDateString('en-US', { weekday: 'short' })}
+                </span>
+                <span className={`block text-[0.7rem] ${isSelected ? 'text-coral-ink' : 'text-ink-soft'}`}>
+                  {d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+                </span>
+              </button>
             )
           })}
-        </select>
+        </div>
       </div>
 
       {selectedDateStr && (
         <div>
-          <label className="block text-sm font-medium text-ink mb-1.5 relative">
-            Select Time <span className="text-coral">*</span>
-            <input 
-              type="text" 
-              name="time" 
-              value={selectedTime} 
-              readOnly
-              required 
-              className="absolute left-0 top-0 opacity-0 w-1 h-1 -z-10"
-              tabIndex={-1}
-            />
-          </label>
+          <span className="block text-sm font-medium text-ink mb-2.5">Select time of day</span>
           {availableSlots.length > 0 ? (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-wrap gap-2">
               {availableSlots.map(slot => {
                 const timeStr = [
                   String(slot.getHours()).padStart(2, '0'),
@@ -196,24 +213,29 @@ export function SlotPicker({ service, availability, upcomingBookings }: { servic
                     key={timeStr}
                     type="button"
                     onClick={() => setSelectedTime(timeStr)}
-                    className={`py-2 px-3 text-sm font-mono rounded-md border text-center transition-colors ${
+                    className={`rounded-lg border px-3.5 py-2 text-sm font-mono transition-colors ${
                       isSelected 
-                        ? 'bg-coral-soft border-coral text-coral-ink' 
-                        : 'bg-paper border-rule text-ink hover:border-coral hover:text-coral'
+                        ? 'border-coral bg-coral-soft text-coral-ink' 
+                        : 'border-rule bg-paper text-ink hover:border-coral'
                     }`}
                   >
-                    {slot.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                    {slot.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                   </button>
                 )
               })}
             </div>
           ) : (
-            <div className="text-sm text-ink-soft py-4 px-4 bg-paper-deep rounded-md border border-rule">
+            <div className="text-sm text-ink-soft py-3 px-4 bg-paper-deep rounded-lg border border-rule">
               No available slots on this date.
             </div>
           )}
         </div>
       )}
+
+      <div className="flex items-center gap-2 text-[0.8rem] text-ink-soft">
+        <Globe className="size-3.5 shrink-0" />
+        <span>{gmtLabel()} - times shown in your timezone</span>
+      </div>
     </div>
   )
 }
