@@ -8,7 +8,7 @@ import { SiteFooter, SiteNav, UtilityBar } from '@/components/site/Chrome'
 import { getCachedSiteContent } from '@/lib/site'
 import { RuleDivider, Eyebrow } from '@/components/ui/primitives'
 import { safeGet } from '@/lib/store'
-import { POSTS_COLLECTION, postSchema, type Post } from '@/lib/schemas/post'
+import { POSTS_COLLECTION, postSchema, readingMinutes, type Post } from '@/lib/schemas/post'
 import type { Comment } from '@/lib/schemas/comment'
 import { CommentsList } from '@/components/site/CommentsList'
 import { NewsletterInline } from '@/components/site/NewsletterPopup'
@@ -168,7 +168,7 @@ export function ArticleView({
                 )}
 
                 <div className="flex flex-col gap-2 font-mono text-[0.8rem] text-ink-soft pt-6 border-t border-rule/50">
-                  <span>{post.readingMinutes} min read</span>
+                  <span>{readingMinutes(post.html || '')} min read</span>
                   {post.tags.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {normalizeTags(post.tags).map((t) => (
@@ -234,7 +234,7 @@ export function ArticleView({
                             /
                           </span>
                         ) : null}
-                        <span>{r.readingMinutes} min read</span>
+                        <span>{readingMinutes(r.html || '')} min read</span>
                       </div>
                       <h3 className="mt-2 font-display text-[1.15rem] font-medium leading-snug tracking-[-0.015em] text-ink">
                         {r.title}

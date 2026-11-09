@@ -1,7 +1,7 @@
 "use server"
 
 import { putDoc, deleteDocById } from '@/lib/store'
-import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
+import { POSTS_COLLECTION, postSchema, readingMinutes } from '@/lib/schemas/post'
 import { revalidatePath } from 'next/cache'
 import { getOwnerSession } from '@/lib/guard'
 import { getAdminDb } from '@/lib/admin'
@@ -101,6 +101,9 @@ export async function savePost(id: string, data: any) {
     if (parsed.data.status === 'published' && parsed.data.publishedAt === 0) {
       parsed.data.publishedAt = Date.now()
     }
+
+    // Keep the stored reading time truthful (schema default is 1 for legacy posts).
+    parsed.data.readingMinutes = readingMinutes(parsed.data.html || '')
 
     // We use the new slug as the ID if the ID was 'new' or if slug changed
     // Note: If slug changes on an existing post, this creates a new doc.
