@@ -443,7 +443,7 @@ export function SiteFooter({
             ) : null}
           </ul>
           <p className="font-mono text-[0.66rem] uppercase tracking-[0.14em] text-ink-soft/70">
-            © {year} · {footer.colophon}
+            {footer.colophon ? `© ${year} · ${footer.colophon}` : `© ${year}`}
           </p>
         </div>
       </div>

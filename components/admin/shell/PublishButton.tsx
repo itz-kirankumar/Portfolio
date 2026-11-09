@@ -25,7 +25,7 @@ export function PublishButton() {
       }}
     >
       <UploadCloud className="size-3.5" />
-      <span className="hidden sm:inline">{busy ? 'Publishing...' : 'Publish Drafts'}</span>
+      <span className="hidden sm:inline">{busy ? 'Publishing...' : 'Publish site changes'}</span>
     </button>
   )
 }

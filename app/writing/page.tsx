@@ -6,6 +6,7 @@ import { Section } from '@/components/ui/primitives'
 import { safeList } from '@/lib/store'
 import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
 import { normalizeTags } from '@/lib/tags'
+import { NewsletterInline } from '@/components/site/NewsletterPopup'
 import { WritingIndex, type WritingIndexPost } from '@/components/site/WritingIndex'
 
 export const revalidate = 3600
@@ -64,6 +65,9 @@ export default async function WritingIndexPage() {
             heading={content.writing.heading}
             intro={content.writing.intro}
           />
+          <div className="mx-auto mt-10 w-full max-w-3xl px-5 pb-4 sm:px-8">
+            <NewsletterInline />
+          </div>
         </Section>
       </main>
 

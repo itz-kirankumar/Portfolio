@@ -11,6 +11,7 @@ import { safeGet } from '@/lib/store'
 import { POSTS_COLLECTION, postSchema, type Post } from '@/lib/schemas/post'
 import type { Comment } from '@/lib/schemas/comment'
 import { CommentsList } from '@/components/site/CommentsList'
+import { NewsletterInline } from '@/components/site/NewsletterPopup'
 import { ArticleActions } from '@/components/site/ArticleActions'
 import { ReadingProgress } from '@/components/site/ReadingProgress'
 import { BackToTop } from '@/components/site/BackToTop'
@@ -195,6 +196,10 @@ export function ArticleView({
                 <RuleDivider />
                 <ArticleActions title={post.title} slug={post.slug} initialLikes={post.likes || 0} />
                 <CommentsList postId={post.slug} initialComments={comments} />
+
+              <div className="mt-10">
+                <NewsletterInline />
+              </div>
               </div>
             </div>
 

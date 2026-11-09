@@ -73,7 +73,6 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-import { NewsletterPopup } from '@/components/site/NewsletterPopup'
 import { ChatWidget } from '@/components/site/ChatWidget'
 import { Tracker } from '@/components/site/Tracker'
 import { ThemeProvider } from '@/components/site/ThemeProvider'
@@ -116,7 +115,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Tracker />
         {children}
         <ChatWidget resumeUrl={meta.resumeUrl ?? ''} email={meta.email} />
-        <NewsletterPopup />
       </body>
     </html>
   )

@@ -367,6 +367,6 @@ export const DEFAULT_CONTENT: SiteContent = {
       { label: 'LinkedIn', href: 'https://www.linkedin.com/in/iamkirankumarg/' },
       { label: 'Email', href: 'mailto:kiran.kumar2028@mastersunion.org' },
     ],
-    colophon: 'Built in Next.js. Set in Bricolage Grotesque and Inter.',
+    colophon: '',
   },
 }

@@ -1,47 +1,17 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
+import React, { useState } from 'react'
 import { subscribeToNewsletter } from '@/app/actions/newsletter'
 
-export function NewsletterPopup() {
-  const [isOpen, setIsOpen] = useState(false)
+// Inline subscription card. It lives at the end of the writing index and each
+// article - no timed overlay, no repeat nags. Readers opt in by choice.
+export function NewsletterInline() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
-  const pathname = usePathname()
-
-  // Reader context only: the popup belongs on the writing index and article
-  // pages, never on the landing page, /work, /admin or other routes. Once
-  // dismissed or subscribed it stays quiet for the rest of the session.
-  const allowed = pathname.startsWith('/writing') || pathname.startsWith('/p/')
-
-  useEffect(() => {
-    if (!allowed) return
-    try {
-      if (sessionStorage.getItem('newsletter-quiet')) return
-    } catch {}
-    const timer = setTimeout(() => setIsOpen(true), 8000)
-    return () => clearTimeout(timer)
-  }, [allowed])
-
-  if (!isOpen || !allowed) return null
-
-  const quiet = () => {
-    try {
-      sessionStorage.setItem('newsletter-quiet', '1')
-    } catch {}
-    setIsOpen(false)
-  }
 
   if (status === 'success') {
     return (
-      <div className="newsletter-popup fixed bottom-6 left-4 z-50 w-[calc(100vw-7rem)] max-w-80 sm:left-6 rounded-xl bg-paper p-6 shadow-lift ring-1 ring-rule animate-in slide-in-from-bottom-5">
-        <button 
-          onClick={quiet}
-          className="absolute right-4 top-4 text-ink-soft hover:text-ink"
-        >
-          ✕
-        </button>
+      <div className="rounded-xl bg-paper-deep p-6 ring-1 ring-rule sm:p-8">
         <p className="font-display text-lg font-semibold text-ink">You're on the list.</p>
         <p className="mt-2 text-sm text-ink-soft">Thanks for subscribing. I'll be in touch soon.</p>
       </div>
@@ -49,52 +19,47 @@ export function NewsletterPopup() {
   }
 
   return (
-    <div className="newsletter-popup fixed bottom-6 left-4 z-50 w-[calc(100vw-7rem)] max-w-80 sm:left-6 rounded-xl bg-paper p-6 shadow-lift ring-1 ring-rule animate-in slide-in-from-bottom-5">
-      <button 
-        onClick={quiet}
-        className="absolute right-4 top-4 text-ink-soft hover:text-ink"
-      >
-        ✕
-      </button>
-      <h3 className="font-display text-lg font-semibold tracking-[-0.015em] text-ink">
-        Get the notes
-      </h3>
-      <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-        Occasional emails about what I'm building, what worked, and what broke.
-      </p>
-
-      <form 
-        className="mt-4 flex flex-col gap-3"
-        action={async (formData) => {
-          setStatus('loading')
-          const res = await subscribeToNewsletter(formData)
-          if (res.error) {
-            setStatus('error')
-            setMessage(res.error)
-          } else {
-            setStatus('success')
-      try { sessionStorage.setItem('newsletter-quiet', '1') } catch {}
-          }
-        }}
-      >
-        <input 
-          type="email" 
-          name="email"
-          placeholder="Email address"
-          required
-          className="w-full rounded-md border border-rule bg-paper-deep px-3 py-2 text-sm text-ink placeholder:text-ink-soft focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
-        />
-        <button 
-          type="submit"
-          disabled={status === 'loading'}
-          className="w-full rounded-md bg-coral-deep px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-coral-ink disabled:opacity-50"
+    <div className="rounded-xl bg-paper-deep p-6 ring-1 ring-rule sm:p-8">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="max-w-md">
+          <h3 className="font-display text-lg font-semibold tracking-[-0.015em] text-ink">
+            Get the notes
+          </h3>
+          <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
+            Occasional emails about what I'm building, what worked, and what broke.
+          </p>
+        </div>
+        <form
+          className="flex w-full max-w-sm flex-col gap-2.5 sm:flex-row sm:gap-2"
+          action={async (formData) => {
+            setStatus('loading')
+            const res = await subscribeToNewsletter(formData)
+            if (res.error) {
+              setStatus('error')
+              setMessage(res.error)
+            } else {
+              setStatus('success')
+            }
+          }}
         >
-          {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
-        </button>
-        {status === 'error' && (
-          <p className="text-xs text-red-500">{message}</p>
-        )}
-      </form>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email address"
+            required
+            aria-label="Email address"
+            className="w-full rounded-md border border-rule bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink-soft focus:border-coral focus:outline-none focus:ring-1 focus:ring-coral"
+          />
+          <button
+            type="submit"
+            disabled={status === 'loading'}
+            className="shrink-0 rounded-md bg-coral-deep px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-coral-ink disabled:opacity-50"
+          >
+            {status === 'loading' ? 'Subscribing…' : 'Subscribe'}
+          </button>
+        </form>
+      </div>
+      {status === 'error' && <p className="mt-3 text-xs text-red-500">{message}</p>}
     </div>
   )
 }
