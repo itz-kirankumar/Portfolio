@@ -26,7 +26,7 @@ export function RotatingHighlight({ base, variants, className }: { base: string;
       setTimeout(() => {
         setI((n) => (n + 1) % pool.length)
         setFlip(false)
-      }, 260)
+      }, 180)
     }, 2600)
     return () => clearInterval(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -37,8 +37,7 @@ export function RotatingHighlight({ base, variants, className }: { base: string;
       className={className}
       style={{
         display: 'inline-block',
-        transition: 'transform 260ms ease, opacity 260ms ease',
-        transform: flip ? 'translateY(-0.35em) rotate(-2deg)' : 'none',
+        transition: 'opacity 180ms ease',
         opacity: flip ? 0 : 1,
       }}
     >

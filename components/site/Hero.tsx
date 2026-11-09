@@ -71,7 +71,7 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
           <span aria-hidden="true" className="text-coral">
             /
           </span>
-          <a href={`mailto:${meta.email}`} className="link-underline hover:text-ink">
+          <a href={`mailto:${meta.email}`} className="link-underline -my-2 inline-flex items-center py-2 hover:text-ink">
             {meta.email}
           </a>
         </p>
@@ -95,7 +95,7 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
       {hero.scribble ? (
         <StickyNote
           rotate={4}
-          className="absolute -bottom-10 -left-8 z-30 max-w-[11rem] whitespace-pre-line sm:-left-14"
+          className="absolute -bottom-8 left-0 z-30 max-w-[11rem] whitespace-pre-line sm:-bottom-10 sm:-left-12"
         >
           {hero.scribble}
         </StickyNote>

@@ -122,7 +122,7 @@ export function ChatWidget({ resumeUrl, email }: { resumeUrl: string; email: str
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? 'Close chat' : 'Ask about Kiran'}
-        className="fixed bottom-5 right-5 z-[70] flex h-14 w-14 items-center justify-center rounded-full bg-coral text-paper-deep shadow-lg shadow-black/40 transition hover:bg-coral-deep focus-visible:outline-2 focus-visible:outline-coral-ink"
+        className="fixed bottom-4 right-4 z-[70] flex h-12 w-12 items-center justify-center rounded-full bg-coral text-paper-deep shadow-lg shadow-black/40 transition hover:bg-coral-deep focus-visible:outline-2 focus-visible:outline-coral-ink sm:bottom-5 sm:right-5 sm:h-14 sm:w-14"
       >
         {open ? (
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
