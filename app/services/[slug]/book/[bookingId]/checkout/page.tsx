@@ -75,7 +75,7 @@ export default async function CheckoutPage({
                 <SectionHead
                   align="center"
                   heading="Payment opens again shortly"
-                  intro={`Your ${service.title} slot request is saved. Online payment is briefly paused while the calendar connection is upgraded, so no payment is taken until your invite can be delivered as promised. This link keeps working - please check back in a little while.`}
+                  intro={`Your ${service.title} slot request is saved. Online payment opens soon while the session details are being finalised - no payment is taken until then. This link keeps working, so please check back shortly.`}
                 />
               </NotebookCard>
             </div>

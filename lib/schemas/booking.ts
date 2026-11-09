@@ -13,7 +13,7 @@
 import { z } from 'zod'
 import { PAYMENT_MODES } from './service'
 
-export const BOOKING_STATUSES = ['pending', 'confirmed', 'cancelled'] as const
+export const BOOKING_STATUSES = ['pending', 'confirmed', 'cancelled', 'completed'] as const
 export type BookingStatus = (typeof BOOKING_STATUSES)[number]
 
 const str = z.string().trim()

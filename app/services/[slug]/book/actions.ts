@@ -25,7 +25,16 @@ export async function verifyPayment(
 
   const db = getAdminDb()
   const ref = db.collection(BOOKINGS_COLLECTION).doc(bookingId)
-  
+
+  // Idempotency: Razorpay can deliver the same success callback more than once
+  // (retry, double-tap, back-button). A booking already confirmed with this
+  // payment must not send a second invite.
+  const existing = await ref.get()
+  const prev = existing.exists ? (existing.data() as any) : null
+  if (prev?.status === 'confirmed' && prev?.payment?.paymentId === paymentId) {
+    return { success: true, alreadyConfirmed: true }
+  }
+
   await ref.update({
     status: 'confirmed',
     'payment.paymentId': paymentId,

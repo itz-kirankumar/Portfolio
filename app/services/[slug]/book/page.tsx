@@ -211,9 +211,8 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
               <div className="text-center py-8">
                 <p className="font-display text-xl font-semibold text-ink">Booking opens again shortly</p>
                 <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">
-                  Online booking for this session is briefly paused while the calendar connection is upgraded,
-                  so that every confirmed slot comes with its video-call invite as promised. No payment is taken
-                  while this notice is up. Please check back in a little while.
+                  Online booking for this session opens soon - the schedule and session details are being
+                  finalised. No payment is taken while this notice is up. Please check back shortly.
                 </p>
               </div>
             ) : (
