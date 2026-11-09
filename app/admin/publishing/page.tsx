@@ -50,7 +50,7 @@ export default async function PublishingPage() {
                     <p className="font-medium text-[0.95rem] text-ink truncate">
                       {post.title || 'Untitled Post'}
                     </p>
-                    <p className="mt-1 text-[0.82rem] text-ink-soft truncate">
+                    <p className="mt-1 hidden text-[0.82rem] text-ink-soft truncate sm:block">
                       {post.excerpt || 'No excerpt'}
                     </p>
                   </div>
@@ -62,7 +62,7 @@ export default async function PublishingPage() {
                     }`}>
                       {post.status}
                     </span>
-                    <span className="text-[0.82rem] text-ink-soft w-24 text-right">
+                    <span className="hidden text-[0.82rem] text-ink-soft w-24 text-right sm:inline">
                       {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-GB') : '-'}
                     </span>
                   </div>

@@ -59,7 +59,7 @@ export default async function WorksPage() {
                       {work.period ? ` · ${work.period}` : ''}
                     </p>
                   </div>
-                  <div className="font-mono text-[0.82rem] uppercase tracking-wider text-ink-soft">
+                  <div className="hidden font-mono text-[0.82rem] uppercase tracking-wider text-ink-soft sm:block">
                     /work/{work.slug}
                   </div>
                 </Link>
