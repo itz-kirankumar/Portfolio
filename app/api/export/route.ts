@@ -6,12 +6,12 @@ import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
 import { BOOKINGS_COLLECTION, bookingSchema } from '@/lib/schemas/booking'
 import { SUBSCRIBERS_COLLECTION, subscriberSchema } from '@/lib/schemas/subscriber'
 import { THEME_COLLECTION, THEME_DOC, themeSchema, DEFAULT_THEME } from '@/lib/schemas/theme'
-import { cookies } from 'next/headers'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export async function GET(req: Request) {
-  // Verify auth manually since API routes don't go through middleware natively unless matched
-  const session = (await cookies()).get('__session')
-  if (!session) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.isOwner) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

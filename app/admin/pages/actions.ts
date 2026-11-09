@@ -5,8 +5,12 @@ import { PAGES_COLLECTION, pageSchema } from '@/lib/schemas/page'
 import { revalidatePath } from 'next/cache'
 
 import { getSiteContent, saveSiteSection } from '@/lib/site'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export async function savePage(id: string, data: any) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.isOwner) return { ok: false, error: 'Not authorised.' }
   try {
     const validated = pageSchema.parse(data)
     validated.updatedAt = Date.now()
@@ -57,6 +61,8 @@ export async function savePage(id: string, data: any) {
 }
 
 export async function deletePage(id: string, slug: string) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.isOwner) return { ok: false, error: 'Not authorised.' }
   try {
     await deleteDocById(PAGES_COLLECTION, id)
 
