@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Omit<Props, 'searchParams'>):
   if (!page) return {}
   
   const { meta } = await getCachedSiteContent()
-  const title = `${page.title} — ${meta.name}`
+  const title = `${page.title} - ${meta.name}`
   
   return {
     title,

@@ -19,7 +19,7 @@ export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Works',
-  description: 'Products, ventures, tools and experiments — each with its own story, live link and source where public.',
+  description: 'Products, ventures, tools and experiments, each with its own story, live link and source where public.',
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -42,7 +42,7 @@ export default async function WorkIndexPage() {
           <SectionHead
             eyebrow="all works"
             heading="Things I've built, *one story each*"
-            intro="Products, ventures, tools and experiments. Open any card for the detail — what it does, why it exists, and where to see it live or read the source."
+            intro="Products, ventures, tools and experiments. Open any card for the detail: what it does, why it exists, and where to see it live or read the source."
           />
 
           <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

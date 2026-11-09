@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!work) return { title: 'Work not found' }
   const description = (work.summary || work.tagline).slice(0, 200)
   return {
-    title: `${work.title} — Works`,
+    title: `${work.title} - Works`,
     description,
     openGraph: { title: work.title, description },
     twitter: { title: work.title, description },

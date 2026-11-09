@@ -50,7 +50,7 @@ export default async function CheckoutPage({
                 <SectionHead
                   align="center"
                   heading="Payment is being connected"
-                  intro={`Your ${service.title} slot request is saved. Online payment goes live here shortly — check back in a bit, or reach out directly and we'll sort it manually.`}
+                  intro={`Your ${service.title} slot request is saved. Online payment goes live here shortly; check back in a bit, or reach out directly and we'll sort it manually.`}
                 />
               </NotebookCard>
             </div>

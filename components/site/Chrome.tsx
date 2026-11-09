@@ -404,7 +404,7 @@ export function SiteFooter({
 
   return (
     <footer className="border-t border-rule bg-paper-deep">
-      <div className="gutter flex flex-col gap-8 py-12 sm:flex-row sm:items-end sm:justify-between">
+      <div className="gutter flex flex-col gap-8 pb-28 pt-12 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-sm">
           <p className="font-display text-xl font-semibold tracking-[-0.01em] text-ink">
             {meta.name}

@@ -24,12 +24,12 @@ export const DEFAULT_WORKS: Work[] = [
     tagline: 'An exam-prep EdTech SaaS, taken from zero to a paying community.',
     kind: 'venture',
     status: 'closed',
-    period: "Jul '24 — Dec '25",
+    period: "Jul '24 – Dec '25",
     summary:
       'Co-founded an exam-prep EdTech SaaS and owned strategy end to end: the community that became the top of the funnel, the pricing that converted it, and the loops that kept people coming back.',
     body: [
       'I built a 12,000-member community from zero and turned it into the acquisition channel, then ran GTM and pricing experiments that converted those members into 600+ paid users at 5% conversion.',
-      'I shipped activation and retention loops that held 1,100+ monthly actives, drove weekly cross-functional execution across engineering, content and marketing, and owned unit economics and budgets — every experiment had a cost and a payback number.',
+      'I shipped activation and retention loops that held 1,100+ monthly actives, drove weekly cross-functional execution across engineering, content and marketing, and owned unit economics and budgets; every experiment had a cost and a payback number.',
     ].join('\n\n'),
     coverUrl: 'https://opengraph.githubassets.com/1/itz-kirankumar/RDFC',
     liveUrl: 'https://rdfctest.in',
@@ -56,15 +56,15 @@ export const DEFAULT_WORKS: Work[] = [
     id: 'threadly',
     slug: 'threadly',
     title: 'Threadly',
-    tagline: 'Find the companies worth contacting — and measure how AI describes your brand.',
+    tagline: 'Find the companies worth contacting, and measure how AI describes your brand.',
     kind: 'product',
     status: 'building',
-    period: '2026 — now',
+    period: '2026 – now',
     summary:
-      'A workspace with two capability areas: GEO intelligence that asks ChatGPT, Claude and Gemini the questions a brand\u2019s buyers ask and tracks mentions, citations and share of voice — and a revenue area with leads, a relationship CRM and an approval-gated outbound engine.',
+      'A workspace with two capability areas: GEO intelligence that asks ChatGPT, Claude and Gemini the questions a brand\u2019s buyers ask and tracks mentions, citations and share of voice, and a revenue area with leads, a relationship CRM and an approval-gated outbound engine.',
     body: [
       'Threadly helps business teams find the companies worth contacting, reach the right people with relevant and truthful email, and measure how AI assistants describe their brand.',
-      'The Intelligence area is live: brand setup with aliases and competitors, buyer-question tracking across ChatGPT, Claude and Gemini, and mention, citation and share-of-voice measurement. The Revenue area — leads, a relationship CRM and an approval-gated outbound engine — is built and tested, and stays owner-only until its release gates close.',
+      'The Intelligence area is live: brand setup with aliases and competitors, buyer-question tracking across ChatGPT, Claude and Gemini, and mention, citation and share-of-voice measurement. The Revenue area (leads, a relationship CRM and an approval-gated outbound engine) is built and tested, and stays owner-only until its release gates close.',
     ].join('\n\n'),
     coverUrl: '/works/threadly.jpg',
     liveUrl: 'https://gothreadly.live',
@@ -88,9 +88,9 @@ export const DEFAULT_WORKS: Work[] = [
     tagline: 'A student command center for Masters\u2019 Union.',
     kind: 'tool',
     status: 'live',
-    period: '2026 — now',
+    period: '2026 – now',
     summary:
-      'A real-time, Firebase-first command center for Masters\u2019 Union students — Google Calendar, MU Gmail, Google Tasks and personal priorities in one secure dashboard.',
+      'A real-time, Firebase-first command center for Masters\u2019 Union students: Google Calendar, MU Gmail, Google Tasks and personal priorities in one secure dashboard.',
     body: [
       'MU One (muone.live) combines Google Calendar, MU Gmail, Google Tasks and personal priorities in one secure dashboard, so students never miss classes, deadlines, assignments or opportunities.',
       'Built with Next.js, TypeScript, Tailwind and the Firebase SDK with real-time Firestore listeners. Open source.',
@@ -110,14 +110,14 @@ export const DEFAULT_WORKS: Work[] = [
     id: 'bowl-and-beyond',
     slug: 'bowl-and-beyond',
     title: 'The Bowl and Beyond',
-    tagline: 'A purpose-led food brand — every bowl sold funds five meals.',
+    tagline: 'A purpose-led food brand: every bowl sold funds five meals.',
     kind: 'venture',
     status: 'building',
-    period: "Aug '26 — Present",
+    period: "Aug '26 – Present",
     summary:
       'Co-founded a purpose-led food brand built on a 1:5 community meal model. Took it 0→1: positioning, naming, and validating demand before spending on inventory.',
     body: [
-      'The Bowl and Beyond is a purpose-led food brand built on a 1:5 community meal model — every bowl sold funds five meals.',
+      'The Bowl and Beyond is a purpose-led food brand built on a 1:5 community meal model: every bowl sold funds five meals.',
       'I took the brand 0→1: positioning, naming, and the meal model itself; validated demand through customer discovery before spending on inventory; and structured early operations and supplier partnerships from scratch.',
     ].join('\n\n'),
     coverUrl: '',
@@ -141,7 +141,7 @@ export const DEFAULT_WORKS: Work[] = [
     tagline: 'AI surveillance with configurable alert logic.',
     kind: 'tool',
     status: 'closed',
-    period: "Jun '24 — Mar '25",
+    period: "Jun '24 – Mar '25",
     summary:
       'An AI surveillance system that recognises 20+ object classes at 95%+ accuracy, with configurable automation and alert logic for residential, industrial and wildlife deployments.',
     body: [
@@ -193,7 +193,7 @@ export const DEFAULT_WORKS: Work[] = [
     summary:
       'A computer-vision system that infers product dimensions from imagery. Filed as a patent in India (E-2/583/2023-CHE).',
     body: [
-      'A computer-vision system that infers product dimensions from imagery, filed as a patent in India — E-2/583/2023-CHE.',
+      'A computer-vision system that infers product dimensions from imagery, filed as a patent in India (E-2/583/2023-CHE).',
     ].join('\n\n'),
     coverUrl: '',
     liveUrl: '',
@@ -217,7 +217,7 @@ export const DEFAULT_WORKS: Work[] = [
     summary:
       'A feedback tool that automates multi-rater aggregation, cutting the manual tracking that made 360° reviews too expensive to run often.',
     body: [
-      'An internal tool that automates multi-rater aggregation for 360° reviews — removing the manual tracking that made them too expensive to run often.',
+      'An internal tool that automates multi-rater aggregation for 360° reviews, removing the manual tracking that made them too expensive to run often.',
     ].join('\n\n'),
     coverUrl: '',
     liveUrl: '',
@@ -234,14 +234,14 @@ export const DEFAULT_WORKS: Work[] = [
     id: 'portfolio',
     slug: 'portfolio',
     title: 'kirankumarg.me',
-    tagline: 'This site — a paper desk that publishes itself.',
+    tagline: 'This site, a paper desk that publishes itself.',
     kind: 'tool',
     status: 'live',
-    period: '2026 — now',
+    period: '2026 – now',
     summary:
-      'The site you are reading: Next.js on Firestore with a full custom admin — publishing, media library, services, bookings with Razorpay checkout, newsletter and theming. Open source.',
+      'The site you are reading: Next.js on Firestore with a full custom admin: publishing, media library, services, bookings with Razorpay checkout, newsletter and theming. Open source.',
     body: [
-      'This very site is one of my builds: a Next.js App Router front on Firestore, statically prerendered with on-demand revalidation, with a complete custom admin behind it — publishing, a media library, bookable services with Razorpay checkout, a newsletter and theming.',
+      'This very site is one of my builds: a Next.js App Router front on Firestore, statically prerendered with on-demand revalidation, with a complete custom admin behind it: publishing, a media library, bookable services with Razorpay checkout, a newsletter and theming.',
       'The Indian Canvas writing series lives here. Everything is open source.',
     ].join('\n\n'),
     coverUrl: 'https://opengraph.githubassets.com/1/itz-kirankumar/Portfolio',

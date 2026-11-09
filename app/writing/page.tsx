@@ -13,7 +13,7 @@ export const revalidate = 3600
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta, writing } = await getCachedSiteContent()
-  const title = `${writing.heading || 'Writing'} — ${meta.name}`
+  const title = `${writing.heading || 'Writing'} - ${meta.name}`
   const description = writing.intro || `Articles and notes by ${meta.name}.`
   return {
     title,

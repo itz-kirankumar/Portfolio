@@ -124,7 +124,7 @@ function Lane({
   label: string
 }) {
   return (
-    <div className="flow-row flow-mask overflow-hidden" aria-label={label}>
+    <div className="flow-row flow-mask overflow-hidden pr-20 sm:pr-24" aria-label={label}>
       <div
         className={cn('flow-track', reverse && 'flow-track--reverse')}
         style={{ ['--flow-duration' as string]: `${Math.max(30, count * 7)}s` }}

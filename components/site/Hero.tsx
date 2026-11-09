@@ -71,7 +71,7 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
           <span aria-hidden="true" className="text-coral">
             /
           </span>
-          <a href={`mailto:${meta.email}`} className="link-underline -my-2 inline-flex items-center py-2 hover:text-ink">
+          <a href={`mailto:${meta.email}`} className="link-underline -my-3.5 inline-flex items-center py-3.5 hover:text-ink">
             {meta.email}
           </a>
         </p>

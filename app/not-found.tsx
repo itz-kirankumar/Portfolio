@@ -13,7 +13,7 @@ export default function NotFound() {
         </h1>
 
         <p className="mt-5 text-[1rem] leading-relaxed text-ink-soft">
-          Which is on brand, honestly — I only ship the things people actually use.
+          Which is on brand, honestly: I only ship the things people actually use.
         </p>
 
         <div className="mt-8 flex justify-center">
