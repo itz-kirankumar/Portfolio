@@ -50,9 +50,15 @@ export function SocialFeed({
     s.onload = load
     s.onerror = () => setXFailed(true)
     document.body.appendChild(s)
-    // If the widget leaves the bare link after 6s, treat as blocked/failed.
+    // If the widget leaves the bare link after 6s, or its timeline iframe
+    // renders collapsed (X rate-limits some IPs to a 0-height shell), treat
+    // as failed and collapse to a compact profile card.
     const t = setTimeout(() => {
-      if (!xRef.current?.querySelector('iframe')) setXFailed(true)
+      const frame = xRef.current?.querySelector<HTMLIFrameElement>(
+        'iframe[src*="syndication.twitter.com"]',
+      )
+      const h = frame?.getBoundingClientRect().height ?? 0
+      if (!frame || h < 100) setXFailed(true)
     }, 6000)
     return () => clearTimeout(t)
   }, [xHandle])
