@@ -12,6 +12,7 @@
 // unannounced work. Source links point at public repositories only.
 
 import type { Work } from '@/lib/schemas/work'
+import { N8N_WORKS } from '@/lib/default-works-n8n'
 
 let seed = 1
 const t = () => seed++ // stable, deterministic ordering timestamps
@@ -257,3 +258,21 @@ export const DEFAULT_WORKS: Work[] = [
   },
 
 ]
+
+// The 50 n8n AI automations (github.com/itz-kirankumar/workflows), one work
+// entry each. Content grounded in each workflow's own JSON; canvas screenshots
+// under /works/n8n/. Same seed contract: timestamps stamped here.
+DEFAULT_WORKS.push(
+  ...N8N_WORKS.map((w) => ({
+    ...w,
+    id: w.slug,
+    kind: 'tool' as const,
+    status: 'repository' as const,
+    period: 'Nov 2026',
+    liveUrl: '',
+    metrics: [],
+    featured: false,
+    createdAt: t(),
+    updatedAt: t(),
+  }))
+)
