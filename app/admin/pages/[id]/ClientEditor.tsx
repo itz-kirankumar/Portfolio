@@ -125,7 +125,7 @@ export function ClientEditor({ id, initialData }: { id: string; initialData: Par
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 text-[0.82rem] font-medium text-coral-ink hover:text-coral-deep transition"
                   >
-                    Open Live Page &nearr;
+                    Open Live Page ↗
                   </a>
                   <button 
                     onClick={handleDelete}

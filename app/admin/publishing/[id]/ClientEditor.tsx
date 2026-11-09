@@ -12,6 +12,29 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
   const router = useRouter()
   
   // Provide defaults
+  // Same-shape snapshot as the initial state, so `dirty` only flips when the
+  // owner actually edits something - not because the doc carries extra fields.
+  const shape = (d: Partial<Post>): Partial<Post> => ({
+    slug: d.slug || '',
+    title: d.title || '',
+    excerpt: d.excerpt || '',
+    coverUrl: d.coverUrl || '',
+    tags: d.tags || [],
+    status: d.status || 'draft',
+    publishedAt: d.publishedAt || 0,
+    createdAt: d.createdAt || 0,
+    html: d.html || '',
+    doc: d.doc || '',
+    newsletter: d.newsletter || {
+      enabled: false,
+      subject: '',
+      status: 'idle',
+      sentAt: 0,
+      recipients: 0,
+      error: '',
+    }
+  })
+  const [initialSnap] = useState<Partial<Post>>(() => shape(initialData))
   const [data, setData] = useState<Partial<Post>>({
     slug: initialData.slug || '',
     title: initialData.title || '',
@@ -39,7 +62,7 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
   const [error, setError] = useState<string | null>(null)
   const [issues, setIssues] = useState<string[]>([])
   
-  const dirty = JSON.stringify(data) !== JSON.stringify(initialData)
+  const dirty = JSON.stringify(data) !== JSON.stringify(initialSnap)
 
     // Auto-save logic
   const saveTimeoutRef = useRef<NodeJS.Timeout>(null)
@@ -224,7 +247,7 @@ export default function ClientEditor({ initialData, id }: { initialData: Partial
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 text-[0.82rem] font-medium text-coral-ink hover:text-coral-deep transition"
                   >
-                    Open Live Preview &nearr;
+                    Open Live Preview ↗
                   </a>
                 </div>
               )}
