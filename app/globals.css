@@ -334,3 +334,18 @@
   mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
 }
+
+/* ---------------------------------------------------------------------------
+   Playful layer
+--------------------------------------------------------------------------- */
+@layer base {
+  ::selection {
+    background: var(--color-coral);
+    color: var(--color-paper-deep);
+  }
+  /* nav links get a wavy coral underline on hover */
+  .site-nav a:hover {
+    text-decoration-style: wavy;
+    text-decoration-color: var(--color-coral);
+  }
+}

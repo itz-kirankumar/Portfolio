@@ -351,9 +351,9 @@ export function Button({
         'transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
         size === 'md' ? 'px-5 py-2.5 text-[0.92rem]' : 'px-7 py-3.5 text-[1rem]',
         variant === 'solid' &&
-          'bg-coral-deep text-white shadow-paper hover:-translate-y-0.5 hover:bg-coral-ink hover:shadow-lift',
+          'bg-coral-deep text-white shadow-paper hover:-translate-y-0.5 hover:-rotate-1 hover:scale-[1.03] hover:bg-coral-ink hover:shadow-lift',
         variant === 'outline' &&
-          'bg-card text-ink ring-1 ring-rule hover:-translate-y-0.5 hover:ring-coral/60 hover:shadow-paper',
+          'bg-card text-ink ring-1 ring-rule hover:-translate-y-0.5 hover:rotate-1 hover:ring-coral/60 hover:shadow-paper',
         variant === 'ghost' && 'text-coral-ink hover:bg-coral-soft',
         variant === 'onDark' &&
           'bg-paper text-ink hover:-translate-y-0.5 hover:bg-white',

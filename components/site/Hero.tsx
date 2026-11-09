@@ -3,6 +3,7 @@
 import { Button, CredPill, Eyebrow, Highlight, Polaroid, StickyNote } from '@/components/ui/primitives'
 import { normalizeHref } from '@/lib/nav-href'
 import Reveal from '@/components/ui/Reveal'
+import { MouseGlow, RotatingHighlight, SpinBadge } from '@/components/site/Playful'
 import type { CredsContent, HeroContent, Meta, ProofContent } from '@/types/site'
 
 /* ------------------------------------------------------------------ Hero --- */
@@ -31,7 +32,12 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
         <h1 className={`font-display text-balance-tight text-[clamp(2.9rem,8vw,6rem)] font-semibold leading-[0.95] tracking-[-0.035em] text-ink ${isStacked ? 'mx-auto' : ''}`}>
           {hero.headlineBefore}{' '}
           {hero.headlineHighlight ? (
-            <Highlight>{hero.headlineHighlight}</Highlight>
+            <Highlight>
+              <RotatingHighlight
+                base={hero.headlineHighlight}
+                variants={['then ship it.', 'then count it.', 'then show it.']}
+              />
+            </Highlight>
           ) : null}
           {hero.headlineAfter}
         </h1>
@@ -94,6 +100,11 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
           {hero.scribble}
         </StickyNote>
       ) : null}
+
+      <SpinBadge
+        text="still shipping · open to product & strategy roles · "
+        className="absolute -right-6 -top-8 z-30 hidden w-24 sm:block lg:-right-10 lg:w-28"
+      />
     </Reveal>
   )
 
@@ -104,6 +115,7 @@ export function Hero({ hero, meta, layout = 'stacked' }: { hero: HeroContent; me
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 left-[7%] hidden w-px bg-coral/15 lg:block"
       />
+      <MouseGlow />
 
       <div className={gridClass}>
         {isPortraitLeft && !isStacked ? mediaContent : textContent}

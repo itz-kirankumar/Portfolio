@@ -283,7 +283,7 @@ export function SiteNav({ nav, resumeUrl, showThemeToggle, tickItems = [] }: { n
             : 'border-b border-transparent bg-paper/60 backdrop-blur-md'
         )}
       >
-      <nav className="gutter flex h-16 items-center justify-between gap-6">
+      <nav className="site-nav gutter flex h-16 items-center justify-between gap-6">
         {/* Logo: scroll to top on the home page, otherwise route home. */}
         {onHome ? (
           <a

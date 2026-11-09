@@ -37,7 +37,7 @@ function WorkCard({ work }: { work: Work }) {
   return (
     <Link
       href={`/work/${work.slug}`}
-      className="group flex w-72 shrink-0 flex-col overflow-hidden rounded-xl bg-card shadow-paper ring-1 ring-rule transition duration-300 hover:-translate-y-1 hover:shadow-lift hover:ring-coral/50 sm:w-80"
+      className="group flex w-72 shrink-0 flex-col overflow-hidden rounded-xl bg-card shadow-paper ring-1 ring-rule transition duration-300 hover:-translate-y-1 hover:-rotate-1 hover:shadow-lift hover:ring-coral/50 sm:w-80"
     >
       <WorkCover work={work} className="aspect-[16/10] w-full" />
       <div className="flex flex-1 flex-col p-5">
@@ -78,7 +78,7 @@ function PostCard({ post }: { post: FlowPost }) {
   return (
     <Link
       href={post.href}
-      className="group flex w-72 shrink-0 flex-col overflow-hidden rounded-xl border border-rule bg-paper transition duration-300 hover:-translate-y-1 hover:border-coral-ink/40 sm:w-80"
+      className="group flex w-72 shrink-0 flex-col overflow-hidden rounded-xl border border-rule bg-paper transition duration-300 hover:-translate-y-1 hover:rotate-1 hover:border-coral-ink/40 sm:w-80"
     >
       {post.coverUrl ? (
         <div className="aspect-[16/9] w-full overflow-hidden bg-paper-deep">

@@ -50,7 +50,7 @@ export default async function WorkIndexPage() {
               <li key={w.id} className="h-full">
                 <Link
                   href={`/work/${w.slug}`}
-                  className="group flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-paper ring-1 ring-rule transition duration-300 hover:-translate-y-1 hover:shadow-lift hover:ring-coral/50"
+                  className="group flex h-full flex-col overflow-hidden rounded-xl bg-card shadow-paper ring-1 ring-rule transition duration-300 hover:-translate-y-1 hover:-rotate-1 hover:shadow-lift hover:ring-coral/50"
                 >
                   <WorkCover work={w} className="aspect-[16/10] w-full" />
                   <div className="flex flex-1 flex-col p-6">
