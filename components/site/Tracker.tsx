@@ -12,8 +12,8 @@ export function Tracker() {
     if (trackedPath.current === pathname) return
     trackedPath.current = pathname
 
-    // Don't track admin pages
-    if (pathname.startsWith('/admin')) return
+    // Don't track admin or owner-preview pages
+    if (pathname.startsWith('/admin') || pathname.startsWith('/preview')) return
 
     try {
       fetch('/api/track', {

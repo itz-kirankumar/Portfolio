@@ -34,12 +34,13 @@ export const dynamic = 'force-dynamic'
 /** How far ahead we look for bookings. Past this the stat reads "N+". */
 const LOOKAHEAD_CAP = 100
 
+/** Monday 00:00 in the owner's timezone (Asia/Kolkata) as a UTC instant. */
 function startOfWeek(now: Date): Date {
-  const d = new Date(now)
-  const day = (d.getDay() + 6) % 7 // Monday = 0
-  d.setHours(0, 0, 0, 0)
-  d.setDate(d.getDate() - day)
-  return d
+  const IST = 5.5 * 3600 * 1000
+  const ist = new Date(now.getTime() + IST)
+  const day = (ist.getUTCDay() + 6) % 7 // Monday = 0
+  const mondayIstAsUtc = Date.UTC(ist.getUTCFullYear(), ist.getUTCMonth(), ist.getUTCDate()) - day * 86400000
+  return new Date(mondayIstAsUtc - IST)
 }
 
 import { ANALYTICS_COLLECTION } from '@/lib/schemas/analytics'
@@ -150,7 +151,7 @@ export default async function AdminDashboard() {
         <StatCard
           label="Revenue this week"
           value={revenue}
-          hint="Payments verified since Monday. Unpaid holds are not counted."
+          hint="Payments verified since Monday, IST. Unpaid holds are not counted."
         />
         <StatCard
           label="Page views"
