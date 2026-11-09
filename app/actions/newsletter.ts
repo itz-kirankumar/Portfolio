@@ -2,6 +2,7 @@
 
 import { createStrict } from '@/lib/store'
 import { SUBSCRIBERS_COLLECTION, subscriberSchema } from '@/lib/schemas/subscriber'
+import { newToken } from '@/lib/ids'
 
 export async function subscribeToNewsletter(formData: FormData) {
   const email = formData.get('email') as string
@@ -18,6 +19,8 @@ export async function subscribeToNewsletter(formData: FormData) {
       email,
       name: '',
       status: 'active',
+      // Every new subscriber gets the token their unsubscribe links need.
+      token: newToken(),
       tags: ['website_widget'],
       createdAt: Date.now(),
       updatedAt: Date.now(),
