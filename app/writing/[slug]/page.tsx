@@ -10,7 +10,7 @@ import { getCachedSiteContent } from '@/lib/site'
 import { safeList, safeGet } from '@/lib/store'
 import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
 import { COMMENTS_COLLECTION, commentSchema } from '@/lib/schemas/comment'
-import { ArticleView, buildArticleMetadata, pickRelated } from '@/components/site/ArticleView'
+import { ArticleView, buildArticleMetadata, pickRelated, seriesNav } from '@/components/site/ArticleView'
 
 export const revalidate = 3600
 
@@ -42,6 +42,7 @@ export default async function WritingDetailPage({ params }: { params: Promise<{ 
     where: [['status', '==', 'published']],
   })
   const related = pickRelated(allPublished, post, 3)
+  const { prev: seriesPrev, next: seriesNext } = seriesNav(allPublished, post)
 
   return (
     <ArticleView
@@ -50,6 +51,8 @@ export default async function WritingDetailPage({ params }: { params: Promise<{ 
       related={related}
       content={content}
       isPreview={false}
+      seriesPrev={seriesPrev}
+      seriesNext={seriesNext}
     />
   )
 }

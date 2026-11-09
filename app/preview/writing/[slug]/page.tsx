@@ -9,7 +9,7 @@ import { getCachedSiteContent } from '@/lib/site'
 import { safeList, safeGet } from '@/lib/store'
 import { POSTS_COLLECTION, postSchema } from '@/lib/schemas/post'
 import { COMMENTS_COLLECTION, commentSchema } from '@/lib/schemas/comment'
-import { ArticleView, buildArticleMetadata, pickRelated } from '@/components/site/ArticleView'
+import { ArticleView, buildArticleMetadata, pickRelated, seriesNav } from '@/components/site/ArticleView'
 import { getOwnerSession } from '@/lib/guard'
 
 export const dynamic = 'force-dynamic'
@@ -45,6 +45,7 @@ export default async function WritingPreviewPage({ params }: { params: Promise<{
     where: [['status', '==', 'published']],
   })
   const related = pickRelated(allPublished, post, 3)
+  const { prev: seriesPrev, next: seriesNext } = seriesNav(allPublished, post)
 
   return (
     <ArticleView
@@ -53,6 +54,8 @@ export default async function WritingPreviewPage({ params }: { params: Promise<{
       related={related}
       content={content}
       isPreview={true}
+      seriesPrev={seriesPrev}
+      seriesNext={seriesNext}
     />
   )
 }

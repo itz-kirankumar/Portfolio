@@ -17,6 +17,26 @@ import { ReadingProgress } from '@/components/site/ReadingProgress'
 import { BackToTop } from '@/components/site/BackToTop'
 import { normalizeTags } from '@/lib/tags'
 
+/** Previous/next neighbours inside the numbered Indian Canvas series. */
+export function seriesNav(all: Post[], current: Post): { prev?: Post; next?: Post } {
+  const m = current.slug.match(/^the-indian-canvas-(\d+)-/)
+  if (!m) return {}
+  const num = parseInt(m[1], 10)
+  const series = all
+    .map((p) => {
+      const pm = p.slug.match(/^the-indian-canvas-(\d+)-/)
+      return { p, n: pm ? parseInt(pm[1], 10) : NaN }
+    })
+    .filter((x) => !isNaN(x.n) && x.p.status === 'published')
+    .sort((a, b) => a.n - b.n)
+  const idx = series.findIndex((x) => x.n === num)
+  if (idx < 0) return {}
+  return {
+    prev: idx > 0 ? series[idx - 1].p : undefined,
+    next: idx < series.length - 1 ? series[idx + 1].p : undefined,
+  }
+}
+
 /** Up to `limit` other published posts, ranked by shared tags then recency. */
 export function pickRelated(all: Post[], current: Post, limit = 3): Post[] {
   const currentTags = new Set(current.tags)
@@ -83,12 +103,16 @@ export function ArticleView({
   related,
   content,
   isPreview,
+  seriesPrev,
+  seriesNext,
 }: {
   post: Post
   comments: Comment[]
   related: Post[]
   content: SiteContent
   isPreview: boolean
+  seriesPrev?: Post
+  seriesNext?: Post
 }) {
   const { meta } = content
 
@@ -205,6 +229,39 @@ export function ArticleView({
 
           </div>
         </article>
+
+        {(seriesPrev || seriesNext) && !isPreview ? (
+          <nav
+            aria-label="Series navigation"
+            className="mx-auto max-w-7xl px-6 lg:px-8 mt-24"
+          >
+            <RuleDivider className="mb-8" />
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-stretch sm:justify-between">
+              {seriesPrev ? (
+                <Link href={`/writing/${seriesPrev.slug}`} className="group max-w-md">
+                  <span className="font-mono text-[0.66rem] uppercase tracking-[0.18em] text-ink-soft">
+                    ← Previous in the series
+                  </span>
+                  <span className="mt-1.5 block font-display text-[1.05rem] font-medium leading-snug text-ink transition-colors group-hover:text-coral-ink">
+                    {seriesPrev.title}
+                  </span>
+                </Link>
+              ) : (
+                <span />
+              )}
+              {seriesNext ? (
+                <Link href={`/writing/${seriesNext.slug}`} className="group max-w-md sm:text-right">
+                  <span className="font-mono text-[0.66rem] uppercase tracking-[0.18em] text-ink-soft">
+                    Next in the series →
+                  </span>
+                  <span className="mt-1.5 block font-display text-[1.05rem] font-medium leading-snug text-ink transition-colors group-hover:text-coral-ink">
+                    {seriesNext.title}
+                  </span>
+                </Link>
+              ) : null}
+            </div>
+          </nav>
+        ) : null}
 
         {related.length > 0 ? (
           <section className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 lg:mt-32">
