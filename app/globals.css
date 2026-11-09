@@ -244,6 +244,46 @@
     opacity: 0.3;
   }
   
+  /* Dark-theme typography colors (prose-stone defaults assume light bg) */
+  .prose :where(h1, h2, h3, h4, h5, h6) {
+    color: var(--color-ink) !important;
+  }
+  .prose strong, .prose b {
+    color: var(--color-ink) !important;
+  }
+  .prose a {
+    color: var(--color-coral-ink) !important;
+    text-decoration-color: color-mix(in srgb, var(--color-coral) 45%, transparent) !important;
+    text-underline-offset: 3px;
+  }
+  .prose a:hover {
+    color: var(--color-coral) !important;
+    text-decoration-color: var(--color-coral) !important;
+  }
+  .prose li::marker {
+    color: var(--color-coral);
+  }
+  .prose hr {
+    border-color: var(--color-rule) !important;
+  }
+  .prose :not(pre) > code {
+    color: var(--color-coral-ink) !important;
+    background: var(--color-card);
+    padding: 0.15em 0.35em;
+    border-radius: 4px;
+  }
+  .prose pre {
+    background: var(--color-paper-deep) !important;
+    border: 1px solid var(--color-rule);
+  }
+  .prose thead, .prose th {
+    color: var(--color-ink) !important;
+    border-color: var(--color-rule) !important;
+  }
+  .prose td {
+    border-color: var(--color-rule) !important;
+  }
+
   .prose figure {
     margin-top: 3em !important;
     margin-bottom: 3em !important;
