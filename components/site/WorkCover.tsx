@@ -22,7 +22,7 @@ export function WorkCover({ work, className }: { work: Work; className?: string 
           loading="lazy"
           className={cn(
             'size-full transition-transform duration-500 group-hover:scale-[1.03]',
-            isRepoCard ? 'object-contain brightness-[0.88] contrast-[1.02]' : 'object-cover'
+            isRepoCard ? 'object-contain brightness-[0.78] contrast-[1.02]' : 'object-cover'
           )}
         />
       </div>
