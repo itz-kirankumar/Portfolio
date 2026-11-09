@@ -78,6 +78,12 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           <NotebookCard className="mb-10">
             <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
               <div className="flex-1 text-center md:text-left">
+                {service.mrpInPaise > service.priceInPaise && (
+                  <p className="mb-1 font-mono text-xs uppercase tracking-widest text-ink-soft">
+                    <span className="line-through">{formatPrice(service.mrpInPaise, service.currency)}</span>
+                    <span className="ml-2 rounded-full bg-coral-soft px-2 py-0.5 text-[0.62rem] text-coral-ink">Launch offer</span>
+                  </p>
+                )}
                 <p className="font-display text-4xl font-semibold text-ink">
                   {formatPrice(service.priceInPaise, service.currency)}
                 </p>

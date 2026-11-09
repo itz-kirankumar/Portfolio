@@ -2,6 +2,7 @@
 
 import { getAdminDb } from '@/lib/admin'
 import { BOOKINGS_COLLECTION } from '@/lib/schemas/booking'
+import { sendBookingInvite } from '@/lib/calendar-invite'
 import crypto from 'crypto'
 
 export async function verifyPayment(
@@ -31,6 +32,33 @@ export async function verifyPayment(
     'payment.verifiedAt': Date.now(),
     updatedAt: Date.now()
   })
+
+  // Payment is confirmed. Now send the calendar invite with the Meet link.
+  // A failure here must never un-confirm a paid booking, so it is wrapped.
+  try {
+    const snap = await ref.get()
+    const booking = snap.data() as any
+    const invite = await sendBookingInvite({
+      bookingId,
+      serviceTitle: booking.serviceTitle || '1:1 Call',
+      guestName: booking.name,
+      guestEmail: booking.email,
+      notes: booking.notes,
+      startISO: booking.startISO,
+      endISO: booking.endISO,
+    })
+    if (invite.ok) {
+      await ref.update({
+        inviteEventId: invite.eventId || '',
+        meetLink: invite.meetLink || '',
+        updatedAt: Date.now(),
+      })
+    } else {
+      console.error('Calendar invite failed for booking', bookingId, invite.error)
+    }
+  } catch (e) {
+    console.error('Calendar invite error for booking', bookingId, e)
+  }
 
   return { success: true }
 }

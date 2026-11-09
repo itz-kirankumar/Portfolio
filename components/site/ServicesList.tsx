@@ -47,6 +47,12 @@ export function ServicesList({ services }: { services: Service[] }) {
 
               <div className="flex flex-col gap-4 md:w-48 md:shrink-0 md:items-end">
                 <div className="text-left md:text-right">
+                  {service.mrpInPaise > service.priceInPaise && (
+                    <p className="font-mono text-[0.72rem] uppercase tracking-[0.12em] text-ink-soft">
+                      <span className="line-through">{formatPrice(service.mrpInPaise, service.currency)}</span>
+                      <span className="ml-2 rounded-full bg-coral-soft px-2 py-0.5 text-[0.6rem] text-coral-ink">Launch offer</span>
+                    </p>
+                  )}
                   <p className="font-display text-2xl font-semibold tracking-[-0.02em] text-ink">
                     {formatPrice(service.priceInPaise, service.currency)}
                   </p>

@@ -42,6 +42,9 @@ export const serviceSchema = z.object({
 
   /** Smallest currency unit. 0 with mode 'free' means genuinely free. */
   priceInPaise: z.number().int().min(0).max(100_000_000).default(0),
+  /** Regular (list) price, shown struck through next to the current offer price.
+   *  0 = no strike-through. Only meaningful when higher than priceInPaise. */
+  mrpInPaise: z.number().int().min(0).max(100_000_000).default(0),
   currency: z.enum(['INR', 'USD', 'EUR', 'GBP']).default('INR'),
 
   paymentMode: z.enum(PAYMENT_MODES).default('razorpay'),
