@@ -108,7 +108,7 @@ export function Tiptap({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-stone prose-lg md:prose-xl max-w-none text-ink prose-headings:font-display prose-headings:font-bold prose-p:leading-relaxed focus:outline-none min-h-[400px]',
+        class: 'prose prose-stone prose-lg md:prose-xl max-w-none font-serif text-ink prose-headings:font-display prose-headings:font-bold prose-p:leading-relaxed focus:outline-none min-h-[400px]',
       },
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {

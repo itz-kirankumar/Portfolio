@@ -212,7 +212,7 @@ export function ArticleView({
             {/* Main Content Area */}
             <div className="order-1 lg:order-2">
               <div
-                className="prose prose-stone prose-lg md:prose-xl max-w-[72ch] text-ink prose-headings:font-display prose-headings:font-bold prose-p:leading-relaxed"
+                className="prose prose-stone prose-lg md:prose-xl max-w-[72ch] font-serif text-ink prose-headings:font-display prose-headings:font-bold prose-p:leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: post.html }}
               />
 

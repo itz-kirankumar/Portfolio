@@ -1,6 +1,6 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from 'next'
-import { Bricolage_Grotesque, Inter, JetBrains_Mono, Caveat } from 'next/font/google'
+import { Bricolage_Grotesque, Inter, JetBrains_Mono, Caveat, Source_Serif_4 } from 'next/font/google'
 import './globals.css'
 
 /* Variable builds — omitting `weight` ships one file per family instead of one
@@ -27,6 +27,15 @@ const jetbrains = JetBrains_Mono({
 const caveat = Caveat({
   subsets: ['latin'],
   variable: '--font-caveat',
+  display: 'swap',
+  preload: false,
+})
+
+/* Long-form reading face. Article bodies and the editor share it so writing
+   looks like reading; the UI chrome stays sans. */
+const sourceSerif = Source_Serif_4({
+  subsets: ['latin'],
+  variable: '--font-source-serif',
   display: 'swap',
   preload: false,
 })
@@ -92,7 +101,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} ${inter.variable} ${jetbrains.variable} ${caveat.variable}`}
+      className={`${bricolage.variable} ${inter.variable} ${jetbrains.variable} ${caveat.variable} ${sourceSerif.variable}`}
       suppressHydrationWarning
     >
       <head>

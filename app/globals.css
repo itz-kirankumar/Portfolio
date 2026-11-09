@@ -40,6 +40,7 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
   --font-hand: var(--font-caveat), ui-serif, cursive;
+  --font-serif: var(--font-source-serif), Georgia, 'Times New Roman', serif;
 }
 
 .theme-toggle-light {
