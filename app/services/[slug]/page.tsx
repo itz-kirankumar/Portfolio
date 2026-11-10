@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { safeGet, safeList } from '@/lib/store'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
+import { getCachedSiteContent } from '@/lib/site'
 
 export const revalidate = 3600
 
@@ -43,6 +44,7 @@ export async function generateMetadata({
       title: service.title,
       description: service.summary,
       images: [ogUrl.toString()],
+      creator: (await getCachedSiteContent()).meta.twitterHandle,
     }
   }
 }

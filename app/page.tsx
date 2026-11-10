@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { absolute: title },
     description,
     openGraph: { title, description },
-    twitter: { title, description },
+    twitter: { card: 'summary_large_image', title, description, creator: meta.twitterHandle },
   }
 }
 

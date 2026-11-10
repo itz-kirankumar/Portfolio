@@ -26,12 +26,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const work = await getWork(slug)
   if (!work) return { title: 'Work not found' }
+  const { meta } = await getCachedSiteContent()
   const description = (work.summary || work.tagline).slice(0, 200)
   return {
     title: `${work.title} - Works`,
     description,
     openGraph: { title: work.title, description },
-    twitter: { title: work.title, description },
+    twitter: { card: 'summary_large_image', title: work.title, description, creator: meta.twitterHandle },
   }
 }
 
