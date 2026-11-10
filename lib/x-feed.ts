@@ -50,32 +50,76 @@ function truncate(s: string, n: number): string {
   return s.length <= n ? s : s.slice(0, n - 1).trimEnd() + '…'
 }
 
+// The mirror is free and flaky: Vercel's fetch to it fails intermittently,
+// and an ISR render that catches a bad minute used to blank the card for a
+// whole revalidate window. Every successful fetch is stored as last-good in
+// Firestore (cache/x-feed-<handle>), and a failed render serves that copy
+// while it is younger than STALE_AFTER_DAYS. The card still hides when there
+// is no fresh-enough good copy at all.
+const CACHE_COLLECTION = 'cache'
+
+type CachedFeed = { posts: XPost[]; fetchedAt: number }
+
+async function readLastGood(handle: string): Promise<CachedFeed | null> {
+  try {
+    const { getAdminDb } = await import('@/lib/admin')
+    const snap = await getAdminDb().collection(CACHE_COLLECTION).doc(`x-feed-${handle}`).get()
+    if (!snap.exists) return null
+    const d = snap.data() as any
+    if (!Array.isArray(d?.posts) || typeof d?.fetchedAt !== 'number') return null
+    return { posts: d.posts, fetchedAt: d.fetchedAt }
+  } catch {
+    return null
+  }
+}
+
+async function writeLastGood(handle: string, posts: XPost[]): Promise<void> {
+  try {
+    const { getAdminDb } = await import('@/lib/admin')
+    await getAdminDb().collection(CACHE_COLLECTION).doc(`x-feed-${handle}`).set({ posts, fetchedAt: Date.now() })
+  } catch {
+    // Cache is best-effort; a write failure must never blank the card.
+  }
+}
+
+async function fetchMirror(handle: string, count: number): Promise<XPost[]> {
+  const res = await fetch(`https://fxtwitter.com/${handle}/feed.xml`, {
+    next: { revalidate: 3600 },
+    signal: AbortSignal.timeout(8000),
+  })
+  if (!res.ok) throw new Error(`mirror ${res.status}`)
+  const xml = await res.text()
+  const items: XPost[] = []
+  for (const m of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+    const item = m[1]
+    const link = item.match(/<link>([^<]+)<\/link>/)?.[1] ?? ''
+    const pub = item.match(/<pubDate>([^<]+)<\/pubDate>/)?.[1] ?? ''
+    const cdata = item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/)?.[1] ?? ''
+    const text = truncate(stripHtml(cdata), 220)
+    const ts = Date.parse(pub)
+    if (!link || !text || Number.isNaN(ts)) continue
+    if (items.length === 0 && Date.now() - ts > STALE_AFTER_DAYS * 86400000) throw new Error('mirror stale')
+    // Only link out to the real X status, never the mirror host.
+    const statusUrl = link.replace(/^https?:\/\/(www\.)?(fxtwitter|fixupx)\.com/i, 'https://x.com')
+    items.push({ text, date: dateFormat.format(new Date(ts)), url: statusUrl })
+    if (items.length >= count) break
+  }
+  return items
+}
+
 export async function getLatestXPosts(handle: string, count = 3): Promise<XPost[]> {
   try {
-    const res = await fetch(`https://fxtwitter.com/${handle}/feed.xml`, {
-      next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(8000),
-    })
-    if (!res.ok) return []
-    const xml = await res.text()
-    const items: XPost[] = []
-    for (const m of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
-      const item = m[1]
-      const link = item.match(/<link>([^<]+)<\/link>/)?.[1] ?? ''
-      const pub = item.match(/<pubDate>([^<]+)<\/pubDate>/)?.[1] ?? ''
-      const cdata = item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/)?.[1] ?? ''
-      const text = truncate(stripHtml(cdata), 220)
-      const ts = Date.parse(pub)
-      if (!link || !text || Number.isNaN(ts)) continue
-      if (items.length === 0 && Date.now() - ts > STALE_AFTER_DAYS * 86400000) return []
-      // Only link out to the real X status, never the mirror host.
-      const statusUrl = link.replace(/^https?:\/\/(www\.)?(fxtwitter|fixupx)\.com/i, 'https://x.com')
-      items.push({ text, date: dateFormat.format(new Date(ts)), url: statusUrl })
-      if (items.length >= count) break
-    }
+    const items = await fetchMirror(handle, count)
+    if (items.length === 0) throw new Error('mirror returned no items')
+    await writeLastGood(handle, items)
     return items
   } catch {
-    // Mirror down, rate-limited, or malformed: hide the card, show nothing stale.
+    // Mirror down, rate-limited, or malformed: fall back to last-good; hide
+    // the card only when no fresh-enough good copy exists.
+    const cached = await readLastGood(handle)
+    if (cached && cached.posts.length > 0 && Date.now() - cached.fetchedAt <= STALE_AFTER_DAYS * 86400000) {
+      return cached.posts.slice(0, count)
+    }
     return []
   }
 }
