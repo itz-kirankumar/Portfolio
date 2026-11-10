@@ -75,3 +75,26 @@ export const BOOKINGS_COLLECTION = 'bookings'
 
 /** Statuses that still occupy their slot. A cancelled booking frees it again. */
 export const BLOCKING_STATUSES: BookingStatus[] = ['pending', 'confirmed']
+
+/**
+ * How long an unpaid paid-mode booking holds its slot before the hold expires
+ * (owner rule, 10 Nov 2026: "if unpaid, release that slot after 2 min").
+ * After this, the slot is bookable again; if the guest still pays afterwards,
+ * verifyPayment confirms the booking anyway - money always wins over a sweep.
+ */
+export const UNPAID_HOLD_MS = 2 * 60 * 1000
+
+type SlotBlocker = Pick<Booking, 'status' | 'createdAt' | 'payment'>
+
+/**
+ * True while this booking still holds its slot. A paid-mode booking whose
+ * payment never verified stops blocking after UNPAID_HOLD_MS. Free-mode and
+ * confirmed bookings block as before.
+ */
+export function blocksSlot(b: SlotBlocker, nowMs: number): boolean {
+  if (b.status === 'confirmed') return true
+  if (b.status !== 'pending') return false
+  const needsPayment = b.payment.mode === 'razorpay' && b.payment.amount > 0
+  if (!needsPayment) return true
+  return b.payment.verifiedAt > 0 || nowMs - b.createdAt <= UNPAID_HOLD_MS
+}

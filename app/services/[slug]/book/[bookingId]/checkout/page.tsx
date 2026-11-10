@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { safeGet } from '@/lib/store'
-import { BOOKINGS_COLLECTION, bookingSchema } from '@/lib/schemas/booking'
+import { BOOKINGS_COLLECTION, bookingSchema, UNPAID_HOLD_MS } from '@/lib/schemas/booking'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
 import { Section, NotebookCard, SectionHead } from '@/components/ui/primitives'
 import Razorpay from 'razorpay'
@@ -35,6 +35,30 @@ export default async function CheckoutPage({
   const service = await safeGet(SERVICES_COLLECTION, slug, serviceSchema)
   if (!service || !service.active || service.paymentMode !== 'razorpay') {
     notFound()
+  }
+
+  // An unpaid hold expires after UNPAID_HOLD_MS (owner rule). The slot is
+  // bookable again from that moment, so this checkout must not take money for
+  // a hold it no longer owns. A verified payment never lands here: verifyPayment
+  // confirms the booking first, and status 'pending' above would already fail.
+  const needsPayment = booking.payment?.mode === 'razorpay' && (booking.payment?.amount ?? 0) > 0
+  if (needsPayment && !booking.payment?.verifiedAt && Date.now() - booking.createdAt > UNPAID_HOLD_MS) {
+    return (
+      <Section tone="paper">
+        <div className="mx-auto max-w-xl text-center">
+          <NotebookCard>
+            <SectionHead
+              align="center"
+              heading="This hold has expired"
+              intro={`Unpaid slots are released after 2 minutes, so this ${service.title} hold is no longer active. Pick the slot again to restart - it only takes a moment.`}
+            />
+            <p className="mt-6">
+              <a href={`/services/${slug}/book`} className="link-underline text-coral-ink">Book again</a>
+            </p>
+          </NotebookCard>
+        </div>
+      </Section>
+    )
   }
 
   const content = await getCachedSiteContent()

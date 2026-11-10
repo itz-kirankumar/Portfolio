@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import { notFound, redirect } from 'next/navigation'
 import { safeGet, safeList, createStrict } from '@/lib/store'
 import { SERVICES_COLLECTION, serviceSchema } from '@/lib/schemas/service'
-import { bookingSchema, BOOKINGS_COLLECTION } from '@/lib/schemas/booking'
+import { bookingSchema, BOOKINGS_COLLECTION, blocksSlot, UNPAID_HOLD_MS } from '@/lib/schemas/booking'
 import { AVAILABILITY_COLLECTION, AVAILABILITY_DOC, availabilitySchema, DEFAULT_AVAILABILITY } from '@/lib/schemas/availability'
 import { bookingId } from '@/lib/ids'
 import { formatPrice } from '@/lib/schemas/service'
@@ -10,6 +10,7 @@ import { Section, NotebookCard } from '@/components/ui/primitives'
 import Reveal from '@/components/ui/Reveal'
 import { SlotPicker } from './SlotPicker'
 import { hasCalendarWriteScope } from '@/lib/calendar-scope'
+import { getAdminDb } from '@/lib/admin'
 
 export default async function BookPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -23,7 +24,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
   const allBookings = await safeList(BOOKINGS_COLLECTION, bookingSchema)
   const nowMs = Date.now()
   let upcomingBookings = allBookings
-    .filter(b => b.status !== 'cancelled' && new Date(b.endISO).getTime() > nowMs)
+    .filter(b => blocksSlot(b, nowMs) && new Date(b.endISO).getTime() > nowMs)
     .map(b => ({
       start: new Date(b.startISO).getTime(),
       end: new Date(b.endISO).getTime()
@@ -172,6 +173,26 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
     
     const docId = bookingId(service!.id, startISO)
     const receiptTokenValue = crypto.randomBytes(20).toString('hex')
+
+    // Release slots held by abandoned unpaid checkouts (owner rule: an unpaid
+    // hold expires after UNPAID_HOLD_MS). Marking them cancelled keeps the
+    // admin list truthful; a late-arriving payment still confirms the booking.
+    try {
+      const db = getAdminDb()
+      const pendings = await db.collection(BOOKINGS_COLLECTION).where('status', '==', 'pending').get()
+      const cutoff = Date.now() - UNPAID_HOLD_MS
+      const stale = pendings.docs.filter(d => {
+        const p = d.data().payment || {}
+        return p.mode === 'razorpay' && (p.amount || 0) > 0 && !p.verifiedAt && (d.data().createdAt || 0) < cutoff
+      })
+      await Promise.all(stale.map(d => d.ref.update({
+        status: 'cancelled',
+        cancelReason: 'Payment not completed within 2 minutes - slot released',
+        updatedAt: Date.now(),
+      }).catch(() => {})))
+    } catch (e) {
+      console.error('Unpaid-hold sweep failed (non-fatal)', e)
+    }
     
     await createStrict(BOOKINGS_COLLECTION, docId, bookingSchema, {
       serviceId: service!.id,
