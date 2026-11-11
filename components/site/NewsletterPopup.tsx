@@ -40,7 +40,7 @@ export function NewsletterInline() {
               setStatus('error')
               setMessage(res.error)
             } else {
-              setStatus('success')
+              setStatus('success'); window.portfolioEvent?.('newsletter_subscribed')
             }
           }}
         >
@@ -128,7 +128,7 @@ export function NewsletterPopup() {
             setStatus('error')
             setMessage(res.error)
           } else {
-            setStatus('success')
+            setStatus('success'); window.portfolioEvent?.('newsletter_subscribed')
             try {
               localStorage.setItem('newsletter-quiet', '1')
             } catch {}

@@ -102,6 +102,7 @@ export const NAV: NavGroup[] = [
   {
     label: 'Audience',
     items: [
+      { href: '/admin/analytics', label: 'Analytics', icon: LayoutDashboard, hint: 'Traffic, reading and conversions', matchNested: true },
       {
         href: '/admin/newsletter',
         label: 'Newsletter',

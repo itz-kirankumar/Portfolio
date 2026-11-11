@@ -1,109 +1,54 @@
-﻿import { PageHeader, Panel } from '@/components/admin/ui'
-import { safeList } from '@/lib/store'
-import { ANALYTICS_COLLECTION, analyticsSchema } from '@/lib/schemas/analytics'
-import { BarChart, Activity, Globe, Eye } from 'lucide-react'
+import { getAdminDb } from '@/lib/admin'
+import { requireOwner } from '@/lib/guard'
+import { PageHeader, Panel, StatCard } from '@/components/admin/ui'
+export const dynamic = 'force-dynamic'
+export const metadata = { title: 'Analytics' }
 
-export const revalidate = 60
-
+type Event = { name: string; path: string; sessionId: string; timestamp: number; props?: { target?: string; referrer?: string; percent?: number; seconds?: number } }
 export default async function AnalyticsPage() {
-  const events = await safeList(ANALYTICS_COLLECTION, analyticsSchema, {
-    orderBy: ['timestamp', 'desc'],
-    limit: 1000 // Get up to 1000 recent events
-  })
+  await requireOwner()
+  let events: Event[] = []
+  let failed = false
+  try {
+    const snapshot = await getAdminDb().collection('portfolioEvents').where('timestamp', '>=', Date.now() - 30 * 86400000).orderBy('timestamp', 'desc').limit(10000).get()
+    events = snapshot.docs.map(d => d.data() as Event)
+  } catch { failed = true }
+  const views = events.filter(e => e.name === 'page_view')
+  const sessions = new Set(views.map(e => e.sessionId)).size
+  const count = (name: string) => events.filter(e => e.name === name).length
+  const groups = (rows: Event[], key: (e: Event) => string) => {
+    const m = new Map<string, number>()
+    for (const e of rows) { const k = key(e); m.set(k, (m.get(k) || 0) + 1) }
+    return [...m].sort((a,b) => b[1] - a[1]).slice(0, 12)
+  }
+  const table = (rows: [string, number][]) => rows.length ? <div className="divide-y divide-rule">{rows.map(([label, n]) => <div key={label} className="flex justify-between gap-4 py-2 text-sm"><span className="min-w-0 break-all">{label}</span><span>{n.toLocaleString()}</span></div>)}</div> : <p className="py-4 text-sm text-ink-soft">No events yet. Counts begin after deployment and visitor consent.</p>
+  const sessionsWith = (name: string) => new Set(events.filter(e => e.name === name).map(e => e.sessionId)).size
+  return <>
+    <PageHeader title="Analytics" description="Last 30 days. Consent-based anonymous sessions, not identified people. Owner, admin, preview, receipt, automation and opted-out traffic excluded." />
+    {failed && <p className="mb-4 rounded border border-red-300 p-4 text-red-600">Analytics could not be loaded. These figures are unavailable, not zero.</p>}
+    {events.length === 10000 && <p className="mb-4">Showing the latest 10,000 events only.</p>}
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard label="Page views" value={failed ? 'Unavailable' : views.length} />
+      <StatCard label="Browser sessions" value={failed ? 'Unavailable' : sessions} hint="A tab session, not a unique person" />
+      <StatCard label="Resume downloads" value={failed ? 'Unavailable' : count('resume_download')} hint="Download clicks, not proof the PDF was read" />
+      <StatCard label="Newsletter signups" value={failed ? 'Unavailable' : count('newsletter_subscribed')} hint="Successful responses only" />
+    </div>
+    <div className="mt-5 grid gap-4 lg:grid-cols-2">
+      <Panel title="Top pages">{table(groups(views, e => e.path))}</Panel>
+      <Panel title="Referrers">{table(groups(views, e => e.props?.referrer || 'Direct / unavailable'))}</Panel>
+      <Panel title="Interactions">{table(groups(events.filter(e => e.name !== 'page_view'), e => e.name))}</Panel>
+      <Panel title="Project, source and resume clicks">{table(groups(events.filter(e => ['project_click','source_click','resume_download'].includes(e.name)), e => e.props?.target || e.path))}</Panel>
+      <Panel title="Reading depth">{table(groups(events.filter(e => e.name === 'reading_depth'), e => `${e.props?.percent}% of page`))}</Panel>
+      <Panel title="Engaged reading">{table(groups(events.filter(e => e.name === 'engaged_time'), e => `${e.props?.seconds} seconds visible`))}</Panel>
+      <Panel title="Booking journey" description="Distinct browser sessions at each step. Submitting the form is not payment or a confirmed booking.">{table([['Viewed booking page', sessionsWith('booking_view')], ['Submitted booking form', sessionsWith('booking_submit')]])}</Panel>
+      <Panel title="Provider dashboards" description="Providers count differently. Do not add their totals together.">
+        <div className="flex flex-col gap-3 py-2 text-sm">
+          <a className="link-underline" href="https://vercel.com/kiran-kumar-g/project-65mna/analytics">Vercel: traffic, sources, devices and regions</a>
+          <a className="link-underline" href="https://clarity.microsoft.com/projects/view/zath09upbe/dashboard">Clarity: heatmaps, masked replay, rage and dead clicks</a>
 
-  const totalViews = events.length
-  
-  // Group by path
-  const paths = new Map<string, number>()
-  events.forEach(e => {
-    paths.set(e.path, (paths.get(e.path) || 0) + 1)
-  })
-  
-  const topPaths = Array.from(paths.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-
-  // Group by referrer
-  const referrers = new Map<string, number>()
-  events.forEach(e => {
-    if (e.referrer) {
-      let hostname = e.referrer
-      try { hostname = new URL(e.referrer).hostname } catch(err){}
-      referrers.set(hostname, (referrers.get(hostname) || 0) + 1)
-    }
-  })
-  
-  const topReferrers = Array.from(referrers.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-
-  // Calculate views in last 7 days vs previous 7 days (simple approximation)
-  const now = Date.now()
-  const week = 7 * 24 * 60 * 60 * 1000
-  const recentWeek = events.filter(e => e.timestamp > now - week).length
-  const previousWeek = events.filter(e => e.timestamp > now - 2*week && e.timestamp <= now - week).length
-
-  return (
-    <>
-      <PageHeader
-        title="Analytics & Tracking"
-        description="A high-level view of your platform's traffic and engagement."
-      />
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
-        <div className="bg-card border border-rule rounded-xl p-6 shadow-sm flex flex-col justify-between">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="font-medium text-ink-soft">Recent Views</h3>
-            <Eye className="size-4 text-ink-soft" />
-          </div>
-          <p className="text-3xl font-display font-bold text-ink">{totalViews}</p>
-          <p className="text-xs text-ink-soft mt-2">from the last {totalViews === 1000 ? '1000+ ' : ''}events tracked.</p>
         </div>
-        
-        <div className="bg-card border border-rule rounded-xl p-6 shadow-sm flex flex-col justify-between">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="font-medium text-ink-soft">Last 7 Days</h3>
-            <Activity className="size-4 text-ink-soft" />
-          </div>
-          <p className="text-3xl font-display font-bold text-ink">{recentWeek}</p>
-          <p className="text-xs text-ink-soft mt-2">
-            {recentWeek > previousWeek ? '+' : ''}{previousWeek > 0 ? Math.round(((recentWeek - previousWeek) / previousWeek) * 100) : 100}% vs previous week
-          </p>
-        </div>
-        
-        <div className="bg-card border border-rule rounded-xl p-6 shadow-sm flex flex-col justify-between">
-          <div className="flex items-start justify-between mb-2">
-            <h3 className="font-medium text-ink-soft">Unique Referrers</h3>
-            <Globe className="size-4 text-ink-soft" />
-          </div>
-          <p className="text-3xl font-display font-bold text-ink">{referrers.size}</p>
-          <p className="text-xs text-ink-soft mt-2">sources driving traffic to your site.</p>
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Panel title="Top Content" description="Most viewed pages across the site.">
-          <ul className="divide-y divide-rule/50">
-            {topPaths.length > 0 ? topPaths.map(([path, count]) => (
-              <li key={path} className="flex justify-between items-center py-3">
-                <span className="font-mono text-sm text-ink truncate pr-4">{path}</span>
-                <span className="font-medium text-ink bg-rule/50 px-2 py-0.5 rounded text-sm">{count}</span>
-              </li>
-            )) : <p className="text-ink-soft text-sm py-4">No data yet.</p>}
-          </ul>
-        </Panel>
-        
-        <Panel title="Top Sources" description="Where your visitors are coming from.">
-          <ul className="divide-y divide-rule/50">
-            {topReferrers.length > 0 ? topReferrers.map(([ref, count]) => (
-              <li key={ref} className="flex justify-between items-center py-3">
-                <span className="text-sm text-ink truncate pr-4">{ref}</span>
-                <span className="font-medium text-ink bg-rule/50 px-2 py-0.5 rounded text-sm">{count}</span>
-              </li>
-            )) : <p className="text-ink-soft text-sm py-4">No external referrers detected yet.</p>}
-          </ul>
-        </Panel>
-      </div>
-    </>
-  )
+      </Panel>
+    </div>
+    <p className="mt-5 text-xs text-ink-soft">Data starts with this instrumentation; historical visits are not reconstructed. No email addresses, names, form text, receipt tokens, full referrer URLs or query strings are stored. Reading thresholds are cumulative milestones, not separate readers. DNT and visitor opt-out are respected.</p>
+  </>
 }

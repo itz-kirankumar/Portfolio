@@ -41,7 +41,7 @@ const sourceSerif = Source_Serif_4({
 })
 
 import { getCachedSiteContent } from '@/lib/site'
-import { ClarityLoader } from '@/components/site/ClarityLoader'
+
 
 export async function generateMetadata(): Promise<Metadata> {
   const { meta } = await getCachedSiteContent()
@@ -122,8 +122,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
         )}
       </head>
-      <body className="bg-paper text-ink font-sans antialiased" suppressHydrationWarning>
-        <ClarityLoader />
+      <body data-clarity-mask="true" className="bg-paper text-ink font-sans antialiased" suppressHydrationWarning>
         <Tracker />
         {children}
         <NewsletterPopup />

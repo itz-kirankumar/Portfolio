@@ -94,7 +94,7 @@ export default async function AdminDashboard() {
       limit: 200,
     }),
     safeList(POSTS_COLLECTION, postSchema, { orderBy: ['updatedAt', 'desc'], limit: 5 }),
-    safeCount(ANALYTICS_COLLECTION),
+    safeCount('portfolioEvents', [['name', '==', 'page_view']]),
   ])
 
   const booked = future.filter((b) => BLOCKING_STATUSES.includes(b.status))
@@ -167,7 +167,8 @@ export default async function AdminDashboard() {
         <StatCard
           label="Page views"
           value={pageViews.toLocaleString()}
-          hint="Tracked anonymously across all pages."
+          hint="Consented visitor views since analytics upgrade."
+          href="/admin/analytics"
         />
       </div>
 
