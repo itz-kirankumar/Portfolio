@@ -23,6 +23,8 @@ import { SocialFeed } from '@/components/site/SocialFeed'
 import { getLatestXPosts } from '@/lib/x-feed'
 import { getCachedSiteContent } from '@/lib/site'
 import { getCachedTheme } from '@/lib/theme'
+import { getCases } from '@/lib/cases'
+import { CasesSection } from '@/components/site/CasesSection'
 
 export const revalidate = 3600
 
@@ -47,12 +49,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 
 export default async function HomePage() {
-  const [content, theme, allPosts, allServices, allWorks] = await Promise.all([
+  const [content, theme, allPosts, allServices, allWorks, allCases] = await Promise.all([
     getCachedSiteContent(),
     getCachedTheme(),
     safeList(POSTS_COLLECTION, postSchema),
     safeList(SERVICES_COLLECTION, serviceSchema),
     getWorks(),
+    getCases(),
   ])
   const { meta } = content
 
@@ -147,6 +150,7 @@ export default async function HomePage() {
       <main>
         {isVisible('hero') && <Hero hero={content.hero} meta={meta} layout={theme.heroLayout} />}
         <FlowWall works={allWorks} posts={flowPosts} />
+        <CasesSection cases={allCases} />
         {activeServices.length > 0 && isVisible('services') && (
           <Section id="services" tone="deep" compact>
             <SectionHead 
