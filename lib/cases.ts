@@ -66,3 +66,52 @@ export async function readCasePage(slug: string, page: number): Promise<Buffer |
   dec.setAuthTag(tag)
   return Buffer.concat([dec.update(ct), dec.final()])
 }
+
+/* One case = one card + one detail page. Each case holds several view-only
+   documents (the files above, keyed by slug). Swapping a file does not
+   change this config. */
+export type CaseGroup = {
+  slug: string
+  title: string
+  kicker: string
+  summary: string
+  question: string
+  facts: { label: string; value: string }[]
+  steps: string[]
+  docs: { slug: string; tab: string }[]
+}
+
+export const CASE_GROUPS: CaseGroup[] = [
+  {
+    slug: 'modi-illva',
+    title: 'Modi Illva India: Where Should AI Go First?',
+    kicker: "Masters' Union ELP case",
+    summary:
+      "A case from the Masters' Union Experiential Learning Program. My team was asked where AI can create real value at Modi Illva India, a spirits and brands joint venture, and what to start with first.",
+    question:
+      'Where in the business can AI create real value in the next 12 months, and what should the company start with in the next 90 days?',
+    facts: [
+      { label: 'Company', value: 'Modi Illva India Pvt. Ltd., 50:50 joint venture of the Umesh Modi Group and Illva Saronno' },
+      { label: 'Brands', value: 'Artic Vodka, Rockford Reserve, Rockford Classic, Singhasan' },
+      { label: 'Program', value: "Masters' Union Experiential Learning Program, Opportunity 1" },
+      { label: 'Output', value: 'A deck of up to 10 slides plus up to 3 appendix slides' },
+      { label: 'Submitted', value: '24 November 2026' },
+    ],
+    steps: [
+      'Map at least 5 AI opportunities across the full value chain',
+      'Prioritise them and pick the top 3',
+      'Go deep on the number one opportunity: problem, data, daily use and results',
+    ],
+    docs: [
+      { slug: 'modi-illva-deck', tab: 'My deck' },
+      { slug: 'modi-illva-case', tab: 'Case brief' },
+    ],
+  },
+]
+
+export async function getCaseGroupDocs(g: CaseGroup) {
+  const docs = await Promise.all(g.docs.map((d) => getCase(d.slug)))
+  return g.docs.map((d, i) => ({ ...d, file: docs[i] })).filter((d) => d.file) as {
+    slug: string; tab: string; file: CaseFile
+  }[]
+}
