@@ -95,7 +95,7 @@ export const CASE_GROUPS: CaseGroup[] = [
       { label: 'Brands', value: 'Artic Vodka, Rockford Reserve, Rockford Classic, Singhasan' },
       { label: 'Program', value: "Masters' Union Experiential Learning Program, Opportunity 1" },
       { label: 'Output', value: 'A deck of up to 10 slides plus up to 3 appendix slides' },
-      { label: 'Submitted', value: '24 November 2026' },
+      { label: 'Deadline', value: '24 November 2026, 6 pm' },
     ],
     steps: [
       'Map at least 5 AI opportunities across the full value chain',
